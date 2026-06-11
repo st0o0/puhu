@@ -1,4 +1,4 @@
-// tests/Servus.Plugin.Marketplace.Tests/PluginManagerTests.cs
+// tests/Servus.TUI.Plugin.Marketplace.Tests/PluginManagerTests.cs
 using System.Net;
 using System.Text.Json;
 using Servus.Plugin.Marketplace.Models;
@@ -85,7 +85,7 @@ public sealed class PluginManagerTests : IDisposable
                 Id = "servus.plugin.dtop", Version = "1.0.0",
                 Source = "https://github.com/st0o0/dtop",
                 UpdatePolicy = UpdatePolicy.Auto,
-                Path = "plugins/servus.plugin.dtop/Servus.Plugin.Dtop.dll"
+                Path = "plugins/servus.plugin.dtop/Servus.TUI.Plugin.Dtop.dll"
             }]
         });
         var manager = CreateManager(new TestHandler());

@@ -1,4 +1,4 @@
-namespace Servus.Plugin;
+namespace Servus.TUI.Plugin;
 
 /// <summary>
 /// Entry point for a Servus plugin. Implement this interface and configure tabs, routes, actors, and services via the builder.

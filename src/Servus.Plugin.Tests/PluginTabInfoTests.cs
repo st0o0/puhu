@@ -1,3 +1,5 @@
+using Servus.TUI.Plugin;
+
 namespace Servus.Plugin.Tests;
 
 public sealed class PluginTabInfoTests

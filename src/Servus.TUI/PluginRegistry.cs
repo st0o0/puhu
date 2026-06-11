@@ -1,4 +1,4 @@
-using Servus.Plugin;
+using Servus.TUI.Plugin;
 
 namespace Servus.TUI;
 

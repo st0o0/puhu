@@ -1,4 +1,4 @@
-namespace Servus.Plugin;
+namespace Servus.TUI.Plugin;
 
 /// <summary>Describes a tab registered by a plugin in the main tab bar.</summary>
 /// <param name="Label">Display text shown in the tab bar.</param>

@@ -1,6 +1,6 @@
 using R3;
 
-namespace Servus.Plugin;
+namespace Servus.TUI.Plugin;
 
 /// <summary>
 /// Provides periodic tick events for UI refresh and actor scheduling.

@@ -1,8 +1,9 @@
 using Akka.Actor;
 using Microsoft.Extensions.DependencyInjection;
+using Termina.Pages;
 using Termina.Reactive;
 
-namespace Servus.Plugin;
+namespace Servus.TUI.Plugin;
 
 /// <summary>
 /// Fluent builder for configuring a Servus plugin — tabs, routes, actors, services, settings, themes, and notifications.
@@ -43,7 +44,7 @@ public interface IServusPluginBuilder
 public interface IRouteContext
 {
     /// <summary>Register a page and view model pair for the given route.</summary>
-    void RegisterRoute<TPage, TViewModel>(string route)
+    void RegisterRoute<TPage, TViewModel>(string route, NavigationBehavior? behavior = null)
         where TPage : ReactivePage<TViewModel>
         where TViewModel : ReactiveViewModel;
 }

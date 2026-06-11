@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Servus.Application.Startup;
-using Servus.Plugin;
+using Servus.TUI.Plugin;
 using Servus.TUI.Services;
 
 namespace Servus.TUI.Setup;

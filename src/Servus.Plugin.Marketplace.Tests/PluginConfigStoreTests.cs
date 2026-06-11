@@ -56,7 +56,7 @@ public sealed class PluginConfigStoreTests : IDisposable
                 Id = "servus.plugin.dtop", Version = "1.0.0",
                 Source = "https://github.com/st0o0/dtop",
                 UpdatePolicy = UpdatePolicy.Auto,
-                Path = "plugins/servus.plugin.dtop/Servus.Plugin.Dtop.dll"
+                Path = "plugins/servus.plugin.dtop/Servus.TUI.Plugin.Dtop.dll"
             }]
         };
         await _store.SaveInstalledAsync(installed);

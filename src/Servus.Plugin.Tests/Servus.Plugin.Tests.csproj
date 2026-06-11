@@ -3,7 +3,7 @@
     <OutputType>Exe</OutputType>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Servus.Plugin\Servus.Plugin.csproj" />
+    <ProjectReference Include="..\Servus.TUI.Plugin\Servus.TUI.Plugin.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="xunit.v3.mtp-v2" />

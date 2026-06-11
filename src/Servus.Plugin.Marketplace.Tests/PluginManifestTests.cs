@@ -15,7 +15,7 @@ public sealed class PluginManifestTests
           "minServusVersion": "1.0.0",
           "license": "MIT",
           "repository": "https://github.com/st0o0/dtop",
-          "delivery": { "type": "github-release", "asset": "Servus.Plugin.Dtop.dll" },
+          "delivery": { "type": "github-release", "asset": "Servus.TUI.Plugin.Dtop.dll" },
           "tags": ["monitoring", "system"]
         }
         """;
@@ -35,7 +35,7 @@ public sealed class PluginManifestTests
     {
         var manifest = JsonSerializer.Deserialize<PluginManifest>(ValidJson)!;
         Assert.Equal(DeliveryType.GitHubRelease, manifest.Delivery.Type);
-        Assert.Equal("Servus.Plugin.Dtop.dll", manifest.Delivery.Asset);
+        Assert.Equal("Servus.TUI.Plugin.Dtop.dll", manifest.Delivery.Asset);
         Assert.Null(manifest.Delivery.PackageId);
     }
 
@@ -47,13 +47,13 @@ public sealed class PluginManifestTests
               "id": "servus.plugin.k8s", "name": "Kubernetes", "description": "K8s",
               "author": "st0o0", "version": "0.1.0", "minServusVersion": "1.0.0",
               "license": "MIT", "repository": "https://github.com/st0o0/servus.plugin.k8s",
-              "delivery": { "type": "nuget", "packageId": "Servus.Plugin.K8s" },
+              "delivery": { "type": "nuget", "packageId": "Servus.TUI.Plugin.K8s" },
               "tags": ["kubernetes"]
             }
             """;
         var manifest = JsonSerializer.Deserialize<PluginManifest>(json)!;
         Assert.Equal(DeliveryType.NuGet, manifest.Delivery.Type);
-        Assert.Equal("Servus.Plugin.K8s", manifest.Delivery.PackageId);
+        Assert.Equal("Servus.TUI.Plugin.K8s", manifest.Delivery.PackageId);
     }
 
     [Fact]

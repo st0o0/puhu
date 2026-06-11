@@ -1,7 +1,7 @@
 using System.Reflection;
 using System.Runtime.Loader;
 using Microsoft.Extensions.DependencyInjection;
-using Servus.Plugin;
+using Servus.TUI.Plugin;
 
 namespace Servus.TUI;
 
@@ -41,7 +41,7 @@ public static class PluginLoader
 
         foreach (var dir in scanDirs)
         {
-            foreach (var dll in Directory.GetFiles(dir, "Servus.Plugin.*.dll"))
+            foreach (var dll in Directory.GetFiles(dir, "Servus.TUI.Plugin.*.dll"))
             {
                 try
                 {
@@ -65,11 +65,15 @@ public static class PluginLoader
             Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
             ".servus", "plugins");
         if (Directory.Exists(userDir))
+        {
             yield return userDir;
+        }
 
         var localDir = Path.Combine(AppContext.BaseDirectory, "plugins");
         if (Directory.Exists(localDir))
+        {
             yield return localDir;
+        }
     }
 
     private static void DiscoverInAssembly(Assembly assembly, List<IServusPlugin> plugins)

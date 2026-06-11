@@ -1,11 +1,11 @@
 using Akka.Actor;
-using Servus.Plugin;
+using Servus.TUI.Plugin;
 
 namespace Servus.TUI;
 
 public sealed class PluginActorContextImpl(
     IServiceProvider services,
-    List<ActorRegistrationInfo> registrations) : Servus.Plugin.IActorContext
+    List<ActorRegistrationInfo> registrations) : Plugin.IActorContext
 {
     public IServiceProvider ServiceProvider => services;
 

@@ -25,7 +25,10 @@ public sealed class AkkaSetup : IServiceSetupContainer
 
                 foreach (var plugin in pluginRegistry.LoadedPlugins)
                 {
-                    if (plugin.ActorSetup is null) continue;
+                    if (plugin.ActorSetup is null)
+                    {
+                        continue;
+                    }
 
                     var actorCtx = new PluginActorContextImpl(sp, plugin.ActorRegistrations);
                     plugin.ActorSetup.Invoke(actorCtx);

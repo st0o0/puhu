@@ -1,5 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
-    <ProjectReference Include="..\Servus.Plugin\Servus.Plugin.csproj" />
+    <ProjectReference Include="..\Servus.TUI.Plugin\Servus.TUI.Plugin.csproj" />
   </ItemGroup>
 </Project>

@@ -1,4 +1,3 @@
-// src/Servus.Plugin.Marketplace/Services/PluginManager.cs
 using Servus.Plugin.Marketplace.Models;
 
 namespace Servus.Plugin.Marketplace.Services;

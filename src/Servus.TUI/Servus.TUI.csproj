@@ -5,7 +5,7 @@
     <PackageId>Servus.TUI</PackageId>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Servus.Plugin\Servus.Plugin.csproj" />
+    <ProjectReference Include="..\Servus.TUI.Plugin\Servus.TUI.Plugin.csproj" />
     <ProjectReference Include="..\Servus.Plugin.Marketplace\Servus.Plugin.Marketplace.csproj" />
     <ProjectReference Include="..\Servus.Plugin.Settings\Servus.Plugin.Settings.csproj" />
   </ItemGroup>

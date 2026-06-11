@@ -1,5 +1,5 @@
 using R3;
-using Servus.Plugin;
+using Servus.TUI.Plugin;
 
 namespace Servus.TUI.Services;
 

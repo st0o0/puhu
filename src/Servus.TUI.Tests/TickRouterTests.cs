@@ -1,16 +1,16 @@
 using Akka.Actor;
 using Akka.Hosting;
 using Akka.Hosting.TestKit;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Servus.Plugin;
 using Servus.TUI.Actors;
+using Servus.TUI.Plugin;
 
 namespace Servus.TUI.Tests;
 
 public sealed class TickRouterTests : TestKit
 {
-    protected override void ConfigureAkka(AkkaConfigurationBuilder builder, IServiceProvider provider) { }
+    protected override void ConfigureAkka(AkkaConfigurationBuilder builder, IServiceProvider provider)
+    {
+    }
 
 
     [Fact]
@@ -22,7 +22,7 @@ public sealed class TickRouterTests : TestKit
         router.Tell(new RegisterMonitor("cpu", probe, AlwaysOn: true, MinInterval: null));
         router.Tell(new Tick(0, TimeSpan.FromSeconds(1)));
 
-        await probe.ExpectMsgAsync<Tick>();
+        await probe.ExpectMsgAsync<Tick>(cancellationToken: TestContext.Current.CancellationToken);
     }
 
     [Fact]
@@ -34,7 +34,7 @@ public sealed class TickRouterTests : TestKit
         router.Tell(new RegisterMonitor("disk", probe, AlwaysOn: false, MinInterval: null));
         router.Tell(new Tick(0, TimeSpan.FromSeconds(1)));
 
-        await probe.ExpectNoMsgAsync(TimeSpan.FromMilliseconds(200));
+        await probe.ExpectNoMsgAsync(TimeSpan.FromMilliseconds(200), TestContext.Current.CancellationToken);
     }
 
     [Fact]
@@ -47,7 +47,7 @@ public sealed class TickRouterTests : TestKit
         router.Tell(new DemandChanged("disk", +1));
         router.Tell(new Tick(0, TimeSpan.FromSeconds(1)));
 
-        await probe.ExpectMsgAsync<Tick>();
+        await probe.ExpectMsgAsync<Tick>(cancellationToken: TestContext.Current.CancellationToken);
     }
 
     [Fact]
@@ -61,7 +61,7 @@ public sealed class TickRouterTests : TestKit
         router.Tell(new DemandChanged("disk", -1));
         router.Tell(new Tick(0, TimeSpan.FromSeconds(1)));
 
-        await probe.ExpectNoMsgAsync(TimeSpan.FromMilliseconds(200));
+        await probe.ExpectNoMsgAsync(TimeSpan.FromMilliseconds(200), TestContext.Current.CancellationToken);
     }
 
     [Fact]
@@ -74,8 +74,8 @@ public sealed class TickRouterTests : TestKit
         router.Tell(new Tick(0, TimeSpan.FromSeconds(1)));
         router.Tell(new Tick(1, TimeSpan.FromSeconds(1)));
 
-        await probe.ExpectMsgAsync<Tick>();
-        await probe.ExpectNoMsgAsync(TimeSpan.FromMilliseconds(200));
+        await probe.ExpectMsgAsync<Tick>(cancellationToken: TestContext.Current.CancellationToken);
+        await probe.ExpectNoMsgAsync(TimeSpan.FromMilliseconds(200), TestContext.Current.CancellationToken);
     }
 
     [Fact]
@@ -89,7 +89,8 @@ public sealed class TickRouterTests : TestKit
         router.Tell(new Tick(1, TimeSpan.FromSeconds(1)));
         router.Tell(new Tick(2, TimeSpan.FromSeconds(1)));
 
-        var received = await probe.ReceiveNAsync(2, TimeSpan.FromSeconds(1)).ToListAsync();
+        var received = await probe.ReceiveNAsync(2, TimeSpan.FromSeconds(1), TestContext.Current.CancellationToken)
+            .ToListAsync(cancellationToken: TestContext.Current.CancellationToken);
         Assert.Equal(2, received.Count);
     }
 }

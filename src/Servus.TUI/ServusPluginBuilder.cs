@@ -1,9 +1,11 @@
+using Akka.Actor;
 using Microsoft.Extensions.DependencyInjection;
-using Servus.Plugin;
+using Servus.TUI.Plugin;
+using IActorContext = Servus.TUI.Plugin.IActorContext;
 
 namespace Servus.TUI;
 
-public sealed record ActorRegistrationInfo(string Name, Akka.Actor.Props Props, TimeSpan? MinInterval, bool AlwaysOn);
+public sealed record ActorRegistrationInfo(string Name, Props Props, TimeSpan? MinInterval, bool AlwaysOn);
 
 public sealed class ServusPluginBuilder(IServiceCollection services, ITickSource tickSource) : IServusPluginBuilder
 {
