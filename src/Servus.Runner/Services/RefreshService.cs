@@ -15,7 +15,7 @@ public sealed class RefreshService : ITickSource, IDisposable
     ];
 
     private readonly Subject<Tick> _ticks = new();
-    private readonly object _gate = new();
+    private readonly Lock _gate = new();
     private IDisposable? _timer;
     private long _seq;
 
@@ -39,7 +39,11 @@ public sealed class RefreshService : ITickSource, IDisposable
         {
             var idx = Array.IndexOf(Steps, Interval.Value);
             var next = Math.Clamp(idx + direction, 0, Steps.Length - 1);
-            if (idx < 0 || Steps[next] == Interval.Value) return;
+            if (idx < 0 || Steps[next] == Interval.Value)
+            {
+                return;
+            }
+
             Interval.Value = Steps[next];
             StartTimerCore();
         }
@@ -47,7 +51,10 @@ public sealed class RefreshService : ITickSource, IDisposable
 
     private void StartTimer()
     {
-        lock (_gate) { StartTimerCore(); }
+        lock (_gate)
+        {
+            StartTimerCore();
+        }
     }
 
     private void StartTimerCore()
@@ -56,20 +63,26 @@ public sealed class RefreshService : ITickSource, IDisposable
         _timer = Observable.Interval(Interval.Value, TimeProvider.System)
             .Subscribe(_ =>
             {
-                if (IsPaused.Value) return;
+                if (IsPaused.Value)
+                {
+                    return;
+                }
+
                 _ticks.OnNext(new Tick(Interlocked.Increment(ref _seq) - 1, Interval.Value));
             });
     }
 
-    private static TimeSpan SnapToStep(TimeSpan value) =>
-        Steps.MinBy(s => Math.Abs((s - value).Ticks));
+    private static TimeSpan SnapToStep(TimeSpan value) => Steps.MinBy(s => Math.Abs((s - value).Ticks));
 
-    IDisposable ITickSource.Subscribe(Action onTick) =>
-        Ticks.Subscribe(_ => onTick());
+    IDisposable ITickSource.Subscribe(Action onTick) => Ticks.Subscribe(_ => onTick());
 
     public void Dispose()
     {
-        lock (_gate) { _timer?.Dispose(); }
+        lock (_gate)
+        {
+            _timer?.Dispose();
+        }
+
         _ticks.OnCompleted();
         _ticks.Dispose();
         Interval.Dispose();

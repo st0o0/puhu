@@ -18,13 +18,17 @@ public sealed class TickRouter : ReceiveActor
             foreach (var (key, reg) in _monitors)
             {
                 if (!reg.AlwaysOn && _demand.GetValueOrDefault(key) == 0)
+                {
                     continue;
+                }
 
                 if (reg.MinInterval is { } min)
                 {
                     var every = Math.Max(1, (int)Math.Ceiling(min.TotalMilliseconds / tick.BaseInterval.TotalMilliseconds));
                     if (tick.Seq % every != 0)
+                    {
                         continue;
+                    }
                 }
 
                 reg.Actor.Tell(tick);
