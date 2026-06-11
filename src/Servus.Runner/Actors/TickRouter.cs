@@ -11,8 +11,7 @@ public sealed class TickRouter : ReceiveActor
     public TickRouter()
     {
         Receive<RegisterMonitor>(m => _monitors[m.Key] = (m.Actor, m.AlwaysOn, m.MinInterval));
-        Receive<DemandChanged>(m =>
-            _demand[m.MonitorKey] = Math.Max(0, _demand.GetValueOrDefault(m.MonitorKey) + m.Delta));
+        Receive<DemandChanged>(m => _demand[m.Key] = Math.Max(0, _demand.GetValueOrDefault(m.Key) + m.Delta));
         Receive<Tick>(tick =>
         {
             foreach (var (key, reg) in _monitors)
@@ -24,7 +23,8 @@ public sealed class TickRouter : ReceiveActor
 
                 if (reg.MinInterval is { } min)
                 {
-                    var every = Math.Max(1, (int)Math.Ceiling(min.TotalMilliseconds / tick.BaseInterval.TotalMilliseconds));
+                    var every = Math.Max(1,
+                        (int)Math.Ceiling(min.TotalMilliseconds / tick.BaseInterval.TotalMilliseconds));
                     if (tick.Seq % every != 0)
                     {
                         continue;
