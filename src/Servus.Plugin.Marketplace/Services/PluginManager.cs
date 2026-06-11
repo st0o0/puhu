@@ -109,9 +109,6 @@ public sealed class PluginManager(
         }
     }
 
-    public IReadOnlyList<InstalledPlugin> GetInstalled() =>
-        configStore.LoadInstalledAsync().GetAwaiter().GetResult().Plugins;
-
     public async Task SetUpdatePolicyAsync(string pluginId, UpdatePolicy policy)
     {
         var installed = await LoadInstalledAsync();

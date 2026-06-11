@@ -2,6 +2,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <AssemblyName>servus</AssemblyName>
+    <IsPackable>false</IsPackable>
     <PackageId>Servus.TUI</PackageId>
   </PropertyGroup>
   <ItemGroup>

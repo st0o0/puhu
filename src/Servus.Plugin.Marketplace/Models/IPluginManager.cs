@@ -9,6 +9,5 @@ public interface IPluginManager
     Task UpdateAsync(string pluginId);
     Task UninstallAsync(string pluginId);
     Task SyncAllAsync();
-    IReadOnlyList<InstalledPlugin> GetInstalled();
     Task SetUpdatePolicyAsync(string pluginId, UpdatePolicy policy);
 }

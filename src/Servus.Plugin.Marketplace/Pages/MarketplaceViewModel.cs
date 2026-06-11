@@ -1,3 +1,4 @@
+using Akka.Actor;
 using R3;
 using Servus.Plugin.Marketplace.Models;
 using Termina.Reactive;
@@ -13,7 +14,7 @@ public enum MarketplaceView
 
 public sealed class MarketplaceViewModel : ReactiveViewModel
 {
-    private readonly IPluginManager _pluginManager;
+    private readonly IActorRef _actor;
 
     public ReactiveProperty<MarketplaceView> ActiveView { get; } = new(MarketplaceView.Browse);
     public ReactiveProperty<IReadOnlyList<PluginInfo>> AvailablePlugins { get; } = new([]);
@@ -22,23 +23,25 @@ public sealed class MarketplaceViewModel : ReactiveViewModel
     public ReactiveProperty<bool> IsSyncing { get; } = new(false);
     public ReactiveProperty<string?> StatusMessage { get; } = new(null);
 
-    public MarketplaceViewModel(IPluginManager pluginManager) => _pluginManager = pluginManager;
-
-    public override void OnActivated() => _ = LoadDataAsync();
-
-    public async Task LoadDataAsync()
+    public MarketplaceViewModel(MarketplaceStore store, IActorRef actor)
     {
-        try
-        {
-            IsSyncing.Value = true;
-            AvailablePlugins.Value = await _pluginManager.FetchAvailableAsync();
-            UpdateSelectedPlugin();
-        }
-        finally
-        {
-            IsSyncing.Value = false;
-        }
+        _actor = actor;
+
+        store.State.Select(s => s.AvailablePlugins).DistinctUntilChanged()
+            .Subscribe(plugins =>
+            {
+                AvailablePlugins.Value = plugins;
+                UpdateSelectedPlugin();
+            });
+
+        store.State.Select(s => s.IsBusy).DistinctUntilChanged()
+            .Subscribe(busy => IsSyncing.Value = busy);
+
+        store.State.Select(s => s.StatusMessage).DistinctUntilChanged()
+            .Subscribe(msg => StatusMessage.Value = msg);
     }
+
+    public override void OnActivated() => _actor.Tell(new RefreshMarketplace());
 
     public void SwitchView(MarketplaceView view)
     {
@@ -53,66 +56,30 @@ public sealed class MarketplaceViewModel : ReactiveViewModel
         UpdateSelectedPlugin();
     }
 
-    public async Task HandleActionAsync()
+    public void HandleAction()
     {
         if (SelectedPlugin.Value is not { } plugin)
         {
             return;
         }
 
-        try
+        var message = plugin.Status switch
         {
-            IsSyncing.Value = true;
-            switch (plugin.Status)
-            {
-                case PluginStatus.NotInstalled:
-                    StatusMessage.Value = $"Installing {plugin.Name}...";
-                    await _pluginManager.InstallAsync(plugin.Id);
-                    StatusMessage.Value = $"{plugin.Name} installed. Restart to activate.";
-                    break;
-                case PluginStatus.UpdateAvailable:
-                    StatusMessage.Value = $"Updating {plugin.Name}...";
-                    await _pluginManager.UpdateAsync(plugin.Id);
-                    StatusMessage.Value = $"{plugin.Name} updated. Restart to activate.";
-                    break;
-                case PluginStatus.Installed:
-                    StatusMessage.Value = $"Removing {plugin.Name}...";
-                    await _pluginManager.UninstallAsync(plugin.Id);
-                    StatusMessage.Value = $"{plugin.Name} removed. Restart to apply.";
-                    break;
-            }
+            PluginStatus.NotInstalled => (object)new InstallPlugin(plugin.Id),
+            PluginStatus.UpdateAvailable => new UpdatePlugin(plugin.Id),
+            PluginStatus.Installed => new UninstallPlugin(plugin.Id),
+            _ => null
+        };
 
-            await LoadDataAsync();
-        }
-        catch (Exception ex)
+        if (message is not null)
         {
-            StatusMessage.Value = $"Error: {ex.Message}";
-        }
-        finally
-        {
-            IsSyncing.Value = false;
+            _actor.Tell(message);
         }
     }
 
-    public async Task SyncAsync()
-    {
-        try
-        {
-            IsSyncing.Value = true;
-            StatusMessage.Value = "Syncing...";
-            await _pluginManager.SyncAllAsync();
-            await LoadDataAsync();
-            StatusMessage.Value = "Sync complete.";
-        }
-        catch (Exception ex)
-        {
-            StatusMessage.Value = $"Sync error: {ex.Message}";
-        }
-        finally
-        {
-            IsSyncing.Value = false;
-        }
-    }
+    public void Refresh() => _actor.Tell(new RefreshMarketplace());
+
+    public void Sync() => _actor.Tell(new SyncAll());
 
     public override void Dispose()
     {
