@@ -1,14 +1,14 @@
 <Solution>
-  <Project Path="Servus.Plugin.Sdk/Servus.Plugin.Sdk.csproj" />
-  <Project Path="Servus.Runner/Servus.Runner.csproj" />
+  <Project Path="Servus.Plugin/Servus.Plugin.csproj" />
+  <Project Path="Servus.TUI/Servus.TUI.csproj" />
   <Project Path="Servus.Plugin.Marketplace/Servus.Plugin.Marketplace.csproj" />
   <Project Path="Servus.Plugin.Settings/Servus.Plugin.Settings.csproj" />
   <Folder Name="/Termina/">
     <Project Path="../lib/termina/src/Termina/Termina.csproj" />
   </Folder>
   <Folder Name="/Tests/">
-    <Project Path="../tests/Servus.Plugin.Sdk.Tests/Servus.Plugin.Sdk.Tests.csproj" />
-    <Project Path="../tests/Servus.Runner.Tests/Servus.Runner.Tests.csproj" />
-    <Project Path="../tests/Servus.Plugin.Marketplace.Tests/Servus.Plugin.Marketplace.Tests.csproj" />
+    <Project Path="Servus.Plugin.Tests/Servus.Plugin.Tests.csproj" />
+    <Project Path="Servus.TUI.Tests/Servus.TUI.Tests.csproj" />
+    <Project Path="Servus.Plugin.Marketplace.Tests/Servus.Plugin.Marketplace.Tests.csproj" />
   </Folder>
 </Solution>

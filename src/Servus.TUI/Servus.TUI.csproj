@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>servus</AssemblyName>
+    <PackageId>Servus.TUI</PackageId>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Servus.Plugin\Servus.Plugin.csproj" />
+    <ProjectReference Include="..\Servus.Plugin.Marketplace\Servus.Plugin.Marketplace.csproj" />
+    <ProjectReference Include="..\Servus.Plugin.Settings\Servus.Plugin.Settings.csproj" />
+    <ProjectReference Include="..\..\lib\termina\src\Termina\Termina.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Akka.Logger.Serilog" />
+    <PackageReference Include="Akka.Hosting" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" />
+    <PackageReference Include="R3" />
+    <PackageReference Include="Serilog.Extensions.Hosting" />
+    <PackageReference Include="Serilog.Sinks.File" />
+    <PackageReference Include="Servus" />
+  </ItemGroup>
+</Project>
