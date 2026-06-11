@@ -1,9 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
     <ProjectReference Include="..\Servus.Plugin\Servus.Plugin.csproj" />
-    <ProjectReference Include="..\..\lib\termina\src\Termina\Termina.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="R3" />
   </ItemGroup>
 </Project>

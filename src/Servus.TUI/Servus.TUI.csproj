@@ -8,7 +8,6 @@
     <ProjectReference Include="..\Servus.Plugin\Servus.Plugin.csproj" />
     <ProjectReference Include="..\Servus.Plugin.Marketplace\Servus.Plugin.Marketplace.csproj" />
     <ProjectReference Include="..\Servus.Plugin.Settings\Servus.Plugin.Settings.csproj" />
-    <ProjectReference Include="..\..\lib\termina\src\Termina\Termina.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Akka.Logger.Serilog" />

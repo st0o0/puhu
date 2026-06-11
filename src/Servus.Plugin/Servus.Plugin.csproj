@@ -6,6 +6,11 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Akka.Hosting" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+    <PackageReference Include="R3" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\lib\termina\src\Termina\Termina.csproj" />
   </ItemGroup>
 </Project>
