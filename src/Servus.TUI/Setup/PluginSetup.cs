@@ -12,9 +12,7 @@ public sealed class PluginSetup : IServiceSetupContainer
 {
     public void SetupServices(IServiceCollection services, IConfiguration configuration)
     {
-        var tickSource = GetRegisteredSingleton<ITickSource>(services)
-            ?? throw new InvalidOperationException(
-                "ITickSource must be registered before PluginSetup. Ensure ServicesSetup runs first.");
+        var ctx = services.BuildServiceProvider().GetRequiredService<SetupContext>();
 
         IReadOnlyList<IServusPlugin> builtInPlugins =
         [
@@ -22,16 +20,9 @@ public sealed class PluginSetup : IServiceSetupContainer
             new SettingsPlugin(),
         ];
 
-        var pluginRegistry = PluginLoader.DiscoverAndConfigure(services, tickSource, builtInPlugins);
+        var pluginRegistry = PluginLoader.DiscoverAndConfigure(services, ctx.TickSource, builtInPlugins);
+        ctx.PluginRegistry = pluginRegistry;
         services.AddSingleton(pluginRegistry);
         TabBarNode.RegisterPluginTabs(pluginRegistry);
-    }
-
-    private static T? GetRegisteredSingleton<T>(IServiceCollection services) where T : class
-    {
-        var descriptor = services.LastOrDefault(d =>
-            d.ServiceType == typeof(T) && d.Lifetime == ServiceLifetime.Singleton);
-
-        return descriptor?.ImplementationInstance as T;
     }
 }

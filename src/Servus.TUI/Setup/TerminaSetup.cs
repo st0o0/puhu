@@ -10,7 +10,8 @@ public sealed class TerminaSetup : IServiceSetupContainer
 {
     public void SetupServices(IServiceCollection services, IConfiguration configuration)
     {
-        var pluginRegistry = GetRegisteredSingleton<PluginRegistry>(services);
+        var ctx = services.BuildServiceProvider().GetRequiredService<SetupContext>();
+        var pluginRegistry = ctx.PluginRegistry;
         var firstRoute = pluginRegistry?.PluginTabs.FirstOrDefault()?.Route ?? "/marketplace";
 
         services.AddTermina(firstRoute, termina =>
@@ -31,13 +32,5 @@ public sealed class TerminaSetup : IServiceSetupContainer
                 }
             }
         });
-    }
-
-    private static T? GetRegisteredSingleton<T>(IServiceCollection services) where T : class
-    {
-        var descriptor = services.LastOrDefault(d =>
-            d.ServiceType == typeof(T) && d.Lifetime == ServiceLifetime.Singleton);
-
-        return descriptor?.ImplementationInstance as T;
     }
 }

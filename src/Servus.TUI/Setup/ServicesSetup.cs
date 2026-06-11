@@ -13,5 +13,8 @@ public sealed class ServicesSetup : IServiceSetupContainer
         var refreshService = new RefreshService(TimeSpan.FromMilliseconds(1000));
         services.AddSingleton(refreshService);
         services.AddSingleton<ITickSource>(refreshService);
+
+        var ctx = new SetupContext { TickSource = refreshService };
+        services.AddSingleton(ctx);
     }
 }
