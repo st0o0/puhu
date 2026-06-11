@@ -10,9 +10,17 @@ public sealed class PluginCache(string cacheDir)
     {
         var path = GetPath(key);
         var metaPath = path + ".meta";
-        if (!File.Exists(path) || !File.Exists(metaPath)) return null;
+        if (!File.Exists(path) || !File.Exists(metaPath))
+        {
+            return null;
+        }
+
         var meta = await File.ReadAllTextAsync(metaPath);
-        if (DateTimeOffset.TryParse(meta, out var ts) && DateTimeOffset.UtcNow - ts > DefaultTtl) return null;
+        if (DateTimeOffset.TryParse(meta, out var ts) && DateTimeOffset.UtcNow - ts > DefaultTtl)
+        {
+            return null;
+        }
+
         await using var stream = File.OpenRead(path);
         return await JsonSerializer.DeserializeAsync<T>(stream);
     }
@@ -28,7 +36,11 @@ public sealed class PluginCache(string cacheDir)
 
     public void InvalidateAll()
     {
-        if (!Directory.Exists(cacheDir)) return;
+        if (!Directory.Exists(cacheDir))
+        {
+            return;
+        }
+
         foreach (var file in Directory.GetFiles(cacheDir)) File.Delete(file);
     }
 

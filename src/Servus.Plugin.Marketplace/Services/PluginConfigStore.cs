@@ -12,7 +12,11 @@ public sealed class PluginConfigStore(string basePath)
 
     public async Task<PluginSources> LoadSourcesAsync()
     {
-        if (!File.Exists(SourcesPath)) return new PluginSources();
+        if (!File.Exists(SourcesPath))
+        {
+            return new PluginSources();
+        }
+
         await using var stream = File.OpenRead(SourcesPath);
         return await JsonSerializer.DeserializeAsync<PluginSources>(stream) ?? new PluginSources();
     }
@@ -26,7 +30,11 @@ public sealed class PluginConfigStore(string basePath)
 
     public async Task<InstalledPluginsFile> LoadInstalledAsync()
     {
-        if (!File.Exists(InstalledPath)) return new InstalledPluginsFile();
+        if (!File.Exists(InstalledPath))
+        {
+            return new InstalledPluginsFile();
+        }
+
         await using var stream = File.OpenRead(InstalledPath);
         return await JsonSerializer.DeserializeAsync<InstalledPluginsFile>(stream) ?? new InstalledPluginsFile();
     }
@@ -40,7 +48,11 @@ public sealed class PluginConfigStore(string basePath)
 
     public async Task EnsureDefaultSourcesAsync()
     {
-        if (File.Exists(SourcesPath)) return;
+        if (File.Exists(SourcesPath))
+        {
+            return;
+        }
+
         var defaults = new PluginSources
         {
             Registries = ["https://raw.githubusercontent.com/st0o0/servus.registry/main/index.json"]

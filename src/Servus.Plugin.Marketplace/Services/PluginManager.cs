@@ -27,7 +27,11 @@ public sealed class PluginManager(
         foreach (var repoUrl in allRepoUrls)
         {
             var manifest = await fetcher.FetchManifestAsync(repoUrl, ignoreCache);
-            if (manifest is null) continue;
+            if (manifest is null)
+            {
+                continue;
+            }
+
             var installedPlugin = installedLookup.GetValueOrDefault(manifest.Id);
             results.Add(PluginInfo.FromManifest(manifest, installedPlugin?.Version, installedPlugin?.UpdatePolicy));
         }
@@ -100,7 +104,9 @@ public sealed class PluginManager(
         {
             var manifest = await fetcher.FetchManifestAsync(plugin.Source, ignoreCache: true);
             if (manifest is not null && Version.Parse(manifest.Version) > Version.Parse(plugin.Version))
+            {
                 await UpdateAsync(plugin.Id);
+            }
         }
     }
 
@@ -111,7 +117,11 @@ public sealed class PluginManager(
     {
         var installed = await LoadInstalledAsync();
         var plugin = installed.Plugins.FirstOrDefault(p => p.Id == pluginId);
-        if (plugin is null) return;
+        if (plugin is null)
+        {
+            return;
+        }
+
         plugin.UpdatePolicy = policy;
         await SaveInstalledAsync(installed);
     }

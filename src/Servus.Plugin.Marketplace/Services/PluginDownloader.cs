@@ -20,7 +20,10 @@ public sealed class PluginDownloader(HttpClient httpClient, string pluginsDir)
     public void Remove(string pluginId)
     {
         var dir = Path.Combine(pluginsDir, pluginId);
-        if (Directory.Exists(dir)) Directory.Delete(dir, true);
+        if (Directory.Exists(dir))
+        {
+            Directory.Delete(dir, true);
+        }
     }
 
     private async Task<string> DownloadFromGitHubAsync(string repositoryUrl, string assetName, string targetDir)
@@ -42,7 +45,11 @@ public sealed class PluginDownloader(HttpClient httpClient, string pluginsDir)
                 break;
             }
         }
-        if (downloadUrl is null) throw new InvalidOperationException($"Asset '{assetName}' not found in latest release");
+        if (downloadUrl is null)
+        {
+            throw new InvalidOperationException($"Asset '{assetName}' not found in latest release");
+        }
+
         var bytes = await httpClient.GetByteArrayAsync(downloadUrl);
         var targetPath = Path.Combine(targetDir, assetName);
         await File.WriteAllBytesAsync(targetPath, bytes);

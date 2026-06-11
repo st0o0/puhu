@@ -11,7 +11,10 @@ public sealed class PluginMetadataFetcher(HttpClient httpClient, PluginCache cac
         if (!ignoreCache)
         {
             var cached = await cache.GetAsync<RegistryIndex>(cacheKey);
-            if (cached is not null) return cached;
+            if (cached is not null)
+            {
+                return cached;
+            }
         }
         var response = await httpClient.GetAsync(registryUrl);
         response.EnsureSuccessStatusCode();
@@ -27,16 +30,27 @@ public sealed class PluginMetadataFetcher(HttpClient httpClient, PluginCache cac
         if (!ignoreCache)
         {
             var cached = await cache.GetAsync<PluginManifest>(cacheKey);
-            if (cached is not null) return cached;
+            if (cached is not null)
+            {
+                return cached;
+            }
         }
         var manifestUrl = ToRawManifestUrl(repositoryUrl);
         try
         {
             var response = await httpClient.GetAsync(manifestUrl);
-            if (!response.IsSuccessStatusCode) return null;
+            if (!response.IsSuccessStatusCode)
+            {
+                return null;
+            }
+
             var content = await response.Content.ReadAsStringAsync();
             var manifest = JsonSerializer.Deserialize<PluginManifest>(content);
-            if (manifest is not null) await cache.SetAsync(cacheKey, manifest);
+            if (manifest is not null)
+            {
+                await cache.SetAsync(cacheKey, manifest);
+            }
+
             return manifest;
         }
         catch (HttpRequestException) { return null; }
@@ -46,7 +60,10 @@ public sealed class PluginMetadataFetcher(HttpClient httpClient, PluginCache cac
     {
         var uri = new Uri(repositoryUrl.TrimEnd('/'));
         if (uri.Host == "github.com")
+        {
             return $"https://raw.githubusercontent.com{uri.AbsolutePath}/main/servus-plugin.json";
+        }
+
         return $"{repositoryUrl.TrimEnd('/')}/servus-plugin.json";
     }
 }
