@@ -7,6 +7,7 @@ namespace Servus.Plugin.Marketplace.Actors;
 /// <summary>
 /// Single owner of all marketplace state and operations.
 /// Receives commands, delegates async I/O via PipeTo, pushes state into the store.
+/// Tracks per-plugin active operations for UI feedback.
 /// </summary>
 public sealed class MarketplaceActor : ReceiveActor
 {
@@ -35,28 +36,28 @@ public sealed class MarketplaceActor : ReceiveActor
 
         Receive<InstallPlugin>(msg =>
         {
-            PushState(store, _state with { IsBusy = true, StatusMessage = $"Installing {msg.PluginId}..." });
+            SetActiveOp(store, msg.PluginId, "Installing...");
             pluginManager.InstallAsync(msg.PluginId)
                 .PipeTo(Self,
-                    success: () => new OperationCompleted(msg.PluginId, $"{msg.PluginId} installed. Restart to activate."),
+                    success: () => new OperationCompleted(msg.PluginId, $"{msg.PluginId} installed"),
                     failure: ex => new OperationFailed(msg.PluginId, ex.Message));
         });
 
         Receive<UpdatePlugin>(msg =>
         {
-            PushState(store, _state with { IsBusy = true, StatusMessage = $"Updating {msg.PluginId}..." });
+            SetActiveOp(store, msg.PluginId, "Updating...");
             pluginManager.UpdateAsync(msg.PluginId)
                 .PipeTo(Self,
-                    success: () => new OperationCompleted(msg.PluginId, $"{msg.PluginId} updated. Restart to activate."),
+                    success: () => new OperationCompleted(msg.PluginId, $"{msg.PluginId} updated"),
                     failure: ex => new OperationFailed(msg.PluginId, ex.Message));
         });
 
         Receive<UninstallPlugin>(msg =>
         {
-            PushState(store, _state with { IsBusy = true, StatusMessage = $"Removing {msg.PluginId}..." });
+            SetActiveOp(store, msg.PluginId, "Removing...");
             pluginManager.UninstallAsync(msg.PluginId)
                 .PipeTo(Self,
-                    success: () => new OperationCompleted(msg.PluginId, $"{msg.PluginId} removed. Restart to apply."),
+                    success: () => new OperationCompleted(msg.PluginId, $"{msg.PluginId} removed"),
                     failure: ex => new OperationFailed(msg.PluginId, ex.Message));
         });
 
@@ -71,16 +72,83 @@ public sealed class MarketplaceActor : ReceiveActor
 
         Receive<OperationCompleted>(msg =>
         {
-            PushState(store, _state with { StatusMessage = msg.Status });
+            ClearActiveOp(store, msg.PluginId, msg.Status);
             Self.Tell(new RefreshMarketplace());
         });
 
         Receive<OperationFailed>(msg =>
         {
-            PushState(store, _state with { IsBusy = false, StatusMessage = $"Error: {msg.Error}" });
+            var ops = new Dictionary<string, string>(_state.ActiveOperations);
+            ops.Remove(msg.PluginId);
+            PushState(store, _state with
+            {
+                IsBusy = false,
+                StatusMessage = $"Error: {msg.Error}",
+                ActiveOperations = ops
+            });
+        });
+
+        Receive<AddSource>(msg =>
+        {
+            pluginManager.AddSourceAsync(msg.Url)
+                .PipeTo(Self,
+                    success: () => new LoadSources(),
+                    failure: ex => new OperationFailed("", ex.Message));
+        });
+
+        Receive<RemoveSource>(msg =>
+        {
+            pluginManager.RemoveSourceAsync(msg.Url)
+                .PipeTo(Self,
+                    success: () => new LoadSources(),
+                    failure: ex => new OperationFailed("", ex.Message));
+        });
+
+        Receive<LoadSources>(_ =>
+        {
+            pluginManager.FetchAvailableAsync()
+                .PipeTo(Self,
+                    success: plugins => new RefreshCompleted(plugins),
+                    failure: ex => new OperationFailed("", ex.Message));
+        });
+
+        Receive<CycleUpdatePolicy>(msg =>
+        {
+            var plugin = _state.AvailablePlugins.FirstOrDefault(p => p.Id == msg.PluginId);
+            if (plugin is null) return;
+
+            var nextPolicy = plugin.UpdatePolicy switch
+            {
+                UpdatePolicy.Auto => UpdatePolicy.Manual,
+                UpdatePolicy.Manual => UpdatePolicy.Pinned,
+                UpdatePolicy.Pinned => UpdatePolicy.Auto,
+                _ => UpdatePolicy.Auto
+            };
+
+            pluginManager.SetUpdatePolicyAsync(msg.PluginId, nextPolicy)
+                .PipeTo(Self,
+                    success: () => new RefreshMarketplace(),
+                    failure: ex => new OperationFailed(msg.PluginId, ex.Message));
         });
 
         Receive<Tick>(_ => Self.Tell(new SyncAll()));
+    }
+
+    private void SetActiveOp(MarketplaceStore store, string pluginId, string label)
+    {
+        var ops = new Dictionary<string, string>(_state.ActiveOperations) { [pluginId] = label };
+        PushState(store, _state with { ActiveOperations = ops });
+    }
+
+    private void ClearActiveOp(MarketplaceStore store, string pluginId, string status)
+    {
+        var ops = new Dictionary<string, string>(_state.ActiveOperations);
+        ops.Remove(pluginId);
+        PushState(store, _state with
+        {
+            ActiveOperations = ops,
+            StatusMessage = status
+        });
     }
 
     private void PushState(MarketplaceStore store, MarketplaceState newState)
