@@ -3,9 +3,10 @@
     <OutputType>Exe</OutputType>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Servus.Plugin.Marketplace\Servus.Plugin.Marketplace.csproj" />
+    <ProjectReference Include="..\Servus.TUI\Servus.TUI.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Akka.Hosting.TestKit" />
     <PackageReference Include="xunit.v3.mtp-v2" />
   </ItemGroup>
 </Project>

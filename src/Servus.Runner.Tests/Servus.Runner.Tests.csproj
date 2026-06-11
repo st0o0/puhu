@@ -1,8 +1,0 @@
-<Project Sdk="Microsoft.NET.Sdk">
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\Servus.Runner\Servus.Runner.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Akka.Hosting.TestKit" Version="1.5.68" />
-  </ItemGroup>
-</Project>

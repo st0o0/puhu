@@ -1,5 +1,5 @@
 using Servus.Plugin.Settings.Pages;
-using Servus.Plugin.Sdk;
+using Servus.Plugin;
 
 namespace Servus.Plugin.Settings;
 

@@ -1,4 +1,4 @@
-namespace Servus.Plugin.Sdk.Tests;
+namespace Servus.Plugin.Tests;
 
 public sealed class PluginTabInfoTests
 {

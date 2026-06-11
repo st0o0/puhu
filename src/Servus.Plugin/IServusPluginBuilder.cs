@@ -1,6 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Servus.Plugin.Sdk;
+namespace Servus.Plugin;
 
 public interface IServusPluginBuilder
 {

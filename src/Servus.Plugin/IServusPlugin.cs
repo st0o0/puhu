@@ -1,4 +1,4 @@
-namespace Servus.Plugin.Sdk;
+namespace Servus.Plugin;
 
 public interface IServusPlugin
 {

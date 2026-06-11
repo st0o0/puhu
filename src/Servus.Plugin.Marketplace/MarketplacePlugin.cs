@@ -1,5 +1,5 @@
 using Servus.Plugin.Marketplace.Pages;
-using Servus.Plugin.Sdk;
+using Servus.Plugin;
 
 namespace Servus.Plugin.Marketplace;
 
