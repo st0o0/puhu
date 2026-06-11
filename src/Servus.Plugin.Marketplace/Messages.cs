@@ -13,3 +13,12 @@ public sealed record SyncAll;
 internal sealed record RefreshCompleted(IReadOnlyList<PluginInfo> Plugins);
 internal sealed record OperationCompleted(string PluginId, string Status);
 internal sealed record OperationFailed(string PluginId, string Error);
+
+// Source management commands
+public sealed record AddSource(string Url);
+public sealed record RemoveSource(string Url);
+public sealed record CycleUpdatePolicy(string PluginId);
+public sealed record LoadSources;
+
+// Internal results for source operations
+internal sealed record SourcesChanged(PluginSources Sources);
