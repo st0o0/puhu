@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Servus.Plugin.Marketplace\Servus.Plugin.Marketplace.csproj" />
+  </ItemGroup>
+</Project>
