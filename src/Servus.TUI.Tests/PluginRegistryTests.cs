@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using R3;
 using Servus.Plugin;
 
 namespace Servus.TUI.Tests;
@@ -77,6 +78,7 @@ public sealed class PluginRegistryTests
     private sealed class StubTick : ITickSource
     {
         public TimeSpan CurrentInterval => TimeSpan.FromSeconds(1);
+        public Observable<Tick> Ticks => Observable.Empty<Tick>();
         public IDisposable Subscribe(Action onTick) => new Noop();
         private sealed class Noop : IDisposable { public void Dispose() { } }
     }
