@@ -3,6 +3,8 @@ using Servus.Plugin;
 
 namespace Servus.TUI;
 
+public sealed record ActorRegistrationInfo(string Name, Akka.Actor.Props Props, TimeSpan? MinInterval, bool AlwaysOn);
+
 public sealed class ServusPluginBuilder(IServiceCollection services, ITickSource tickSource) : IServusPluginBuilder
 {
     public IServiceCollection Services { get; } = services;
@@ -14,6 +16,7 @@ public sealed class ServusPluginBuilder(IServiceCollection services, ITickSource
     public Action<IThemeContext>? ThemeSetup { get; private set; }
     public Action<INotificationContext>? NotificationSetup { get; private set; }
     public List<(string Key, Type Type)> SettingsRegistrations { get; } = [];
+    public List<ActorRegistrationInfo> ActorRegistrations { get; } = [];
 
     public IServusPluginBuilder WithTab(string label, string route, ConsoleKey? hotKey = null)
     {

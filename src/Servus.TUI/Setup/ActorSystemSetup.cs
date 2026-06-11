@@ -39,11 +39,10 @@ public sealed class ActorSystemSetup : IServiceSetupContainer
                 refreshService.Ticks.Subscribe(t => tickRouter.Tell(t));
 
                 var pluginRegistry = resolver.GetService<PluginRegistry>();
-                var tickSource = resolver.GetService<ITickSource>();
                 var sp = resolver.GetService<IServiceProvider>();
-                var actorCtx = new PluginActorContextImpl(system, sp, tickSource);
                 foreach (var plugin in pluginRegistry.LoadedPlugins)
                 {
+                    var actorCtx = new PluginActorContextImpl(sp, plugin.ActorRegistrations);
                     plugin.ActorSetup?.Invoke(actorCtx);
                 }
             });

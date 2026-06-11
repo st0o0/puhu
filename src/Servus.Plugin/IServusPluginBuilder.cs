@@ -1,3 +1,4 @@
+using Akka.Actor;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Servus.Plugin;
@@ -26,8 +27,12 @@ public interface IRouteContext
 public interface IActorContext
 {
     IServiceProvider ServiceProvider { get; }
-    ITickSource TickSource { get; }
-    void RegisterActor(string name, Func<object> propsFactory);
+    IActorRegistration RegisterActor(string name, Props props);
+}
+
+public interface IActorRegistration
+{
+    IActorRegistration WithTicks(TimeSpan? minInterval = null, bool alwaysOn = false);
 }
 
 public interface IThemeContext
