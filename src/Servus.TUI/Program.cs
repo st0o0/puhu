@@ -8,6 +8,7 @@ var runner = AppBuilder.Create(Host.CreateApplicationBuilder(args), b => b.Build
     .WithSetup<MarketplaceSetup>()
     .WithSetup<PluginSetup>()
     .WithSetup<ActorSystemSetup>()
+    .WithSetup<AkkaSetup>()
     .WithSetup<TerminaSetup>()
     .Build();
 

@@ -5,7 +5,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using R3;
 using Servus.Application.Startup;
-using Servus.Plugin;
 using Servus.TUI.Actors;
 using Servus.TUI.Services;
 
@@ -37,14 +36,6 @@ public sealed class ActorSystemSetup : IServiceSetupContainer
 
                 var refreshService = resolver.GetService<RefreshService>();
                 refreshService.Ticks.Subscribe(t => tickRouter.Tell(t));
-
-                var pluginRegistry = resolver.GetService<PluginRegistry>();
-                var sp = resolver.GetService<IServiceProvider>();
-                foreach (var plugin in pluginRegistry.LoadedPlugins)
-                {
-                    var actorCtx = new PluginActorContextImpl(sp, plugin.ActorRegistrations);
-                    plugin.ActorSetup?.Invoke(actorCtx);
-                }
             });
         });
     }
