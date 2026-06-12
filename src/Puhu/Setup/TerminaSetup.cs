@@ -65,7 +65,9 @@ public sealed class GlobalKeyHandler(TerminaApplication app) : IHostedService, I
                 app.Shutdown();
                 break;
 
-            case ConsoleKey.Tab when Plugin.Nodes.TabBarNode.TabCount > 0:
+            case ConsoleKey.Tab
+                when Plugin.Nodes.TabBarNode.TabCount > 0
+                     && app.CurrentPath != "/splash":
                 try
                 {
                     var delta = key.KeyInfo.Modifiers.HasFlag(ConsoleModifiers.Shift) ? -1 : 1;
