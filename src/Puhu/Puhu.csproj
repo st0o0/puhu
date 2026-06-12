@@ -18,6 +18,6 @@
     <PackageReference Include="Servus" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="themes\**\*.theme" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="Themes\**\*.theme" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

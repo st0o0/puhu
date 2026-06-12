@@ -23,7 +23,7 @@ public sealed class ServicesSetup : IServiceSetupContainer
         services.AddSingleton(settingsStore);
 
         var themeService = new ThemeService(settingsStore);
-        themeService.LoadFromDirectory(Path.Combine(AppContext.BaseDirectory, "themes"));
+        themeService.LoadFromDirectory(Path.Combine(AppContext.BaseDirectory, "Themes"));
         if (!themeService.RestoreSaved() && !themeService.ApplyByName("btop-default"))
         {
             themeService.ApplyBuiltIn("dark");
