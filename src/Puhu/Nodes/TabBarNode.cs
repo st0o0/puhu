@@ -1,7 +1,6 @@
-﻿using Puhu.Themes;
+﻿using Puhu.Plugin;
 using Termina.Layout;
 using Termina.Rendering;
-using Termina.Terminal;
 
 namespace Puhu.Nodes;
 
@@ -11,6 +10,7 @@ public sealed class TabBarNode : LayoutNode
     private static IReadOnlyList<string> _allRoutes = [];
 
     private readonly int _activeIndex;
+    private readonly ThemeDefinition _theme;
 
     public static void RegisterPluginTabs(PluginRegistry registry)
     {
@@ -26,9 +26,10 @@ public sealed class TabBarNode : LayoutNode
         _allRoutes = routes;
     }
 
-    public TabBarNode(int activeIndex)
+    public TabBarNode(int activeIndex, ThemeDefinition theme)
     {
         _activeIndex = activeIndex;
+        _theme = theme;
         HeightConstraint = new SizeConstraint.Fixed(1);
         WidthConstraint = new SizeConstraint.Fill();
     }
@@ -42,9 +43,7 @@ public sealed class TabBarNode : LayoutNode
     public override void Render(IRenderContext context, Rect bounds)
     {
         if (!bounds.HasArea)
-        {
             return;
-        }
 
         var ctx = context.CreateSubContext(bounds);
         ctx.Fill(0, 0, bounds.Width, 1);
@@ -52,15 +51,14 @@ public sealed class TabBarNode : LayoutNode
         for (var i = 0; i < _allLabels.Count; i++)
         {
             var label = $" {_allLabels[i]} ";
-            var theme = ThemeService.Instance.Current;
             if (i == _activeIndex)
             {
-                ctx.SetForeground(theme.SelectionText);
-                ctx.SetBackground(theme.Selection);
+                ctx.SetForeground(_theme.SelectionText);
+                ctx.SetBackground(_theme.Selection);
             }
             else
             {
-                ctx.SetForeground(theme.TextDim);
+                ctx.SetForeground(_theme.TextDim);
             }
 
             ctx.WriteAt(x, 0, label);

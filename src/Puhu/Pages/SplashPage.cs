@@ -1,4 +1,4 @@
-using Puhu.Themes;
+using Puhu.Plugin;
 using R3;
 using Termina.Layout;
 using Termina.Reactive;
@@ -18,36 +18,35 @@ public sealed class SplashPage : ReactivePage<SplashViewModel>
         """;
 
     private readonly ProgressBarNode _progressBar;
+    private readonly ThemeDefinition _theme;
 
-    public SplashPage()
+    public SplashPage(IThemeService themeService)
     {
-        var theme = ThemeService.Instance.Current;
+        _theme = themeService.Current;
         _progressBar = new ProgressBarNode()
-            .WithGradient(Gradient.Create(theme.Accent, theme.Selection))
+            .WithGradient(Gradient.Create(_theme.Accent, _theme.Selection))
             .WithLabel(" {0:P0}");
     }
 
     public override ILayoutNode BuildLayout()
     {
-        var theme = ThemeService.Instance.Current;
-
         var content = Layouts.Vertical(
             new TextNode("").Fill(),
-            new TextNode(Logo).WithForeground(theme.Accent).AlignCenter(),
+            new TextNode(Logo).WithForeground(_theme.Accent).AlignCenter(),
             new TextNode(""),
             Layouts.Horizontal(
                 new TextNode("  "),
                 _progressBar,
                 new TextNode("  ")
             ),
-            new TextNode(ViewModel.StatusText.Value).WithForeground(theme.TextDim).AlignCenter(),
+            new TextNode(ViewModel.StatusText.Value).WithForeground(_theme.TextDim).AlignCenter(),
             new TextNode("").Fill(),
-            new TextNode("ESC Quit").WithForeground(theme.TextDim).AlignCenter()
+            new TextNode("ESC Quit").WithForeground(_theme.TextDim).AlignCenter()
         );
 
         return new PanelNode()
             .WithBorder(BorderStyle.Rounded)
-            .WithBorderColor(theme.Border)
+            .WithBorderColor(_theme.Border)
             .WithContent(content);
     }
 

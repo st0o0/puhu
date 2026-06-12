@@ -1,4 +1,3 @@
-using Puhu.Themes;
 using Puhu.Plugin;
 using Termina.Layout;
 using Termina.Rendering;
@@ -8,10 +7,12 @@ namespace Puhu.Nodes;
 public sealed class KeyHintsNode : LayoutNode
 {
     private readonly string[] _hints;
+    private readonly ThemeDefinition _theme;
 
-    public KeyHintsNode(params string[] hints)
+    public KeyHintsNode(ThemeDefinition theme, params string[] hints)
     {
         _hints = hints;
+        _theme = theme;
         HeightConstraint = new SizeConstraint.Fixed(1);
         WidthConstraint = new SizeConstraint.Fill();
     }
@@ -24,10 +25,9 @@ public sealed class KeyHintsNode : LayoutNode
             return;
 
         var ctx = context.CreateSubContext(bounds);
-        var theme = ThemeService.Instance.Current;
 
-        ctx.SetBackground(theme.StatusBar);
-        ctx.SetForeground(theme.StatusBarText);
+        ctx.SetBackground(_theme.StatusBar);
+        ctx.SetForeground(_theme.StatusBarText);
         ctx.Fill(0, 0, bounds.Width, 1);
 
         var x = 1;
@@ -39,11 +39,11 @@ public sealed class KeyHintsNode : LayoutNode
             var parts = hint.Split(':', 2);
             if (parts.Length == 2)
             {
-                ctx.SetForeground(theme.Accent);
+                ctx.SetForeground(_theme.Accent);
                 ctx.WriteAt(x, 0, parts[0]);
                 x += parts[0].Length;
 
-                ctx.SetForeground(theme.StatusBarText);
+                ctx.SetForeground(_theme.StatusBarText);
                 ctx.WriteAt(x, 0, ":" + parts[1]);
                 x += parts[1].Length + 1;
             }

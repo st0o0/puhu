@@ -21,7 +21,7 @@ public sealed class SplashViewModel : ReactiveViewModel
 
     public override void OnActivated()
     {
-        const int steps = 10;
+        const int steps = 20;
         const int intervalMs = 50;
         var current = 0;
 

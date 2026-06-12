@@ -5,21 +5,11 @@ namespace Puhu.Themes;
 
 public sealed class ThemeService : IThemeService
 {
-    private static ThemeService? _instance;
-
-    public static ThemeService Instance => _instance
-        ?? throw new InvalidOperationException("ThemeService has not been initialized.");
-
     private readonly Dictionary<string, string> _themePaths = new(StringComparer.OrdinalIgnoreCase);
 
     public ThemeDefinition Current { get; private set; } = new();
 
     public IReadOnlyCollection<string> AvailableThemes => _themePaths.Keys;
-
-    public ThemeService()
-    {
-        _instance = this;
-    }
 
     public void Apply(ThemeDefinition theme)
     {

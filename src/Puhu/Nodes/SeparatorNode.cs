@@ -1,4 +1,3 @@
-using Puhu.Themes;
 using Puhu.Plugin;
 using Termina.Layout;
 using Termina.Rendering;
@@ -7,12 +6,14 @@ namespace Puhu.Nodes;
 
 public sealed class SeparatorNode : LayoutNode
 {
+    private readonly ThemeDefinition _theme;
     private readonly char _left;
     private readonly char _right;
     private readonly char _fill;
 
-    public SeparatorNode(char left = '├', char right = '┤', char fill = '─')
+    public SeparatorNode(ThemeDefinition theme, char left = '├', char right = '┤', char fill = '─')
     {
+        _theme = theme;
         _left = left;
         _right = right;
         _fill = fill;
@@ -28,8 +29,7 @@ public sealed class SeparatorNode : LayoutNode
             return;
 
         var ctx = context.CreateSubContext(bounds);
-        var theme = ThemeService.Instance.Current;
-        ctx.SetForeground(theme.Border);
+        ctx.SetForeground(_theme.Border);
 
         ctx.WriteAt(0, 0, _left);
         for (var x = 1; x < bounds.Width - 1; x++)

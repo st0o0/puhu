@@ -50,13 +50,30 @@ public sealed record StartPageRoute(string Route);
 public sealed class GlobalKeyHandler(TerminaApplication app) : IHostedService, IDisposable
 {
     private IDisposable? _subscription;
+    private int _currentTab;
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
         _subscription = app.Input.OfType<IInputEvent, KeyPressed>()
-            .Where(k => k.KeyInfo.Key == ConsoleKey.Escape)
-            .Subscribe(_ => app.Shutdown());
+            .Subscribe(HandleKey);
         return Task.CompletedTask;
+    }
+
+    private void HandleKey(KeyPressed key)
+    {
+        switch (key.KeyInfo.Key)
+        {
+            case ConsoleKey.Escape:
+                app.Shutdown();
+                break;
+
+            case ConsoleKey.Tab when Nodes.TabBarNode.TabCount > 0:
+                var delta = key.KeyInfo.Modifiers.HasFlag(ConsoleModifiers.Shift) ? -1 : 1;
+                var count = Nodes.TabBarNode.TabCount;
+                _currentTab = (_currentTab + delta + count) % count;
+                app.NavigateTo(Nodes.TabBarNode.GetRoute(_currentTab));
+                break;
+        }
     }
 
     public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
