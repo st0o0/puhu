@@ -89,8 +89,16 @@ internal sealed class RenderTestContext : IRenderContext
 
     public void Clear() => Fill(0, 0, Width, Height);
 
-    public IRenderContext CreateSubContext(Rect bounds) =>
-        new RenderTestContext(_root, _offsetX + bounds.X, _offsetY + bounds.Y, bounds.Width, bounds.Height);
+    public IRenderContext CreateSubContext(Rect bounds)
+    {
+        var x = Math.Max(0, bounds.X);
+        var y = Math.Max(0, bounds.Y);
+        var right = Math.Min(Width, bounds.X + bounds.Width);
+        var bottom = Math.Min(Height, bounds.Y + bounds.Height);
+        var width = Math.Max(0, right - x);
+        var height = Math.Max(0, bottom - y);
+        return new RenderTestContext(_root, _offsetX + x, _offsetY + y, width, height);
+    }
 
     private void Put(int x, int y, char c)
     {

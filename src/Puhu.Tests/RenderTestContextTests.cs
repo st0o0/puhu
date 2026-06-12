@@ -32,4 +32,25 @@ public sealed class RenderTestContextTests
 
         Assert.Equal("        ab", ctx.Row(0));
     }
+
+    [Fact]
+    public void SubContext_ExceedingRoot_IsClippedWithoutThrowing()
+    {
+        var ctx = new RenderTestContext(10, 1);
+        var sub = ctx.CreateSubContext(new Rect(8, 0, 5, 1));
+        sub.WriteAt(0, 0, "abcde");
+
+        Assert.Equal("        ab", ctx.Row(0));
+    }
+
+    [Fact]
+    public void NestedSubContext_ClipsAgainstParent()
+    {
+        var ctx = new RenderTestContext(10, 2);
+        var outer = ctx.CreateSubContext(new Rect(2, 0, 6, 2));
+        var inner = outer.CreateSubContext(new Rect(4, 0, 10, 1));
+        inner.WriteAt(0, 0, "zzzz");
+
+        Assert.Equal("      zz  ", ctx.Row(0));
+    }
 }
