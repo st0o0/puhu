@@ -99,6 +99,7 @@ public sealed class SubNavNodeTests
 
         Assert.Contains(" 1 alpha ", ctx.Row(0));
         Assert.Contains("2 beta", ctx.Row(0));
+        Assert.Equal("  1 alpha   2 beta", ctx.Row(0).TrimEnd());
     }
 
     [Fact]

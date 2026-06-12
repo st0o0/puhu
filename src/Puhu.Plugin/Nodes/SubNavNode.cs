@@ -76,7 +76,7 @@ public sealed class SubNavNode<TView> : LayoutNode
                 ctx.SetForeground(theme.SelectionText);
                 ctx.SetBackground(theme.Selection);
                 ctx.WriteAt(x, 0, $" {keyName} {label} ");
-                x += keyName.Length + label.Length + 4;
+                x += keyName.Length + label.Length + 3;
             }
             else
             {
