@@ -91,7 +91,8 @@ internal sealed class AppShellNode : LayoutNode
             }
             else
             {
-                ctx.WriteAt(cx + 1 + key.Length, y, ' ');
+                ctx.SetForeground(theme.TextDim);
+                ctx.WriteAt(cx + 2 + key.Length, y, ' ');
             }
 
             ctx.SetForeground(theme.Border);

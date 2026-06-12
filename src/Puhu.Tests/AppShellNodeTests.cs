@@ -51,6 +51,15 @@ public sealed class AppShellNodeTests
     }
 
     [Fact]
+    public void Render_KeyOnlyHint_RendersCleanSegment()
+    {
+        var ctx = Render(40, 10, new EmptyNode(), "Esc");
+        var bottom = ctx.Row(9);
+
+        Assert.Contains("┤ Esc ├", bottom);
+    }
+
+    [Fact]
     public void Render_ContentGetsInnerBounds()
     {
         var probe = new BoundsProbeNode();
