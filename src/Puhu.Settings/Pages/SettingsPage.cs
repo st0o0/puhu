@@ -12,7 +12,6 @@ public sealed class SettingsPage : ReactivePage<SettingsViewModel>, IKeyHintProv
     private readonly IThemeService _themeService;
     private readonly IRefreshController _refreshController;
     private SubNavNode<SettingsView>? _subNav;
-    private KeyedDynamicLayoutNode<SettingsView>? _viewSwitcher;
 
     public SettingsPage(ITabNavigator tabNavigator, IThemeService themeService, IRefreshController refreshController)
     {
@@ -29,15 +28,6 @@ public sealed class SettingsPage : ReactivePage<SettingsViewModel>, IKeyHintProv
             _themeService,
             (ConsoleKey.D1, "Themes", SettingsView.Themes),
             (ConsoleKey.D2, "Refresh", SettingsView.Refresh));
-
-        _viewSwitcher = Layouts.KeyedDynamic(
-            () => ViewModel.ActiveView.Value,
-            view => view switch
-            {
-                SettingsView.Themes => BuildThemesView(),
-                SettingsView.Refresh => BuildRefreshView(),
-                _ => Layouts.Empty()
-            });
     }
 
     public string[] GetKeyHints() => ViewModel.ActiveView.Value switch
@@ -48,9 +38,16 @@ public sealed class SettingsPage : ReactivePage<SettingsViewModel>, IKeyHintProv
 
     public override ILayoutNode BuildLayout()
     {
+        // Views are rebuilt fresh on every layout pass: they are static TextNode
+        // snapshots of ViewModel state, so caching them (e.g. via KeyedDynamic)
+        // would freeze selection markers and the paused line after first paint.
+        LayoutNode activeView = ViewModel.ActiveView.Value == SettingsView.Themes
+            ? BuildThemesView()
+            : BuildRefreshView();
+
         return Layouts.Vertical(
             _subNav!.Height(1),
-            _viewSwitcher!.Fill());
+            activeView.Fill());
     }
 
     public override void OnNavigatedTo()
@@ -81,17 +78,13 @@ public sealed class SettingsPage : ReactivePage<SettingsViewModel>, IKeyHintProv
         ViewModel.SelectedIndex.Subscribe(_ => InvalidateLayout()).DisposeWith(Subscriptions);
         ViewModel.SavedTheme.Subscribe(_ => InvalidateLayout()).DisposeWith(Subscriptions);
         ViewModel.ActiveView
-            .Subscribe(_ =>
-            {
-                _viewSwitcher?.Invalidate();
-                InvalidateLayout();
-            })
+            .Subscribe(_ => InvalidateLayout())
             .DisposeWith(Subscriptions);
         _refreshController.Interval.Skip(1).Subscribe(_ => InvalidateLayout()).DisposeWith(Subscriptions);
         _refreshController.IsPaused.Skip(1).Subscribe(_ => InvalidateLayout()).DisposeWith(Subscriptions);
     }
 
-    private ILayoutNode BuildThemesView()
+    private LayoutNode BuildThemesView()
     {
         var theme = _themeService.Current;
         var rows = new List<ILayoutNode>
@@ -120,7 +113,7 @@ public sealed class SettingsPage : ReactivePage<SettingsViewModel>, IKeyHintProv
         return Layouts.Vertical(rows.ToArray());
     }
 
-    private ILayoutNode BuildRefreshView()
+    private LayoutNode BuildRefreshView()
     {
         var theme = _themeService.Current;
         var rows = new List<ILayoutNode>

@@ -17,7 +17,6 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHi
     private readonly IThemeService _themeService;
     private readonly ITabNavigator _tabNavigator;
     private readonly IRefreshController _refreshController;
-    private KeyedDynamicLayoutNode<MarketplaceView>? _viewSwitcher;
     private int _expandedIndex = -1;
     private SubNavNode<MarketplaceView>? _subNav;
 
@@ -39,16 +38,6 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHi
             (ConsoleKey.D1, "Browse", MarketplaceView.Browse),
             (ConsoleKey.D2, "Installed", MarketplaceView.Installed),
             (ConsoleKey.D3, "Sources", MarketplaceView.Sources));
-
-        _viewSwitcher = Layouts.KeyedDynamic(
-            () => ViewModel.ActiveView.Value,
-            view => view switch
-            {
-                MarketplaceView.Browse => BuildBrowseView(),
-                MarketplaceView.Installed => BuildInstalledView(),
-                MarketplaceView.Sources => BuildSourcesView(),
-                _ => Layouts.Empty()
-            });
     }
 
     public string[] GetKeyHints() => ViewModel.ActiveView.Value switch
@@ -61,9 +50,20 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHi
 
     public override ILayoutNode BuildLayout()
     {
+        // Views are rebuilt fresh on every layout pass: they are static snapshots
+        // of ViewModel state, so caching them (e.g. via KeyedDynamic) would freeze
+        // selection markers and expansion state after the first paint.
+        LayoutNode activeView = ViewModel.ActiveView.Value switch
+        {
+            MarketplaceView.Browse => BuildBrowseView(),
+            MarketplaceView.Installed => BuildInstalledView(),
+            MarketplaceView.Sources => BuildSourcesView(),
+            _ => Layouts.Empty()
+        };
+
         return Layouts.Vertical(
             _subNav!.Height(1),
-            _viewSwitcher!.Fill());
+            activeView.Fill());
     }
 
     public override void OnNavigatedTo()
@@ -134,11 +134,7 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHi
 
         // Subscriptions
         ViewModel.ActiveView
-            .Subscribe(_ =>
-            {
-                _viewSwitcher?.Invalidate();
-                InvalidateLayout();
-            })
+            .Subscribe(_ => InvalidateLayout())
             .DisposeWith(Subscriptions);
 
         ViewModel.AvailablePlugins
@@ -172,7 +168,7 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHi
 
     // --- Browse View ---
 
-    private ILayoutNode BuildBrowseView()
+    private LayoutNode BuildBrowseView()
     {
         var theme = _themeService.Current;
         var plugins = ViewModel.AvailablePlugins.Value;
@@ -242,7 +238,7 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHi
 
     // --- Installed View ---
 
-    private ILayoutNode BuildInstalledView()
+    private LayoutNode BuildInstalledView()
     {
         var theme = _themeService.Current;
         var plugins = ViewModel.InstalledPlugins.Value;
@@ -300,7 +296,7 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHi
 
     // --- Sources View ---
 
-    private ILayoutNode BuildSourcesView()
+    private LayoutNode BuildSourcesView()
     {
         var theme = _themeService.Current;
         var sources = ViewModel.Sources.Value;
