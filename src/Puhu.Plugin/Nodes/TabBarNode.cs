@@ -1,8 +1,8 @@
-﻿using Puhu.Plugin;
+using Puhu.Plugin;
 using Termina.Layout;
 using Termina.Rendering;
 
-namespace Puhu.Nodes;
+namespace Puhu.Plugin.Nodes;
 
 public sealed class TabBarNode : LayoutNode
 {
@@ -12,18 +12,10 @@ public sealed class TabBarNode : LayoutNode
     private readonly int _activeIndex;
     private readonly ThemeDefinition _theme;
 
-    public static void RegisterPluginTabs(PluginRegistry registry)
+    public static void RegisterTabs(IReadOnlyList<PluginTabInfo> tabs)
     {
-        var labels = new List<string>();
-        var routes = new List<string>();
-        foreach (var tab in registry.PluginTabs)
-        {
-            labels.Add(tab.Label);
-            routes.Add(tab.Route);
-        }
-
-        _allLabels = labels;
-        _allRoutes = routes;
+        _allLabels = tabs.Select(t => t.Label).ToList();
+        _allRoutes = tabs.Select(t => t.Route).ToList();
     }
 
     public TabBarNode(int activeIndex, ThemeDefinition theme)

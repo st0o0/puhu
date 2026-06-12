@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Puhu.Marketplace;
-using Puhu.Nodes;
+using Puhu.Plugin.Nodes;
 using Puhu.Plugin;
 using Puhu.Settings;
 using Servus.Application.Startup;
@@ -23,6 +23,6 @@ public sealed class PluginSetup : IServiceSetupContainer
         var pluginRegistry = PluginLoader.DiscoverAndConfigure(services, builtInPlugins);
         ctx.PluginRegistry = pluginRegistry;
         services.AddSingleton(pluginRegistry);
-        TabBarNode.RegisterPluginTabs(pluginRegistry);
+        TabBarNode.RegisterTabs(pluginRegistry.PluginTabs);
     }
 }

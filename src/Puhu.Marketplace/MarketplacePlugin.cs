@@ -19,17 +19,12 @@ public sealed class MarketplacePlugin : IPuhuPlugin
             .WithServices(services => services.AddSingleton<MarketplaceStore>())
             .WithActors((system, registry, resolver) =>
             {
-                var store = resolver.GetService<MarketplaceStore>();
-                var manager = resolver.GetService<IPluginManager>();
-                var actor = system.ActorOf(
-                    Props.Create(() => new MarketplaceActor(manager, store)), "marketplace");
+                var actor = system.ActorOf(resolver.Props<MarketplaceActor>(), "marketplace");
                 registry.Register<MarketplaceActor>(actor);
 
                 var tickRouter = registry.Get<TickRouterKey>();
-                tickRouter.Tell(new RegisterMonitor(
-                    "marketplace", actor, false, TimeSpan.FromSeconds(30)));
+                tickRouter.Tell(new RegisterMonitor("marketplace", actor, false, TimeSpan.FromSeconds(30)));
             })
-            .WithRoutes(termina =>
-                termina.RegisterRoute<MarketplacePage, MarketplaceViewModel>("/marketplace"));
+            .WithRoutes(termina => termina.RegisterRoute<MarketplacePage, MarketplaceViewModel>("/marketplace"));
     }
 }

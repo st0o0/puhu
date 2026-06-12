@@ -2,7 +2,7 @@ using Puhu.Plugin;
 using Termina.Layout;
 using Termina.Rendering;
 
-namespace Puhu.Nodes;
+namespace Puhu.Plugin.Nodes;
 
 public static class AppShell
 {

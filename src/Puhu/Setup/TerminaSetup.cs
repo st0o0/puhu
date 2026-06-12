@@ -65,11 +65,11 @@ public sealed class GlobalKeyHandler(TerminaApplication app) : IHostedService, I
                 app.Shutdown();
                 break;
 
-            case ConsoleKey.Tab when Nodes.TabBarNode.TabCount > 0:
+            case ConsoleKey.Tab when Plugin.Nodes.TabBarNode.TabCount > 0:
                 var delta = key.KeyInfo.Modifiers.HasFlag(ConsoleModifiers.Shift) ? -1 : 1;
-                var count = Nodes.TabBarNode.TabCount;
+                var count = Plugin.Nodes.TabBarNode.TabCount;
                 _currentTab = (_currentTab + delta + count) % count;
-                app.NavigateTo(Nodes.TabBarNode.GetRoute(_currentTab));
+                app.NavigateTo(Plugin.Nodes.TabBarNode.GetRoute(_currentTab));
                 break;
         }
     }

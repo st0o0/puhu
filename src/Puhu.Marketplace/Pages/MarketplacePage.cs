@@ -1,4 +1,6 @@
 ﻿using Puhu.Marketplace.Models;
+using Puhu.Plugin;
+using Puhu.Plugin.Nodes;
 using R3;
 using Termina.Input;
 using Termina.Layout;
@@ -12,12 +14,14 @@ namespace Puhu.Marketplace.Pages;
 public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>
 {
     private readonly IToastService _toastService;
+    private readonly IThemeService _themeService;
     private KeyedDynamicLayoutNode<MarketplaceView>? _viewSwitcher;
     private int _expandedIndex = -1;
 
-    public MarketplacePage(IToastService toastService)
+    public MarketplacePage(IToastService toastService, IThemeService themeService)
     {
         _toastService = toastService;
+        _themeService = themeService;
         FocusPolicy = FocusPolicy.FirstFocusable;
     }
 
@@ -36,20 +40,22 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>
 
     public override ILayoutNode BuildLayout()
     {
-        return Layouts.Vertical(
-            BuildTabBar(),
-            _viewSwitcher!.Fill(),
-            BuildKeyHints()
-        );
+        var hints = ViewModel.ActiveView.Value switch
+        {
+            MarketplaceView.Browse => new[] { "↑↓:Navigate", "Enter:Expand", "i:Install", "r:Refresh" },
+            MarketplaceView.Installed => new[] { "↑↓:Navigate", "u:Update", "x:Uninstall", "p:Policy" },
+            MarketplaceView.Sources => new[] { "↑↓:Navigate", "a:Add", "x:Remove" },
+            _ => Array.Empty<string>()
+        };
+
+        return AppShell.Wrap(_themeService.Current, 0, _viewSwitcher!.Fill(), hints);
     }
 
     public override void OnNavigatedTo()
     {
         base.OnNavigatedTo();
 
-        // Tab switching
-        KeyBindings.Register(ConsoleKey.Tab, () => CycleView(1));
-        KeyBindings.Register(ConsoleKey.Tab, ConsoleModifiers.Shift, () => CycleView(-1));
+        // View switching
         KeyBindings.Register(ConsoleKey.D1, () => ViewModel.SwitchView(MarketplaceView.Browse));
         KeyBindings.Register(ConsoleKey.D2, () => ViewModel.SwitchView(MarketplaceView.Installed));
         KeyBindings.Register(ConsoleKey.D3, () => ViewModel.SwitchView(MarketplaceView.Sources));
@@ -144,35 +150,6 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>
                     Icon: isError ? "✗" : "✓"));
             })
             .DisposeWith(Subscriptions);
-    }
-
-    private void CycleView(int direction)
-    {
-        var views = Enum.GetValues<MarketplaceView>();
-        var current = (int)ViewModel.ActiveView.Value;
-        var next = (current + direction + views.Length) % views.Length;
-        ViewModel.SwitchView(views[next]);
-    }
-
-    // --- Tab Bar ---
-
-    private ILayoutNode BuildTabBar()
-    {
-        var tabs = Enum.GetValues<MarketplaceView>();
-        var children = new List<ILayoutNode>();
-
-        foreach (var tab in tabs)
-        {
-            var isActive = tab == ViewModel.ActiveView.Value;
-            var label = isActive ? $"[{tab}]" : $" {tab} ";
-            var node = new TextNode(label);
-            if (isActive) node.WithForeground(Color.Cyan).Bold();
-            children.Add(node);
-        }
-
-        children.Add(new TextNode("Marketplace").WithForeground(Color.DarkGray).AlignRight().WidthFill());
-
-        return Layouts.Horizontal(children.ToArray()).Height(1);
     }
 
     // --- Browse View ---
@@ -335,18 +312,4 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>
         return Layouts.Vertical(rows.ToArray()).Fill();
     }
 
-    // --- Key Hints ---
-
-    private ILayoutNode BuildKeyHints()
-    {
-        var hints = ViewModel.ActiveView.Value switch
-        {
-            MarketplaceView.Browse => "↑↓ Navigate  Enter Expand  i Install  r Refresh  Tab View",
-            MarketplaceView.Installed => "↑↓ Navigate  u Update  x Uninstall  p Policy  Tab View",
-            MarketplaceView.Sources => "↑↓ Navigate  a Add  x Remove  Tab View",
-            _ => ""
-        };
-
-        return new TextNode(hints).WithForeground(Color.DarkGray).Height(1);
-    }
 }
