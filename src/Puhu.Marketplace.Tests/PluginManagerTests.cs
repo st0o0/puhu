@@ -1,8 +1,8 @@
 ﻿// tests/Puhu.Marketplace.Tests/PluginManagerTests.cs
 using System.Net;
 using System.Text.Json;
-using Puhu.Plugin.Marketplace.Models;
-using Puhu.Plugin.Marketplace.Services;
+using Puhu.Marketplace.Models;
+using Puhu.Marketplace.Services;
 
 namespace Puhu.Marketplace.Tests;
 

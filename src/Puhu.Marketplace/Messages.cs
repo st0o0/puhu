@@ -1,6 +1,6 @@
-﻿using Puhu.Plugin.Marketplace.Models;
+﻿using Puhu.Marketplace.Models;
 
-namespace Puhu.Plugin.Marketplace;
+namespace Puhu.Marketplace;
 
 // Commands — sent from ViewModel to actor
 public sealed record RefreshMarketplace;

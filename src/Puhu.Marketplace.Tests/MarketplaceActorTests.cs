@@ -1,9 +1,8 @@
 ﻿using Akka.Actor;
 using Akka.Hosting;
 using Akka.Hosting.TestKit;
-using Puhu.Plugin.Marketplace;
-using Puhu.Plugin.Marketplace.Actors;
-using Puhu.Plugin.Marketplace.Models;
+using Puhu.Marketplace.Actors;
+using Puhu.Marketplace.Models;
 
 namespace Puhu.Marketplace.Tests;
 

@@ -1,6 +1,6 @@
 ﻿using Termina.Reactive;
 
-namespace Puhu.Plugin.Settings.Pages;
+namespace Puhu.Settings.Pages;
 
 public sealed class SettingsViewModel : ReactiveViewModel
 {

@@ -1,5 +1,5 @@
-﻿using Puhu.Plugin.Marketplace.Models;
-using Puhu.Plugin.Marketplace.Services;
+﻿using Puhu.Marketplace.Models;
+using Puhu.Marketplace.Services;
 
 namespace Puhu.Marketplace.Tests;
 

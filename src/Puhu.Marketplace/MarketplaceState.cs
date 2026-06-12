@@ -1,6 +1,6 @@
-﻿using Puhu.Plugin.Marketplace.Models;
+﻿using Puhu.Marketplace.Models;
 
-namespace Puhu.Plugin.Marketplace;
+namespace Puhu.Marketplace;
 
 /// <summary>Immutable snapshot of the marketplace state, pushed from actor to store.</summary>
 public sealed record MarketplaceState

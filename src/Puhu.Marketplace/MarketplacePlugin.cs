@@ -1,11 +1,11 @@
 ﻿using Akka.Actor;
 using Microsoft.Extensions.DependencyInjection;
-using Puhu.Plugin.Marketplace.Actors;
-using Puhu.Plugin.Marketplace.Models;
-using Puhu.Plugin.Marketplace.Pages;
+using Puhu.Marketplace.Actors;
+using Puhu.Marketplace.Models;
+using Puhu.Marketplace.Pages;
 using Puhu.Plugin;
 
-namespace Puhu.Plugin.Marketplace;
+namespace Puhu.Marketplace;
 
 public sealed class MarketplacePlugin : IPuhuPlugin
 {

@@ -1,11 +1,11 @@
-﻿using Akka.Hosting;
-using Akka.Actor;
+﻿using Akka.Actor;
+using Akka.Hosting;
+using Puhu.Marketplace.Actors;
+using Puhu.Marketplace.Models;
 using R3;
-using Puhu.Plugin.Marketplace.Actors;
-using Puhu.Plugin.Marketplace.Models;
 using Termina.Reactive;
 
-namespace Puhu.Plugin.Marketplace.Pages;
+namespace Puhu.Marketplace.Pages;
 
 public enum MarketplaceView
 {

@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Puhu.Plugin.Marketplace.Models;
-using Puhu.Plugin.Marketplace.Services;
+using Puhu.Marketplace.Models;
+using Puhu.Marketplace.Services;
 using Servus.Application.Startup;
 
 namespace Puhu.Setup;

@@ -1,4 +1,4 @@
-﻿namespace Puhu.Plugin.Marketplace.Models;
+﻿namespace Puhu.Marketplace.Models;
 
 public interface IPluginManager
 {

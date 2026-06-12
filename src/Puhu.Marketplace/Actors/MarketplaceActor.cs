@@ -1,8 +1,8 @@
 ﻿using Akka.Actor;
-using Puhu.Plugin.Marketplace.Models;
+using Puhu.Marketplace.Models;
 using Puhu.Plugin;
 
-namespace Puhu.Plugin.Marketplace.Actors;
+namespace Puhu.Marketplace.Actors;
 
 /// <summary>
 /// Single owner of all marketplace state and operations.

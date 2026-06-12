@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
 
-namespace Puhu.Plugin.Marketplace.Services;
+namespace Puhu.Marketplace.Services;
 
 public sealed class PluginCache(string cacheDir)
 {

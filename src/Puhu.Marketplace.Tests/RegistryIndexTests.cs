@@ -1,5 +1,5 @@
 ﻿using System.Text.Json;
-using Puhu.Plugin.Marketplace.Models;
+using Puhu.Marketplace.Models;
 
 namespace Puhu.Marketplace.Tests;
 

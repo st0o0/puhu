@@ -1,6 +1,6 @@
 ﻿using R3;
 
-namespace Puhu.Plugin.Marketplace;
+namespace Puhu.Marketplace;
 
 /// <summary>
 /// Reactive read-only bridge between MarketplaceActor and the ViewModel.

@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
-using Puhu.Plugin.Marketplace.Models;
+using Puhu.Marketplace.Models;
 
-namespace Puhu.Plugin.Marketplace.Services;
+namespace Puhu.Marketplace.Services;
 
 public sealed class PluginConfigStore(string basePath)
 {

@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Puhu.Plugin.Marketplace.Models;
+namespace Puhu.Marketplace.Models;
 
 public sealed record InstalledPluginsFile
 {

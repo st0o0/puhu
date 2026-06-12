@@ -1,5 +1,5 @@
-﻿using R3;
-using Puhu.Plugin.Marketplace.Models;
+﻿using Puhu.Marketplace.Models;
+using R3;
 using Termina.Input;
 using Termina.Layout;
 using Termina.Notifications;
@@ -7,7 +7,7 @@ using Termina.Reactive;
 using Termina.Rendering;
 using Termina.Terminal;
 
-namespace Puhu.Plugin.Marketplace.Pages;
+namespace Puhu.Marketplace.Pages;
 
 public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>
 {

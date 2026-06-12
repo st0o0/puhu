@@ -1,7 +1,7 @@
-﻿using Puhu.Plugin.Settings.Pages;
-using Puhu.Plugin;
+﻿using Puhu.Plugin;
+using Puhu.Settings.Pages;
 
-namespace Puhu.Plugin.Settings;
+namespace Puhu.Settings;
 
 public sealed class SettingsPlugin : IPuhuPlugin
 {
