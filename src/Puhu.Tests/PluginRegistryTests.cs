@@ -1,13 +1,13 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using R3;
+using Akka.Actor;
+using Akka.DependencyInjection;
+using Akka.Hosting;
+using Microsoft.Extensions.DependencyInjection;
 using Puhu.Plugin;
 
 namespace Puhu.Tests;
 
 public sealed class PluginRegistryTests
 {
-    private static ITickSource StubTickSource() => new StubTick();
-
     [Fact]
     public void Empty_Registry_HasNoTabs()
     {
@@ -19,10 +19,10 @@ public sealed class PluginRegistryTests
     public void Registry_CollectsTabsFromBuilders()
     {
         var services = new ServiceCollection();
-        var b1 = new PuhuPluginBuilder(services, StubTickSource());
-        b1.WithTab("Overview", "/overview", ConsoleKey.D0);
-        var b2 = new PuhuPluginBuilder(services, StubTickSource());
-        b2.WithTab("Processes", "/process", ConsoleKey.D1);
+        var b1 = new PuhuPluginBuilder(services);
+        b1.WithTab("Overview", "/overview");
+        var b2 = new PuhuPluginBuilder(services);
+        b2.WithTab("Processes", "/process");
 
         var registry = new PluginRegistry([b1, b2]);
 
@@ -35,7 +35,7 @@ public sealed class PluginRegistryTests
     public void Builder_WithoutTab_IsNotInPluginTabs()
     {
         var services = new ServiceCollection();
-        var builder = new PuhuPluginBuilder(services, StubTickSource());
+        var builder = new PuhuPluginBuilder(services);
         builder.WithServices(s => s.AddSingleton("hello"));
 
         var registry = new PluginRegistry([builder]);
@@ -46,9 +46,9 @@ public sealed class PluginRegistryTests
     public void Builder_StoresRouteSetup()
     {
         var services = new ServiceCollection();
-        var builder = new PuhuPluginBuilder(services, StubTickSource());
+        var builder = new PuhuPluginBuilder(services);
         var invoked = false;
-        builder.ConfigureRoutes(_ => invoked = true);
+        builder.WithRoutes(_ => invoked = true);
         builder.RouteSetup?.Invoke(null!);
         Assert.True(invoked);
     }
@@ -57,10 +57,10 @@ public sealed class PluginRegistryTests
     public void Builder_StoresActorSetup()
     {
         var services = new ServiceCollection();
-        var builder = new PuhuPluginBuilder(services, StubTickSource());
+        var builder = new PuhuPluginBuilder(services);
         var invoked = false;
-        builder.ConfigureActors(_ => invoked = true);
-        builder.ActorSetup?.Invoke(null!);
+        builder.WithActors((_, _, _) => invoked = true);
+        builder.ActorSetup?.Invoke(null!, null!, null!);
         Assert.True(invoked);
     }
 
@@ -68,18 +68,10 @@ public sealed class PluginRegistryTests
     public void Builder_StoresServiceSetup()
     {
         var services = new ServiceCollection();
-        var builder = new PuhuPluginBuilder(services, StubTickSource());
+        var builder = new PuhuPluginBuilder(services);
         var invoked = false;
         builder.WithServices(_ => invoked = true);
         builder.ServiceSetup?.Invoke(null!);
         Assert.True(invoked);
-    }
-
-    private sealed class StubTick : ITickSource
-    {
-        public TimeSpan CurrentInterval => TimeSpan.FromSeconds(1);
-        public Observable<Tick> Ticks => Observable.Empty<Tick>();
-        public IDisposable Subscribe(Action onTick) => new Noop();
-        private sealed class Noop : IDisposable { public void Dispose() { } }
     }
 }

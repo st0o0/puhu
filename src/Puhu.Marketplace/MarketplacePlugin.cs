@@ -1,4 +1,5 @@
-﻿using Akka.Actor;
+using Akka.Actor;
+using Akka.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Puhu.Marketplace.Actors;
 using Puhu.Marketplace.Models;
@@ -16,15 +17,19 @@ public sealed class MarketplacePlugin : IPuhuPlugin
         builder
             .WithTab("Marketplace", "/marketplace")
             .WithServices(services => services.AddSingleton<MarketplaceStore>())
-            .ConfigureActors(ctx =>
+            .WithActors((system, registry, resolver) =>
             {
-                var store = ctx.ServiceProvider.GetRequiredService<MarketplaceStore>();
-                var manager = ctx.ServiceProvider.GetRequiredService<IPluginManager>();
-                ctx.RegisterActor<MarketplaceActor>("marketplace",
-                        Props.Create(() => new MarketplaceActor(manager, store)))
-                    .WithTicks(minInterval: TimeSpan.FromSeconds(30));
+                var store = resolver.GetService<MarketplaceStore>();
+                var manager = resolver.GetService<IPluginManager>();
+                var actor = system.ActorOf(
+                    Props.Create(() => new MarketplaceActor(manager, store)), "marketplace");
+                registry.Register<MarketplaceActor>(actor);
+
+                var tickRouter = registry.Get<TickRouterKey>();
+                tickRouter.Tell(new RegisterMonitor(
+                    "marketplace", actor, false, TimeSpan.FromSeconds(30)));
             })
-            .ConfigureRoutes(ctx =>
-                ctx.RegisterRoute<MarketplacePage, MarketplaceViewModel>("/marketplace"));
+            .WithRoutes(termina =>
+                termina.RegisterRoute<MarketplacePage, MarketplaceViewModel>("/marketplace"));
     }
 }

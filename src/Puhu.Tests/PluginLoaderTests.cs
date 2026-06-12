@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using R3;
+using Microsoft.Extensions.DependencyInjection;
 using Puhu.Plugin;
 
 namespace Puhu.Tests;
@@ -10,10 +9,9 @@ public sealed class PluginLoaderTests
     public void DiscoverAndConfigure_FindsBuiltInPlugins()
     {
         var services = new ServiceCollection();
-        var tickSource = new StubTick();
         var builtIns = new List<IPuhuPlugin> { new FakePlugin("Test") };
 
-        var registry = PluginLoader.DiscoverAndConfigure(services, tickSource, builtIns);
+        var registry = PluginLoader.DiscoverAndConfigure(services, builtIns);
 
         Assert.Single(registry.LoadedPlugins);
         Assert.Single(registry.PluginTabs);
@@ -24,10 +22,9 @@ public sealed class PluginLoaderTests
     public void DiscoverAndConfigure_SkipsFailingPlugins()
     {
         var services = new ServiceCollection();
-        var tickSource = new StubTick();
         var builtIns = new List<IPuhuPlugin> { new ThrowingPlugin(), new FakePlugin("Good") };
 
-        var registry = PluginLoader.DiscoverAndConfigure(services, tickSource, builtIns);
+        var registry = PluginLoader.DiscoverAndConfigure(services, builtIns);
 
         Assert.Single(registry.LoadedPlugins);
         Assert.Equal("/good", registry.PluginTabs[0].Route);
@@ -37,9 +34,8 @@ public sealed class PluginLoaderTests
     public void DiscoverAndConfigure_EmptyBuiltIns_ReturnsEmptyRegistry()
     {
         var services = new ServiceCollection();
-        var tickSource = new StubTick();
 
-        var registry = PluginLoader.DiscoverAndConfigure(services, tickSource, []);
+        var registry = PluginLoader.DiscoverAndConfigure(services, []);
 
         Assert.Empty(registry.LoadedPlugins);
     }
@@ -57,13 +53,5 @@ public sealed class PluginLoaderTests
     {
         public string Name => "Broken";
         public void Configure(IPuhuPluginBuilder builder) => throw new Exception("boom");
-    }
-
-    private sealed class StubTick : ITickSource
-    {
-        public TimeSpan CurrentInterval => TimeSpan.FromSeconds(1);
-        public Observable<Tick> Ticks => Observable.Empty<Tick>();
-        public IDisposable Subscribe(Action onTick) => new Noop();
-        private sealed class Noop : IDisposable { public void Dispose() { } }
     }
 }

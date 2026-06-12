@@ -1,4 +1,4 @@
-﻿using Puhu.Plugin;
+using Puhu.Plugin;
 using Puhu.Settings.Pages;
 
 namespace Puhu.Settings;
@@ -11,7 +11,7 @@ public sealed class SettingsPlugin : IPuhuPlugin
     {
         builder
             .WithTab("Settings", "/settings")
-            .ConfigureRoutes(ctx =>
-                ctx.RegisterRoute<SettingsPage, SettingsViewModel>("/settings"));
+            .WithRoutes(termina =>
+                termina.RegisterRoute<SettingsPage, SettingsViewModel>("/settings"));
     }
 }
