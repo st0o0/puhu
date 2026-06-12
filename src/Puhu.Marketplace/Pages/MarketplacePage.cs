@@ -183,7 +183,7 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>
             new TextNode(plugin.AvailableVersion).WithForeground(Color.DarkGray),
             new TextNode($"  @{plugin.Author}").WithForeground(Color.DarkGray),
             activeOp is not null
-                ? (ILayoutNode)new SpinnerNode(SpinnerStyle.Dots)
+                ? new SpinnerNode()
                     .WithLabel(activeOp).WithSpinnerColor(Color.Green)
                 : new TextNode($"  {GetActionBadge(plugin)}")
                     .WithForeground(GetBadgeColor(plugin.Status))
