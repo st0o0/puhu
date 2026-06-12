@@ -17,7 +17,7 @@ public static class PluginLoader
         var builders = new List<PuhuPluginBuilder>();
         foreach (var plugin in allPlugins)
         {
-            var builder = new PuhuPluginBuilder(services);
+            var builder = new PuhuPluginBuilder(services, plugin.Name.ToLowerInvariant().Replace(' ', '-'));
             try
             {
                 plugin.Configure(builder);

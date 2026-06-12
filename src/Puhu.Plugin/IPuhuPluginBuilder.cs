@@ -9,6 +9,7 @@ namespace Puhu.Plugin;
 public interface IPuhuPluginBuilder
 {
     IPuhuPluginBuilder WithTab(string label, string route);
+    IPuhuPluginBuilder WithSettings(string label, string route);
     IPuhuPluginBuilder WithServices(Action<IServiceCollection> configure);
     IPuhuPluginBuilder WithActors(Action<ActorSystem, IActorRegistry, IDependencyResolver> configure);
     IPuhuPluginBuilder WithRoutes(Action<TerminaBuilder> configure);
