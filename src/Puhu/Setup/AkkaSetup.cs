@@ -57,6 +57,8 @@ public sealed class AkkaSetup : IServiceSetupContainer
                     {
                         var actorRef = system.ActorOf(reg.Props, reg.Name);
 
+                        reg.RegistryAction?.Invoke(registry, actorRef);
+
                         if (reg is { AlwaysOn: true } or { MinInterval: not null })
                         {
                             tickRouter.Tell(new RegisterMonitor(

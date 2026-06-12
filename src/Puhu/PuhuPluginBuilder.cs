@@ -1,11 +1,17 @@
 ﻿using Akka.Actor;
+using Akka.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Puhu.Plugin;
 using IActorContext = Puhu.Plugin.IActorContext;
 
 namespace Puhu;
 
-public sealed record ActorRegistrationInfo(string Name, Props Props, TimeSpan? MinInterval, bool AlwaysOn, Type? ActorType = null);
+public sealed record ActorRegistrationInfo(
+    string Name,
+    Props Props,
+    TimeSpan? MinInterval,
+    bool AlwaysOn,
+    Action<IActorRegistry, IActorRef>? RegistryAction = null);
 
 public sealed class PuhuPluginBuilder(IServiceCollection services, ITickSource tickSource) : IPuhuPluginBuilder
 {

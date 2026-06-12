@@ -17,8 +17,7 @@ public sealed class MarketplaceViewModelTests : IDisposable
     {
         var registry = ActorRegistry.For(new ActorSystemImpl("TEST"));
         registry.Register<MarketplaceActor>(ActorRefs.Nobody);
-        var requiredActor = new RequiredActor<MarketplaceActor>(registry);
-        _vm = new MarketplaceViewModel(_store, requiredActor);
+        _vm = new MarketplaceViewModel(_store, registry);
     }
 
     [Fact]

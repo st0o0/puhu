@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Servus.Application.Startup;
+using Termina;
 using Termina.Hosting;
 using Termina.Pages;
 
@@ -14,7 +16,7 @@ public sealed class TerminaSetup : IServiceSetupContainer
         var pluginRegistry = ctx.PluginRegistry;
         var firstRoute = pluginRegistry?.PluginTabs.FirstOrDefault()?.Route ?? "/marketplace";
 
-        services.AddTermina(firstRoute, termina =>
+        services.AddTermina(termina =>
         {
             termina.ConfigureRuntime(x =>
             {
@@ -32,5 +34,21 @@ public sealed class TerminaSetup : IServiceSetupContainer
                 }
             }
         });
+
+        services.AddSingleton(new StartPageRoute(firstRoute));
+        services.AddHostedService<StartPageNavigator>();
     }
+}
+
+public sealed record StartPageRoute(string Route);
+
+public sealed class StartPageNavigator(TerminaApplication app, StartPageRoute startPage) : IHostedService
+{
+    public Task StartAsync(CancellationToken cancellationToken)
+    {
+        app.NavigateTo(startPage.Route);
+        return Task.CompletedTask;
+    }
+
+    public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
 }

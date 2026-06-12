@@ -29,9 +29,9 @@ public sealed class MarketplaceViewModel : ReactiveViewModel
     public ReactiveProperty<bool> IsSyncing { get; } = new(false);
     public ReactiveProperty<string?> StatusMessage { get; } = new(null);
 
-    public MarketplaceViewModel(MarketplaceStore store, IRequiredActor<MarketplaceActor> requiredActor)
+    public MarketplaceViewModel(MarketplaceStore store, IReadOnlyActorRegistry registry)
     {
-        _actor = requiredActor.ActorRef;
+        _actor = registry.Get<MarketplaceActor>();
 
         store.State.Select(s => s.AvailablePlugins).DistinctUntilChanged()
             .Subscribe(plugins =>
@@ -148,4 +148,5 @@ public sealed class MarketplaceViewModel : ReactiveViewModel
         MarketplaceView.Installed => InstalledPlugins.Value,
         _ => AvailablePlugins.Value
     };
+
 }

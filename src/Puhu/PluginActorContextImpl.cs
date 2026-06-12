@@ -1,4 +1,5 @@
 ﻿using Akka.Actor;
+using Akka.Hosting;
 using Puhu.Plugin;
 
 namespace Puhu;
@@ -18,7 +19,8 @@ public sealed class PluginActorContextImpl(
 
     public IActorRegistration RegisterActor<TActor>(string name, Props props) where TActor : ActorBase
     {
-        var info = new ActorRegistrationInfo(name, props, null, false, typeof(TActor));
+        var info = new ActorRegistrationInfo(name, props, null, false,
+            RegistryAction: (registry, actorRef) => registry.Register<TActor>(actorRef));
         registrations.Add(info);
         return new ActorRegistrationBuilder(info, registrations);
     }
