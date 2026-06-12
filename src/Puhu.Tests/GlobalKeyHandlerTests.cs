@@ -1,5 +1,4 @@
 using Puhu.Plugin;
-using Puhu.Plugin.Nodes;
 using Termina.Input;
 
 namespace Puhu.Tests;
@@ -11,8 +10,9 @@ public sealed class GlobalKeyExtensionsTests
     {
         var bindings = new PageKeyBindings();
         var shutdownCalled = false;
+        var tabNav = new FakeTabNavigator([], 0);
 
-        bindings.RegisterGlobalKeys(() => shutdownCalled = true, _ => { });
+        bindings.RegisterGlobalKeys(() => shutdownCalled = true, _ => { }, tabNav);
         bindings.TryHandle(new ConsoleKeyInfo('\0', ConsoleKey.Escape, false, false, false));
 
         Assert.True(shutdownCalled);
@@ -21,35 +21,25 @@ public sealed class GlobalKeyExtensionsTests
     [Fact]
     public void Tab_NavigatesToNextTab()
     {
-        TabBarNode.RegisterTabs([
-            new PluginTabInfo("A", "/a"),
-            new PluginTabInfo("B", "/b")
-        ]);
-        TabBarNode.CurrentTabIndex = 0;
-
+        var tabNav = new FakeTabNavigator(["/a", "/b"], 0);
         var bindings = new PageKeyBindings();
         string? navigatedTo = null;
 
-        bindings.RegisterGlobalKeys(() => { }, path => navigatedTo = path);
+        bindings.RegisterGlobalKeys(() => { }, path => navigatedTo = path, tabNav);
         bindings.TryHandle(new ConsoleKeyInfo('\0', ConsoleKey.Tab, false, false, false));
 
         Assert.Equal("/b", navigatedTo);
-        Assert.Equal(1, TabBarNode.CurrentTabIndex);
+        Assert.Equal(1, tabNav.CurrentIndex);
     }
 
     [Fact]
     public void ShiftTab_NavigatesToPreviousTab()
     {
-        TabBarNode.RegisterTabs([
-            new PluginTabInfo("A", "/a"),
-            new PluginTabInfo("B", "/b")
-        ]);
-        TabBarNode.CurrentTabIndex = 0;
-
+        var tabNav = new FakeTabNavigator(["/a", "/b"], 0);
         var bindings = new PageKeyBindings();
         string? navigatedTo = null;
 
-        bindings.RegisterGlobalKeys(() => { }, path => navigatedTo = path);
+        bindings.RegisterGlobalKeys(() => { }, path => navigatedTo = path, tabNav);
         bindings.TryHandle(new ConsoleKeyInfo('\0', ConsoleKey.Tab, true, false, false));
 
         Assert.Equal("/b", navigatedTo);
@@ -58,19 +48,36 @@ public sealed class GlobalKeyExtensionsTests
     [Fact]
     public void Tab_WrapsAround()
     {
-        TabBarNode.RegisterTabs([
-            new PluginTabInfo("A", "/a"),
-            new PluginTabInfo("B", "/b")
-        ]);
-        TabBarNode.CurrentTabIndex = 1;
-
+        var tabNav = new FakeTabNavigator(["/a", "/b"], 1);
         var bindings = new PageKeyBindings();
         string? navigatedTo = null;
 
-        bindings.RegisterGlobalKeys(() => { }, path => navigatedTo = path);
+        bindings.RegisterGlobalKeys(() => { }, path => navigatedTo = path, tabNav);
         bindings.TryHandle(new ConsoleKeyInfo('\0', ConsoleKey.Tab, false, false, false));
 
         Assert.Equal("/a", navigatedTo);
-        Assert.Equal(0, TabBarNode.CurrentTabIndex);
+        Assert.Equal(0, tabNav.CurrentIndex);
+    }
+
+    private sealed class FakeTabNavigator : ITabNavigator
+    {
+        private readonly string[] _routes;
+
+        public int CurrentIndex { get; private set; }
+        public bool HasTabs => _routes.Length > 0;
+
+        public FakeTabNavigator(string[] routes, int currentIndex)
+        {
+            _routes = routes;
+            CurrentIndex = currentIndex;
+        }
+
+        public void CycleTab(Action<string> navigate, int delta)
+        {
+            var count = _routes.Length;
+            var next = (CurrentIndex + delta + count) % count;
+            CurrentIndex = next;
+            navigate(_routes[next]);
+        }
     }
 }

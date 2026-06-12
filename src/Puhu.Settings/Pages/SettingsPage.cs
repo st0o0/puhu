@@ -4,8 +4,17 @@ using Termina.Reactive;
 
 namespace Puhu.Settings.Pages;
 
-public sealed class SettingsPage : ReactivePage<SettingsViewModel>
+public sealed class SettingsPage : ReactivePage<SettingsViewModel>, IKeyHintProvider
 {
+    private readonly ITabNavigator _tabNavigator;
+
+    public SettingsPage(ITabNavigator tabNavigator)
+    {
+        _tabNavigator = tabNavigator;
+    }
+
+    public string[] GetKeyHints() => ["Esc:Quit", "Tab:Switch"];
+
     public override ILayoutNode BuildLayout() =>
         new TextNode("Settings — coming soon");
 
@@ -15,6 +24,7 @@ public sealed class SettingsPage : ReactivePage<SettingsViewModel>
 
         KeyBindings.RegisterGlobalKeys(
             () => ViewModel.RequestShutdown(),
-            path => Navigate(path));
+            path => Navigate(path),
+            _tabNavigator);
     }
 }

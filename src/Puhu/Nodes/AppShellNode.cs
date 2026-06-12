@@ -1,9 +1,10 @@
+using Puhu.Plugin;
 using Termina.Layout;
 using Termina.Rendering;
 
-namespace Puhu.Plugin.Nodes;
+namespace Puhu.Nodes;
 
-public sealed class AppShellNode : LayoutNode
+internal sealed class AppShellNode : LayoutNode
 {
     private readonly ThemeDefinition _theme;
     private readonly TabBarNode _tabBar;
@@ -21,15 +22,6 @@ public sealed class AppShellNode : LayoutNode
     }
 
     public override Size Measure(Size available) => available;
-
-    // Layout rows:
-    //   0      ╭────────╮  top border
-    //   1      │ tabs   │  tab bar
-    //   2      ├────────┤  separator
-    //   3..n-4 │content │  content area
-    //   n-3    ├────────┤  separator
-    //   n-2    │ hints  │  key hints
-    //   n-1    ╰────────╯  bottom border
 
     public override void Render(IRenderContext context, Rect bounds)
     {

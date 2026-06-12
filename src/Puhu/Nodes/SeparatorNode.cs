@@ -2,9 +2,9 @@ using Puhu.Plugin;
 using Termina.Layout;
 using Termina.Rendering;
 
-namespace Puhu.Plugin.Nodes;
+namespace Puhu.Nodes;
 
-public sealed class SeparatorNode : LayoutNode
+internal sealed class SeparatorNode : LayoutNode
 {
     private readonly ThemeDefinition _theme;
     private readonly char _left;

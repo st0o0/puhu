@@ -2,9 +2,9 @@ using Puhu.Plugin;
 using Termina.Layout;
 using Termina.Rendering;
 
-namespace Puhu.Plugin.Nodes;
+namespace Puhu.Nodes;
 
-public sealed class KeyHintsNode : LayoutNode
+internal sealed class KeyHintsNode : LayoutNode
 {
     private readonly string[] _hints;
     private readonly ThemeDefinition _theme;

@@ -23,15 +23,4 @@ public sealed record ThemeDefinition
     public Color Success { get; init; } = Color.BrightGreen;
     public Color Header { get; init; } = Color.BrightBlack;
     public Color Accent { get; init; } = Color.Cyan;
-
-    public Gradient CpuGradient { get; init; } = Gradient.Create(
-        Color.FromHex("#50fa7b"), Color.FromHex("#f1fa8c"), Color.FromHex("#ff5555"));
-    public Gradient MemGradient { get; init; } = Gradient.Create(
-        Color.FromHex("#8be9fd"), Color.FromHex("#bd93f9"), Color.FromHex("#ff79c6"));
-    public Gradient GpuGradient { get; init; } = Gradient.Create(
-        Color.FromHex("#bd93f9"), Color.FromHex("#ff79c6"), Color.FromHex("#ff5555"));
-    public Gradient NetGradient { get; init; } = Gradient.Create(
-        Color.FromHex("#8be9fd"), Color.FromHex("#50fa7b"), Color.FromHex("#f1fa8c"));
-    public Gradient DiskGradient { get; init; } = Gradient.Create(
-        Color.FromHex("#50fa7b"), Color.FromHex("#f1fa8c"), Color.FromHex("#ff5555"));
 }

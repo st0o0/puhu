@@ -4,39 +4,41 @@ Terminal-based dashboard application built on Termina (custom TUI framework) wit
 
 ## Build & Test
 
-All commands run from repo root. Solution file is `src/Puhu.TUI.slnx`.
+All commands run from repo root. Solution file is `src/Puhu.slnx`.
 
 ```bash
-dotnet build src/Puhu.TUI.slnx
+dotnet build src/Puhu.slnx
 
 # Tests (xUnit v3 on Microsoft.Testing.Platform — use dotnet run, not dotnet test)
-dotnet run --project src/Puhu.TUI.Tests/Puhu.TUI.Tests.csproj
+dotnet run --project src/Puhu.Tests/Puhu.Tests.csproj
 dotnet run --project src/Puhu.Plugin.Tests/Puhu.Plugin.Tests.csproj
-dotnet run --project src/Puhu.Plugin.Marketplace.Tests/Puhu.Plugin.Marketplace.Tests.csproj
+dotnet run --project src/Puhu.Marketplace.Tests/Puhu.Marketplace.Tests.csproj
 
 # Single class
-dotnet run --project src/Puhu.TUI.Tests/Puhu.TUI.Tests.csproj -- -class "Puhu.TUI.Tests.TickRouterTests"
+dotnet run --project src/Puhu.Tests/Puhu.Tests.csproj -- -class "Puhu.Tests.TickRouterTests"
 
 # Run the app
-dotnet run --project src/Puhu.TUI/Puhu.TUI.csproj
+dotnet run --project src/Puhu/Puhu.csproj
 ```
 
 ## Architecture
 
 ```
-Puhu.Plugin                 Plugin SDK (fat — includes Termina, Akka.Hosting, R3)
+Puhu.Plugin                 Plugin SDK (includes Termina, Akka.Hosting, R3)
   IPuhuPlugin               Entry point: Name + Configure(builder)
   IPuhuPluginBuilder         Fluent builder: tabs, routes, actors, services, settings, themes, notifications
   ITickSource                Periodic tick events — Observable<Tick> + Subscribe(Action)
-  IActorContext              Actor registration with typed Akka Props + fluent WithTicks()
-  IRouteContext              Page/ViewModel route registration (type-safe Termina constraints)
+  IKeyHintProvider           Pages implement this to declare key hints; runner wraps in shell chrome
+  ITabNavigator              Tab-cycling abstraction — plugins use it, runner implements it
+  SubNavNode<T>              Reusable sub-navigation node for plugin pages
 
-Puhu.Plugin.Marketplace     Built-in plugin: install/manage external plugins
-Puhu.Plugin.Settings        Built-in plugin: settings UI
+Puhu.Marketplace            Built-in plugin: install/manage external plugins
+Puhu.Settings               Built-in plugin: settings UI
 
-Puhu.TUI                    Runner — host, setup chain, actor system, Termina integration
+Puhu                        Runner — host, setup chain, actor system, Termina integration
   Setup/                    Ordered setup chain: Logging → Services → Marketplace → Plugin → ActorSystem → Akka → Termina
   Setup/SetupContext         Typed context flowing through setup phases (replaces service-collection introspection)
+  Nodes/                    Shell chrome (AppShellNode, TabBarNode, KeyHintsNode, SeparatorNode) — internal to runner
   Actors/TickRouter          Routes tick messages to actors based on demand and min-interval
   Services/RefreshService    Implements ITickSource — configurable interval (250ms–4s), pause/resume
 
@@ -51,7 +53,7 @@ Plugins implement `IPuhuPlugin.Configure(IPuhuPluginBuilder)`. The builder colle
 2. **PluginSetup** — discovers + configures plugins, builds PluginRegistry
 3. **ActorSystemSetup** — Akka infrastructure, TickRouter, RefreshService→TickRouter wiring
 4. **AkkaSetup** — creates plugin actors from collected registrations, registers tick-aware actors
-5. **TerminaSetup** — configures Termina with plugin routes
+5. **TerminaSetup** — configures Termina with plugin routes + registers shell LayoutDecorator (wraps IKeyHintProvider pages)
 
 ### Tick System
 

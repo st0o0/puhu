@@ -2,9 +2,9 @@ using Puhu.Plugin;
 using Termina.Layout;
 using Termina.Rendering;
 
-namespace Puhu.Plugin.Nodes;
+namespace Puhu.Nodes;
 
-public sealed class TabBarNode : LayoutNode
+internal sealed class TabBarNode : LayoutNode
 {
     private static List<string> _allLabels = [];
     private static IReadOnlyList<string> _allRoutes = [];

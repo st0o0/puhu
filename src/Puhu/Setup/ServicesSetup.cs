@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Puhu.Nodes;
 using Puhu.Plugin;
 using Puhu.Services;
 using Puhu.Themes;
@@ -20,6 +21,8 @@ public sealed class ServicesSetup : IServiceSetupContainer
         themeService.ApplyBuiltIn("dark");
         services.AddSingleton(themeService);
         services.AddSingleton<IThemeService>(themeService);
+
+        services.AddSingleton<ITabNavigator>(new TabNavigator());
 
         var ctx = new SetupContext();
         services.AddSingleton(ctx);

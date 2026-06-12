@@ -38,11 +38,6 @@ public static partial class BtopThemeParser
             Success = Color.BrightGreen,
             Header = GetColor(values, "inactive_fg", Color.BrightBlack),
             Accent = GetColor(values, "hi_fg", Color.Cyan),
-            CpuGradient = GetGradient(values, "cpu"),
-            MemGradient = GetGradient(values, "free"),
-            GpuGradient = GetGradient(values, "temp"),
-            NetGradient = GetGradient(values, "download"),
-            DiskGradient = GetGradient(values, "upload"),
         };
     }
 

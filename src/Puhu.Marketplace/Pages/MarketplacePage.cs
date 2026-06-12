@@ -11,18 +11,20 @@ using Termina.Terminal;
 
 namespace Puhu.Marketplace.Pages;
 
-public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>
+public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHintProvider
 {
     private readonly IToastService _toastService;
     private readonly IThemeService _themeService;
+    private readonly ITabNavigator _tabNavigator;
     private KeyedDynamicLayoutNode<MarketplaceView>? _viewSwitcher;
     private int _expandedIndex = -1;
     private SubNavNode<MarketplaceView>? _subNav;
 
-    public MarketplacePage(IToastService toastService, IThemeService themeService)
+    public MarketplacePage(IToastService toastService, IThemeService themeService, ITabNavigator tabNavigator)
     {
         _toastService = toastService;
         _themeService = themeService;
+        _tabNavigator = tabNavigator;
         FocusPolicy = FocusPolicy.FirstFocusable;
     }
 
@@ -32,9 +34,9 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>
             ViewModel.ActiveView,
             KeyBindings,
             _themeService,
-            (ConsoleKey.B, "Browse", MarketplaceView.Browse),
-            (ConsoleKey.I, "Installed", MarketplaceView.Installed),
-            (ConsoleKey.S, "Sources", MarketplaceView.Sources));
+            (ConsoleKey.D1, "Browse", MarketplaceView.Browse),
+            (ConsoleKey.D2, "Installed", MarketplaceView.Installed),
+            (ConsoleKey.D3, "Sources", MarketplaceView.Sources));
 
         _viewSwitcher = Layouts.KeyedDynamic(
             () => ViewModel.ActiveView.Value,
@@ -47,21 +49,19 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>
             });
     }
 
+    public string[] GetKeyHints() => ViewModel.ActiveView.Value switch
+    {
+        MarketplaceView.Browse => ["↑↓:Navigate", "Enter:Expand", "i:Install", "r:Refresh"],
+        MarketplaceView.Installed => ["↑↓:Navigate", "u:Update", "x:Uninstall", "p:Policy"],
+        MarketplaceView.Sources => ["↑↓:Navigate", "a:Add", "x:Remove"],
+        _ => []
+    };
+
     public override ILayoutNode BuildLayout()
     {
-        var hints = ViewModel.ActiveView.Value switch
-        {
-            MarketplaceView.Browse => new[] { "↑↓:Navigate", "Enter:Expand", "i:Install", "r:Refresh" },
-            MarketplaceView.Installed => new[] { "↑↓:Navigate", "u:Update", "x:Uninstall", "p:Policy" },
-            MarketplaceView.Sources => new[] { "↑↓:Navigate", "a:Add", "x:Remove" },
-            _ => Array.Empty<string>()
-        };
-
-        var content = Layouts.Vertical(
+        return Layouts.Vertical(
             _subNav!.Height(1),
             _viewSwitcher!.Fill());
-
-        return AppShell.Wrap(_themeService.Current, 0, content, hints);
     }
 
     public override void OnNavigatedTo()
@@ -70,7 +70,8 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>
 
         KeyBindings.RegisterGlobalKeys(
             () => ViewModel.RequestShutdown(),
-            path => Navigate(path));
+            path => Navigate(path),
+            _tabNavigator);
 
         // Navigation
         KeyBindings.Register(ConsoleKey.UpArrow, () =>

@@ -2,7 +2,6 @@ using R3;
 using Termina.Input;
 using Termina.Layout;
 using Termina.Rendering;
-using Termina.Terminal;
 
 namespace Puhu.Plugin.Nodes;
 
@@ -48,7 +47,9 @@ public sealed class SubNavNode<TView> : LayoutNode
     public override void Render(IRenderContext context, Rect bounds)
     {
         if (!bounds.HasArea)
+        {
             return;
+        }
 
         var ctx = context.CreateSubContext(bounds);
         ctx.Fill(0, 0, bounds.Width, 1);
@@ -58,8 +59,11 @@ public sealed class SubNavNode<TView> : LayoutNode
         {
             var item = _items[i];
             var keyName = item.Key.ToString();
-            if (keyName.StartsWith("D") && keyName.Length == 2 && char.IsDigit(keyName[1]))
+            if (keyName.StartsWith('D') && keyName.Length == 2 && char.IsDigit(keyName[1]))
+            {
                 keyName = keyName[1..];
+            }
+
             var label = $"{keyName}:{item.Label}";
             var isActive = EqualityComparer<TView>.Default.Equals(_activeView.Value, item.Value);
 

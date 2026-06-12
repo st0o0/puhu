@@ -1,8 +1,12 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Puhu.Nodes;
 using Puhu.Pages;
+using Puhu.Plugin;
 using Servus.Application.Startup;
 using Termina.Hosting;
+using Termina.Layout;
+using Termina.Pages;
 
 namespace Puhu.Setup;
 
@@ -12,6 +16,7 @@ public sealed class TerminaSetup : IServiceSetupContainer
     {
         var ctx = services.BuildServiceProvider().GetRequiredService<SetupContext>();
         var pluginRegistry = ctx.PluginRegistry;
+        var themeService = services.BuildServiceProvider().GetRequiredService<IThemeService>();
         var firstRoute = pluginRegistry?.PluginTabs.FirstOrDefault()?.Route ?? "/marketplace";
 
         services.AddTermina("/splash", termina =>
@@ -32,6 +37,17 @@ public sealed class TerminaSetup : IServiceSetupContainer
             }
 
             termina.RegisterRoute<SplashPage, SplashViewModel>("/splash");
+
+            termina.UseLayoutDecorator((page, layout) =>
+            {
+                if (page is IKeyHintProvider hintProvider)
+                {
+                    var hints = hintProvider.GetKeyHints();
+                    return new AppShellNode(themeService.Current, TabBarNode.CurrentTabIndex, layout, hints);
+                }
+
+                return layout;
+            });
         });
 
         services.AddSingleton(new StartPageRoute(firstRoute));
