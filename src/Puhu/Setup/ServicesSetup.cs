@@ -16,7 +16,7 @@ public sealed class ServicesSetup : IServiceSetupContainer
             Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
             ".servus", "settings.json");
         var settingsStore = new SettingsStore(settingsPath);
-        services.AddSingleton(settingsStore);
+        services.AddSingleton<ISettingsStore>(settingsStore);
 
         var savedMs = settingsStore.Get<int?>("puhu.refresh-interval");
         var refreshService = new RefreshService(

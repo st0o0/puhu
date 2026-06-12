@@ -37,6 +37,10 @@ public sealed class PluginManager(
         return results;
     }
 
+    public Task<PluginSources> GetSourcesAsync() => configStore.LoadSourcesAsync();
+
+    public Task EnsureDefaultSourcesAsync() => configStore.EnsureDefaultSourcesAsync();
+
     public async Task AddSourceAsync(string repoUrl)
     {
         var sources = await configStore.LoadSourcesAsync();
