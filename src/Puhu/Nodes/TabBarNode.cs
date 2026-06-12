@@ -1,4 +1,5 @@
-﻿using Termina.Layout;
+﻿using Puhu.Themes;
+using Termina.Layout;
 using Termina.Rendering;
 using Termina.Terminal;
 
@@ -51,14 +52,15 @@ public sealed class TabBarNode : LayoutNode
         for (var i = 0; i < _allLabels.Count; i++)
         {
             var label = $" {_allLabels[i]} ";
+            var theme = ThemeService.Instance.Current;
             if (i == _activeIndex)
             {
-                ctx.SetForeground(Color.Black);
-                ctx.SetBackground(Color.White);
+                ctx.SetForeground(theme.SelectionText);
+                ctx.SetBackground(theme.Selection);
             }
             else
             {
-                ctx.SetForeground(Color.Gray);
+                ctx.SetForeground(theme.TextDim);
             }
 
             ctx.WriteAt(x, 0, label);

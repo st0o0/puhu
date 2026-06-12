@@ -1,6 +1,11 @@
 using Termina.Terminal;
 
-namespace Puhu.Themes;
+namespace Puhu.Plugin;
+
+public interface IThemeService
+{
+    ThemeDefinition Current { get; }
+}
 
 public sealed record ThemeDefinition
 {

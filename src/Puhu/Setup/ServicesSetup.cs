@@ -19,6 +19,7 @@ public sealed class ServicesSetup : IServiceSetupContainer
         themeService.LoadFromDirectory(Path.Combine(AppContext.BaseDirectory, "themes"));
         themeService.ApplyBuiltIn("dark");
         services.AddSingleton(themeService);
+        services.AddSingleton<IThemeService>(themeService);
 
         var ctx = new SetupContext { TickSource = refreshService };
         services.AddSingleton(ctx);

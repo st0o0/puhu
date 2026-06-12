@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using Puhu.Plugin;
 using Termina.Terminal;
 
 namespace Puhu.Themes;

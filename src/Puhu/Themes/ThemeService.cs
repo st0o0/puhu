@@ -1,8 +1,9 @@
+using Puhu.Plugin;
 using Termina.Terminal;
 
 namespace Puhu.Themes;
 
-public sealed class ThemeService
+public sealed class ThemeService : IThemeService
 {
     private static ThemeService? _instance;
 

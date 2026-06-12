@@ -2,6 +2,7 @@ using Puhu.Themes;
 using R3;
 using Termina.Layout;
 using Termina.Reactive;
+using Termina.Rendering;
 using Termina.Terminal;
 
 namespace Puhu.Pages;
@@ -30,7 +31,7 @@ public sealed class SplashPage : ReactivePage<SplashViewModel>
     {
         var theme = ThemeService.Instance.Current;
 
-        return Layouts.Vertical(
+        var content = Layouts.Vertical(
             new TextNode("").Fill(),
             new TextNode(Logo).WithForeground(theme.Accent).AlignCenter(),
             new TextNode(""),
@@ -41,8 +42,13 @@ public sealed class SplashPage : ReactivePage<SplashViewModel>
             ),
             new TextNode(ViewModel.StatusText.Value).WithForeground(theme.TextDim).AlignCenter(),
             new TextNode("").Fill(),
-            new TextNode("Press ESC to quit").WithForeground(theme.TextDim).AlignCenter()
+            new TextNode("ESC Quit").WithForeground(theme.TextDim).AlignCenter()
         );
+
+        return new PanelNode()
+            .WithBorder(BorderStyle.Rounded)
+            .WithBorderColor(theme.Border)
+            .WithContent(content);
     }
 
     public override void OnNavigatedTo()
