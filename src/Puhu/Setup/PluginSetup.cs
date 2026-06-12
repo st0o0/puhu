@@ -23,6 +23,6 @@ public sealed class PluginSetup : IServiceSetupContainer
         var pluginRegistry = PluginLoader.DiscoverAndConfigure(services, builtInPlugins);
         ctx.PluginRegistry = pluginRegistry;
         services.AddSingleton(pluginRegistry);
-        TabBarNode.RegisterTabs(pluginRegistry.PluginTabs);
+        TabRegistry.RegisterTabs(pluginRegistry.PluginTabs);
     }
 }
