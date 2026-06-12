@@ -34,9 +34,17 @@ public sealed class SplashViewModel : ReactiveViewModel
                 if (current >= steps)
                 {
                     _animation?.Dispose();
+                    _animation = null;
                     Navigate(_startPage.Route);
                 }
             });
+    }
+
+    public override void OnDeactivating()
+    {
+        _animation?.Dispose();
+        _animation = null;
+        base.OnDeactivating();
     }
 
     public override void Dispose()
