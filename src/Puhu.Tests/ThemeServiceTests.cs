@@ -76,6 +76,31 @@ public sealed class ThemeServiceTests : IDisposable
         Assert.False(service.RestoreSaved());
     }
 
+    [Fact]
+    public void Apply_Definition_ClearsThemeNameAndEmits()
+    {
+        var service = new ThemeService();
+        service.LoadFromDirectory(_themeDir);
+        service.ApplyByName("testtheme");
+        ThemeDefinition? observed = null;
+        using var sub = service.Changes.Subscribe(t => observed = t);
+
+        service.Apply(new ThemeDefinition());
+
+        Assert.Null(service.CurrentThemeName);
+        Assert.NotNull(observed);
+    }
+
+    [Fact]
+    public void ApplyBuiltIn_DoesNotSetRestorableName()
+    {
+        var service = new ThemeService();
+
+        service.ApplyBuiltIn("nord");
+
+        Assert.Null(service.CurrentThemeName);
+    }
+
     private sealed class FakeSettingsStore : ISettingsStore
     {
         private readonly Dictionary<string, object?> _values = [];

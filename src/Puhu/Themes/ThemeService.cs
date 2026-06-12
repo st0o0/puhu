@@ -21,7 +21,7 @@ public sealed class ThemeService : IThemeService
 
     public string? CurrentThemeName { get; private set; }
 
-    public Observable<ThemeDefinition> Changes => _changes;
+    public Observable<ThemeDefinition> Changes => _changes.AsObservable();
 
     public IReadOnlyCollection<string> AvailableThemes => _themePaths.Keys;
 
@@ -72,7 +72,7 @@ public sealed class ThemeService : IThemeService
             },
             _ => new ThemeDefinition(),
         };
-        CurrentThemeName = theme;
+        CurrentThemeName = null;
         _changes.OnNext(Current);
     }
 

@@ -7,19 +7,19 @@ public interface IThemeService
 {
     ThemeDefinition Current { get; }
 
-    /// <summary>Name des aktiven Themes (null bei direktem Apply einer Definition).</summary>
+    /// <summary>Name of the active theme (null when a definition was applied directly or a built-in fallback is active).</summary>
     string? CurrentThemeName { get; }
 
-    /// <summary>Feuert bei jedem Theme-Wechsel — UI nutzt das für Live-Rerender.</summary>
+    /// <summary>Emits on every theme change — UI uses this for live re-rendering.</summary>
     Observable<ThemeDefinition> Changes { get; }
 
-    /// <summary>Namen aller geladenen .theme-Dateien.</summary>
+    /// <summary>Names of all loaded .theme files.</summary>
     IReadOnlyCollection<string> AvailableThemes { get; }
 
-    /// <summary>Theme live anwenden (ohne Persistenz). False wenn unbekannt.</summary>
+    /// <summary>Apply a theme live (without persisting). Returns false if unknown.</summary>
     bool ApplyByName(string name);
 
-    /// <summary>Aktives Theme als Nutzer-Auswahl persistieren.</summary>
+    /// <summary>Persist the active theme as the user's selection.</summary>
     void SaveCurrent();
 }
 
