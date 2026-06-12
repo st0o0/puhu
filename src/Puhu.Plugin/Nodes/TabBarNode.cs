@@ -35,7 +35,9 @@ public sealed class TabBarNode : LayoutNode
     public override void Render(IRenderContext context, Rect bounds)
     {
         if (!bounds.HasArea)
+        {
             return;
+        }
 
         var ctx = context.CreateSubContext(bounds);
         ctx.Fill(0, 0, bounds.Width, 1);

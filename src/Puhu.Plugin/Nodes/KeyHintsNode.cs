@@ -22,7 +22,9 @@ public sealed class KeyHintsNode : LayoutNode
     public override void Render(IRenderContext context, Rect bounds)
     {
         if (!bounds.HasArea)
+        {
             return;
+        }
 
         var ctx = context.CreateSubContext(bounds);
 
@@ -34,7 +36,9 @@ public sealed class KeyHintsNode : LayoutNode
         foreach (var hint in _hints)
         {
             if (x + hint.Length >= bounds.Width)
+            {
                 break;
+            }
 
             var parts = hint.Split(':', 2);
             if (parts.Length == 2)

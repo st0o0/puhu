@@ -26,16 +26,23 @@ public sealed class SeparatorNode : LayoutNode
     public override void Render(IRenderContext context, Rect bounds)
     {
         if (!bounds.HasArea)
+        {
             return;
+        }
 
         var ctx = context.CreateSubContext(bounds);
         ctx.SetForeground(_theme.Border);
 
         ctx.WriteAt(0, 0, _left);
         for (var x = 1; x < bounds.Width - 1; x++)
+        {
             ctx.WriteAt(x, 0, _fill);
+        }
+
         if (bounds.Width > 1)
+        {
             ctx.WriteAt(bounds.Width - 1, 0, _right);
+        }
 
         ctx.ResetColors();
     }

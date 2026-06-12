@@ -41,7 +41,10 @@ public sealed class PluginCache(string cacheDir)
             return;
         }
 
-        foreach (var file in Directory.GetFiles(cacheDir)) File.Delete(file);
+        foreach (var file in Directory.GetFiles(cacheDir))
+        {
+            File.Delete(file);
+        }
     }
 
     private string GetPath(string key)

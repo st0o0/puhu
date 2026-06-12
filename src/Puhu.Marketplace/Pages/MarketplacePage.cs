@@ -78,7 +78,8 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>
             if (ViewModel.ActiveView.Value == MarketplaceView.Browse)
             {
                 _expandedIndex = _expandedIndex == ViewModel.SelectedIndex.Value
-                    ? -1 : ViewModel.SelectedIndex.Value;
+                    ? -1
+                    : ViewModel.SelectedIndex.Value;
                 InvalidateLayout();
             }
         });
@@ -229,17 +230,17 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>
         if (plugins.Count == 0)
             return new TextNode("No plugins installed.").WithForeground(Color.DarkGray);
 
-        var rows = new List<ILayoutNode>();
-
-        rows.Add(Layouts.Horizontal(
-            new TextNode("Plugin").WithForeground(Color.White).Bold().WidthPercent(35),
-            new TextNode("Installed").WithForeground(Color.White).Bold().WidthPercent(15),
-            new TextNode("Available").WithForeground(Color.White).Bold().WidthPercent(15),
-            new TextNode("Policy").WithForeground(Color.White).Bold().WidthPercent(15),
-            new TextNode("Status").WithForeground(Color.White).Bold().WidthPercent(20)
-        ).Height(1));
-
-        rows.Add(new TextNode(new string('─', 60)).WithForeground(Color.DarkGray).Height(1));
+        var rows = new List<ILayoutNode>
+        {
+            Layouts.Horizontal(
+                new TextNode("Plugin").WithForeground(Color.White).Bold().WidthPercent(35),
+                new TextNode("Installed").WithForeground(Color.White).Bold().WidthPercent(15),
+                new TextNode("Available").WithForeground(Color.White).Bold().WidthPercent(15),
+                new TextNode("Policy").WithForeground(Color.White).Bold().WidthPercent(15),
+                new TextNode("Status").WithForeground(Color.White).Bold().WidthPercent(20)
+            ).Height(1),
+            new TextNode(new string('-', 60)).WithForeground(Color.DarkGray).Height(1)
+        };
 
         for (var i = 0; i < plugins.Count; i++)
         {
@@ -283,9 +284,8 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>
     private ILayoutNode BuildSourcesView()
     {
         var sources = ViewModel.Sources.Value;
-        var rows = new List<ILayoutNode>();
+        var rows = new List<ILayoutNode> { new TextNode("Registries").WithForeground(Color.DarkGray).Bold().Height(1) };
 
-        rows.Add(new TextNode("Registries").WithForeground(Color.DarkGray).Bold().Height(1));
         if (sources.Registries.Count == 0)
         {
             rows.Add(new TextNode("  (none)").WithForeground(Color.DarkGray).Height(1));
@@ -293,7 +293,9 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>
         else
         {
             foreach (var url in sources.Registries)
+            {
                 rows.Add(new TextNode($"  {url}").WithForeground(Color.Gray).Height(1));
+            }
         }
 
         rows.Add(Layouts.Empty().Height(1));
@@ -306,10 +308,11 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>
         else
         {
             foreach (var url in sources.Repositories)
+            {
                 rows.Add(new TextNode($"  {url}").WithForeground(Color.Gray).Height(1));
+            }
         }
 
         return Layouts.Vertical(rows.ToArray()).Fill();
     }
-
 }
