@@ -1,3 +1,4 @@
+using Puhu.Plugin;
 using Puhu.Themes;
 using Termina.Terminal;
 
@@ -28,5 +29,23 @@ public sealed class BtopThemeParserTests
 
         Assert.Equal(Color.FromHex("#50fa7b"), theme.GraphGradient.Sample(0f));
         Assert.Equal(Color.FromHex("#ff5555"), theme.GraphGradient.Sample(1f));
+    }
+
+    [Fact]
+    public void Parse_OnlyGraphStart_BlendsWithDefaultMidAndEnd()
+    {
+        var theme = BtopThemeParser.Parse("""theme[graph_start]="#000000" """);
+
+        Assert.Equal(Color.FromHex("#000000"), theme.GraphGradient.Sample(0f));
+        Assert.Equal(Color.FromHex("#ff5555"), theme.GraphGradient.Sample(1f));
+    }
+}
+
+public sealed class ThemeDefinitionTests
+{
+    [Fact]
+    public void DefaultInstances_AreEqual()
+    {
+        Assert.Equal(new ThemeDefinition(), new ThemeDefinition());
     }
 }
