@@ -3,7 +3,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Puhu.Nodes;
 using Puhu.Pages;
 using Puhu.Plugin;
+using Puhu.Services;
 using Servus.Application.Startup;
+using Termina;
 using Termina.Hosting;
 using Termina.Layout;
 using Termina.Pages;
@@ -48,6 +50,11 @@ public sealed class TerminaSetup : IServiceSetupContainer
                 return layout;
             });
         });
+
+        services.AddHostedService(sp => new ShellRedrawService(
+            sp.GetRequiredService<ITickSource>(),
+            sp.GetRequiredService<IThemeService>(),
+            () => sp.GetRequiredService<TerminaApplication>().RequestRedraw()));
 
         services.AddSingleton(new StartPageRoute(firstRoute));
     }
