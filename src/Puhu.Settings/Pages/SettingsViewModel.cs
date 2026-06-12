@@ -4,17 +4,48 @@ using Termina.Reactive;
 
 namespace Puhu.Settings.Pages;
 
+public enum SettingsView
+{
+    Themes,
+    Refresh
+}
+
 public sealed class SettingsViewModel : ReactiveViewModel
 {
     private readonly IThemeService _themeService;
+    private readonly IRefreshController _refreshController;
 
     public IReadOnlyList<string> Themes { get; }
     public ReactiveProperty<int> SelectedIndex { get; }
     public ReactiveProperty<string?> SavedTheme { get; }
 
-    public SettingsViewModel(IThemeService themeService)
+    public ReactiveProperty<SettingsView> ActiveView { get; } = new(SettingsView.Themes);
+
+    public IReadOnlyList<TimeSpan> RefreshSteps => _refreshController.Steps;
+
+    public int RefreshSelectedIndex
+    {
+        get
+        {
+            for (var i = 0; i < _refreshController.Steps.Count; i++)
+            {
+                if (_refreshController.Steps[i] == _refreshController.Interval.CurrentValue)
+                {
+                    return i;
+                }
+            }
+
+            return 0;
+        }
+    }
+
+    public bool IsPaused => _refreshController.IsPaused.CurrentValue;
+
+    public SettingsViewModel(IThemeService themeService, IRefreshController refreshController)
     {
         _themeService = themeService;
+        _refreshController = refreshController;
+
         Themes = themeService.AvailableThemes
             .OrderBy(t => t, StringComparer.OrdinalIgnoreCase)
             .ToList();
@@ -53,12 +84,19 @@ public sealed class SettingsViewModel : ReactiveViewModel
         SavedTheme.Value = Themes[SelectedIndex.Value];
     }
 
+    public void MoveRefreshSelection(int delta)
+    {
+        var next = Math.Clamp(RefreshSelectedIndex + delta, 0, _refreshController.Steps.Count - 1);
+        _refreshController.SetInterval(_refreshController.Steps[next]);
+    }
+
     public override void OnActivated() { }
 
     public override void Dispose()
     {
         SelectedIndex.Dispose();
         SavedTheme.Dispose();
+        ActiveView.Dispose();
         base.Dispose();
     }
 }

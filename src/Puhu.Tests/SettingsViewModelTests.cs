@@ -11,7 +11,7 @@ public sealed class SettingsViewModelTests
     {
         var service = new FakeThemeService(["alpha", "beta", "gamma"]) { Name = "beta" };
 
-        var vm = new SettingsViewModel(service);
+        var vm = CreateVm(service);
 
         Assert.Equal(1, vm.SelectedIndex.Value);
     }
@@ -20,7 +20,7 @@ public sealed class SettingsViewModelTests
     public void MoveSelection_AppliesThemeAsLivePreview()
     {
         var service = new FakeThemeService(["alpha", "beta"]);
-        var vm = new SettingsViewModel(service);
+        var vm = CreateVm(service);
 
         vm.MoveSelection(1);
 
@@ -32,7 +32,7 @@ public sealed class SettingsViewModelTests
     public void MoveSelection_ClampsAtEnds()
     {
         var service = new FakeThemeService(["alpha", "beta"]);
-        var vm = new SettingsViewModel(service);
+        var vm = CreateVm(service);
 
         vm.MoveSelection(-1);
         Assert.Equal(0, vm.SelectedIndex.Value);
@@ -45,7 +45,7 @@ public sealed class SettingsViewModelTests
     public void SaveSelected_PersistsAndMarksSaved()
     {
         var service = new FakeThemeService(["alpha", "beta"]);
-        var vm = new SettingsViewModel(service);
+        var vm = CreateVm(service);
         vm.MoveSelection(1);
 
         vm.SaveSelected();
@@ -58,12 +58,56 @@ public sealed class SettingsViewModelTests
     public void EmptyThemes_MoveAndSave_DoNotThrow()
     {
         var service = new FakeThemeService([]);
-        var vm = new SettingsViewModel(service);
+        var vm = CreateVm(service);
 
         vm.MoveSelection(1);
         vm.SaveSelected();
 
         Assert.Equal(0, vm.SelectedIndex.Value);
+    }
+
+    [Fact]
+    public void MoveRefreshSelection_SetsIntervalToStep()
+    {
+        var controller = new FakeRefreshController(); // starts at 1s = Steps[2]
+        var vm = CreateVm(controller: controller);
+
+        vm.MoveRefreshSelection(-1);
+
+        Assert.Equal(TimeSpan.FromMilliseconds(500), controller.Interval.CurrentValue);
+    }
+
+    [Fact]
+    public void MoveRefreshSelection_ClampsAtEnds()
+    {
+        var controller = new FakeRefreshController();
+        var vm = CreateVm(controller: controller);
+
+        vm.MoveRefreshSelection(-10);
+        Assert.Equal(TimeSpan.FromMilliseconds(250), controller.Interval.CurrentValue);
+
+        vm.MoveRefreshSelection(10);
+        Assert.Equal(TimeSpan.FromMilliseconds(4000), controller.Interval.CurrentValue);
+    }
+
+    [Fact]
+    public void RefreshSelectedIndex_FollowsControllerInterval()
+    {
+        var controller = new FakeRefreshController();
+        var vm = CreateVm(controller: controller);
+
+        controller.SetInterval(TimeSpan.FromMilliseconds(250));
+
+        Assert.Equal(0, vm.RefreshSelectedIndex);
+    }
+
+    private static SettingsViewModel CreateVm(
+        FakeThemeService? themeService = null,
+        FakeRefreshController? controller = null)
+    {
+        themeService ??= new FakeThemeService([]);
+        controller ??= new FakeRefreshController();
+        return new SettingsViewModel(themeService, controller);
     }
 
     private sealed class FakeThemeService(IReadOnlyList<string> themes) : IThemeService
