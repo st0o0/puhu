@@ -59,9 +59,4 @@ public sealed class SplashPage : ReactivePage<SplashViewModel>
             .DisposeWith(Subscriptions);
     }
 
-    public override void Dispose()
-    {
-        _progressBar.Dispose();
-        base.Dispose();
-    }
 }
