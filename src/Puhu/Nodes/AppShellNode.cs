@@ -4,19 +4,23 @@ using Termina.Rendering;
 
 namespace Puhu.Nodes;
 
+/// <summary>
+/// Full-screen btop-style shell panel: TopBarNode as top border,
+/// key hints embedded in the bottom border, content in between.
+/// </summary>
 internal sealed class AppShellNode : LayoutNode
 {
-    private readonly ThemeDefinition _theme;
-    private readonly TabBarNode _tabBar;
-    private readonly KeyHintsNode _keyHints;
+    private readonly IThemeService _themeService;
+    private readonly TopBarNode _topBar;
     private readonly ILayoutNode _content;
+    private readonly string[] _keyHints;
 
-    public AppShellNode(ThemeDefinition theme, int activeTab, ILayoutNode content, params string[] keyHints)
+    public AppShellNode(IThemeService themeService, IRefreshController refreshController, ILayoutNode content, params string[] keyHints)
     {
-        _theme = theme;
-        _tabBar = new TabBarNode(activeTab, theme);
-        _keyHints = new KeyHintsNode(theme, keyHints);
+        _themeService = themeService;
+        _topBar = new TopBarNode(themeService, refreshController);
         _content = content;
+        _keyHints = keyHints;
         HeightConstraint = new SizeConstraint.Fill();
         WidthConstraint = new SizeConstraint.Fill();
     }
@@ -25,59 +29,101 @@ internal sealed class AppShellNode : LayoutNode
 
     public override void Render(IRenderContext context, Rect bounds)
     {
-        if (!bounds.HasArea || bounds.Width < 4 || bounds.Height < 6)
+        if (!bounds.HasArea || bounds.Width < 12 || bounds.Height < 3)
         {
             return;
         }
 
-        var ctx = context.CreateSubContext(bounds);
+        var theme = _themeService.Current;
         var w = bounds.Width;
         var h = bounds.Height;
+        var ctx = context.CreateSubContext(bounds);
 
-        ctx.SetForeground(_theme.Border);
+        _topBar.Render(context, new Rect(bounds.X, bounds.Y, w, 1));
 
-        DrawHorizontal(ctx, 0, w, '╭', '─', '╮');
-        DrawVerticalBorders(ctx, 1, w);
-        DrawHorizontal(ctx, 2, w, '├', '─', '┤');
-
-        for (var y = 3; y <= h - 4; y++)
+        ctx.SetForeground(theme.Border);
+        for (var y = 1; y < h - 1; y++)
         {
-            DrawVerticalBorders(ctx, y, w);
+            ctx.WriteAt(0, y, '│');
+            ctx.WriteAt(w - 1, y, '│');
         }
 
-        DrawHorizontal(ctx, h - 3, w, '├', '─', '┤');
-        DrawVerticalBorders(ctx, h - 2, w);
-        DrawHorizontal(ctx, h - 1, w, '╰', '─', '╯');
-
+        RenderBottomBorder(ctx, theme, w, h - 1);
         ctx.ResetColors();
 
-        var inner = w - 2;
-        _tabBar.Render(context, new Rect(bounds.X + 1, bounds.Y + 1, inner, 1));
-        _content.Render(context, new Rect(bounds.X + 1, bounds.Y + 3, inner, Math.Max(1, h - 6)));
-        _keyHints.Render(context, new Rect(bounds.X + 1, bounds.Y + h - 2, inner, 1));
+        _content.Render(context, new Rect(bounds.X + 1, bounds.Y + 1, w - 2, h - 2));
     }
 
-    private static void DrawHorizontal(IRenderContext ctx, int y, int w, char left, char fill, char right)
+    private void RenderBottomBorder(IRenderContext ctx, ThemeDefinition theme, int w, int y)
     {
-        var line = string.Create(w, (left, fill, right), static (span, state) =>
+        ctx.SetForeground(theme.Border);
+        ctx.WriteAt(0, y, '╰');
+        for (var x = 1; x < w - 1; x++)
         {
-            span[0] = state.left;
-            span[^1] = state.right;
-            span[1..^1].Fill(state.fill);
-        });
-        ctx.WriteAt(0, y, line);
+            ctx.WriteAt(x, y, '─');
+        }
+
+        ctx.WriteAt(w - 1, y, '╯');
+
+        var cx = 1;
+        foreach (var hint in _keyHints)
+        {
+            var parts = hint.Split(':', 2);
+            var key = parts[0];
+            var label = parts.Length == 2 ? parts[1].ToLowerInvariant() : null;
+            var innerLength = label is null ? key.Length + 2 : key.Length + label.Length + 3;
+            var total = innerLength + 2;
+
+            if (cx + total >= w - 1)
+            {
+                break;
+            }
+
+            ctx.SetForeground(theme.Border);
+            ctx.WriteAt(cx, y, '┤');
+            ctx.SetForeground(theme.Accent);
+            ctx.WriteAt(cx + 1, y, $" {key}");
+
+            if (label is not null)
+            {
+                ctx.SetForeground(theme.TextDim);
+                ctx.WriteAt(cx + 2 + key.Length, y, $" {label} ");
+            }
+            else
+            {
+                ctx.SetForeground(theme.TextDim);
+                ctx.WriteAt(cx + 2 + key.Length, y, ' ');
+            }
+
+            ctx.SetForeground(theme.Border);
+            ctx.WriteAt(cx + total - 1, y, '├');
+            cx += total + 1;
+        }
     }
 
-    private static void DrawVerticalBorders(IRenderContext ctx, int y, int w)
+    public override void OnActivate()
     {
-        ctx.WriteAt(0, y, "│");
-        ctx.WriteAt(w - 1, y, "│");
+        if (_content is IActivatableNode contentNode)
+        {
+            contentNode.OnActivate();
+        }
+
+        base.OnActivate();
+    }
+
+    public override void OnDeactivate()
+    {
+        if (_content is IActivatableNode contentNode)
+        {
+            contentNode.OnDeactivate();
+        }
+
+        base.OnDeactivate();
     }
 
     public override void Dispose()
     {
-        _tabBar.Dispose();
-        _keyHints.Dispose();
+        _topBar.Dispose();
         if (_content is IDisposable d)
         {
             d.Dispose();

@@ -1,9 +1,10 @@
-﻿[assembly: System.Runtime.Versioning.TargetFramework(".NETCoreApp,Version=v10.0", FrameworkDisplayName=".NET 10.0")]
+[assembly: System.Runtime.Versioning.TargetFramework(".NETCoreApp,Version=v10.0", FrameworkDisplayName=".NET 10.0")]
 namespace Puhu.Plugin
 {
     public static class GlobalKeyExtensions
     {
         public static void RegisterGlobalKeys(this Termina.Input.PageKeyBindings keyBindings, System.Action requestShutdown, System.Action<string> navigate, Puhu.Plugin.ITabNavigator tabNavigator) { }
+        public static void RegisterGlobalKeys(this Termina.Input.PageKeyBindings keyBindings, System.Action requestShutdown, System.Action<string> navigate, Puhu.Plugin.ITabNavigator tabNavigator, Puhu.Plugin.IRefreshController refreshController) { }
     }
     public interface IKeyHintProvider
     {
@@ -22,6 +23,16 @@ namespace Puhu.Plugin
         Puhu.Plugin.IPuhuPluginBuilder WithSettings(string label, string route);
         Puhu.Plugin.IPuhuPluginBuilder WithTab(string label, string route);
     }
+    public interface IRefreshController
+    {
+        R3.ReadOnlyReactiveProperty<System.TimeSpan> Interval { get; }
+        R3.ReadOnlyReactiveProperty<bool> IsPaused { get; }
+        System.Collections.Generic.IReadOnlyList<System.TimeSpan> Steps { get; }
+        void SetInterval(System.TimeSpan interval);
+        void SlowDown();
+        void SpeedUp();
+        void TogglePause();
+    }
     public interface ISettingsStore
     {
         T? Get<T>(string key);
@@ -36,13 +47,22 @@ namespace Puhu.Plugin
     }
     public interface IThemeService
     {
+        System.Collections.Generic.IReadOnlyCollection<string> AvailableThemes { get; }
+        R3.Observable<Puhu.Plugin.ThemeDefinition> Changes { get; }
         Puhu.Plugin.ThemeDefinition Current { get; }
+        string? CurrentThemeName { get; }
+        bool ApplyByName(string name);
+        void SaveCurrent();
     }
     public interface ITickSource
     {
         System.TimeSpan CurrentInterval { get; }
         R3.Observable<Puhu.Plugin.Tick> Ticks { get; }
         System.IDisposable Subscribe(System.Action onTick);
+    }
+    public static class IntervalFormat
+    {
+        public static string Format(System.TimeSpan interval) { }
     }
     public static class PluginBuilderExtensions
     {
@@ -79,6 +99,7 @@ namespace Puhu.Plugin
         public Termina.Terminal.Color Border { get; init; }
         public Termina.Terminal.Color Error { get; init; }
         public Termina.Terminal.Color Foreground { get; init; }
+        public Termina.Terminal.Gradient GraphGradient { get; init; }
         public Termina.Terminal.Color Header { get; init; }
         public Termina.Terminal.Color PanelTitle { get; init; }
         public Termina.Terminal.Color Selection { get; init; }

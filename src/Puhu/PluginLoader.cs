@@ -45,7 +45,7 @@ public static class PluginLoader
 
         foreach (var dir in scanDirs)
         {
-            foreach (var dll in Directory.GetFiles(dir, "Puhu.Plugin.*.dll"))
+            foreach (var dll in Directory.GetFiles(dir, "Puhu.*.dll"))
             {
                 try
                 {

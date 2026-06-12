@@ -1,0 +1,12 @@
+# Gruvbox Dark
+theme[main_bg]="#1d2021"
+theme[main_fg]="#ebdbb2"
+theme[title]="#b8bb26"
+theme[hi_fg]="#fabd2f"
+theme[inactive_fg]="#928374"
+theme[div_line]="#504945"
+theme[selected_bg]="#fe8019"
+theme[selected_fg]="#1d2021"
+theme[graph_start]="#b8bb26"
+theme[graph_mid]="#fabd2f"
+theme[graph_end]="#fb4934"

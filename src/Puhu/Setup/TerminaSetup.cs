@@ -3,7 +3,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Puhu.Nodes;
 using Puhu.Pages;
 using Puhu.Plugin;
+using Puhu.Services;
 using Servus.Application.Startup;
+using Termina;
 using Termina.Hosting;
 using Termina.Layout;
 using Termina.Pages;
@@ -14,9 +16,11 @@ public sealed class TerminaSetup : IServiceSetupContainer
 {
     public void SetupServices(IServiceCollection services, IConfiguration configuration)
     {
-        var ctx = services.BuildServiceProvider().GetRequiredService<SetupContext>();
+        var sp = services.BuildServiceProvider();
+        var ctx = sp.GetRequiredService<SetupContext>();
         var pluginRegistry = ctx.PluginRegistry;
-        var themeService = services.BuildServiceProvider().GetRequiredService<IThemeService>();
+        var themeService = sp.GetRequiredService<IThemeService>();
+        var refreshController = sp.GetRequiredService<IRefreshController>();
         var firstRoute = pluginRegistry?.PluginTabs.FirstOrDefault()?.Route ?? "/marketplace";
 
         services.AddTermina("/splash", termina =>
@@ -42,13 +46,18 @@ public sealed class TerminaSetup : IServiceSetupContainer
             {
                 if (page is IKeyHintProvider hintProvider)
                 {
-                    var hints = hintProvider.GetKeyHints();
-                    return new AppShellNode(themeService.Current, TabBarNode.CurrentTabIndex, layout, hints);
+                    return new AppShellNode(themeService, refreshController, layout, hintProvider.GetKeyHints());
                 }
 
                 return layout;
             });
         });
+
+        services.AddHostedService(sp => new ShellRedrawService(
+            sp.GetRequiredService<ITickSource>(),
+            sp.GetRequiredService<IThemeService>(),
+            sp.GetRequiredService<IRefreshController>(),
+            () => sp.GetRequiredService<TerminaApplication>().RequestRedraw()));
 
         services.AddSingleton(new StartPageRoute(firstRoute));
     }

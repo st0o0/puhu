@@ -4,6 +4,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Puhu\Puhu.csproj" />
+    <ProjectReference Include="..\Puhu.Settings\Puhu.Settings.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Akka.Hosting.TestKit" />

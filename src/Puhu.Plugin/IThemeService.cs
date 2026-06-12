@@ -1,3 +1,4 @@
+using R3;
 using Termina.Terminal;
 
 namespace Puhu.Plugin;
@@ -5,10 +6,28 @@ namespace Puhu.Plugin;
 public interface IThemeService
 {
     ThemeDefinition Current { get; }
+
+    /// <summary>Name of the active theme (null when a definition was applied directly or a built-in fallback is active).</summary>
+    string? CurrentThemeName { get; }
+
+    /// <summary>Emits on every theme change — UI uses this for live re-rendering.</summary>
+    Observable<ThemeDefinition> Changes { get; }
+
+    /// <summary>Names of all loaded .theme files.</summary>
+    IReadOnlyCollection<string> AvailableThemes { get; }
+
+    /// <summary>Apply a theme live (without persisting). Returns false if unknown.</summary>
+    bool ApplyByName(string name);
+
+    /// <summary>Persist the active theme as the user's selection.</summary>
+    void SaveCurrent();
 }
 
 public sealed record ThemeDefinition
 {
+    private static readonly Gradient DefaultGraphGradient =
+        Gradient.Create(Color.FromHex("#50fa7b"), Color.FromHex("#f1fa8c"), Color.FromHex("#ff5555"));
+
     public Color Background { get; init; } = Color.Default;
     public Color Foreground { get; init; } = Color.White;
     public Color TextDim { get; init; } = Color.Gray;
@@ -23,4 +42,5 @@ public sealed record ThemeDefinition
     public Color Success { get; init; } = Color.BrightGreen;
     public Color Header { get; init; } = Color.BrightBlack;
     public Color Accent { get; init; } = Color.Cyan;
+    public Gradient GraphGradient { get; init; } = DefaultGraphGradient;
 }

@@ -334,6 +334,6 @@ ASALocalRun/
 docs/superpowers/specs/
 
 docs/superpowers/plans/
-./superpowers
+.superpowers/
 # Verify - ignore received files (only commit verified)
 *.received.*

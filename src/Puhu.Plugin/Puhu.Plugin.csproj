@@ -4,10 +4,13 @@
     <Description>Plugin SDK for building Puhu TUI plugins</Description>
     <PackageTags>puhu;tui;plugin;sdk</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <NuspecFile>Puhu.Plugin.nuspec</NuspecFile>
+    <NuspecProperties>version=$(PackageVersion);configuration=$(Configuration)</NuspecProperties>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Akka.Hosting" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+    <PackageReference Include="R3" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\lib\termina\src\Termina\Termina.csproj" />
