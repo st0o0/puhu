@@ -3,6 +3,7 @@ using Puhu.Plugin;
 
 namespace Puhu.Tests;
 
+[Collection("TabRegistry")]
 public sealed class TabRegistryTests
 {
     [Fact]

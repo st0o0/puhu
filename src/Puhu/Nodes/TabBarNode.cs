@@ -6,17 +6,8 @@ namespace Puhu.Nodes;
 
 internal sealed class TabBarNode : LayoutNode
 {
-    private static List<string> _allLabels = [];
-    private static IReadOnlyList<string> _allRoutes = [];
-
     private readonly int _activeIndex;
     private readonly ThemeDefinition _theme;
-
-    public static void RegisterTabs(IReadOnlyList<PluginTabInfo> tabs)
-    {
-        _allLabels = tabs.Select(t => t.Label).ToList();
-        _allRoutes = tabs.Select(t => t.Route).ToList();
-    }
 
     public TabBarNode(int activeIndex, ThemeDefinition theme)
     {
@@ -25,12 +16,6 @@ internal sealed class TabBarNode : LayoutNode
         HeightConstraint = new SizeConstraint.Fixed(1);
         WidthConstraint = new SizeConstraint.Fill();
     }
-
-    public static string GetRoute(int index) => _allRoutes[Math.Clamp(index, 0, _allRoutes.Count - 1)];
-
-    public static int TabCount => _allRoutes.Count;
-
-    public static int CurrentTabIndex { get; set; }
 
     public override Size Measure(Size available) => available with { Height = 1 };
 
@@ -43,10 +28,11 @@ internal sealed class TabBarNode : LayoutNode
 
         var ctx = context.CreateSubContext(bounds);
         ctx.Fill(0, 0, bounds.Width, 1);
+        var labels = TabRegistry.Labels;
         var x = 1;
-        for (var i = 0; i < _allLabels.Count; i++)
+        for (var i = 0; i < labels.Count; i++)
         {
-            var label = $" {_allLabels[i]} ";
+            var label = $" {labels[i]} ";
             if (i == _activeIndex)
             {
                 ctx.SetForeground(_theme.SelectionText);
