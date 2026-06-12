@@ -1,6 +1,5 @@
 using Puhu.Plugin;
 using R3;
-using Termina.Terminal;
 
 namespace Puhu.Themes;
 
@@ -34,60 +33,9 @@ public sealed class ThemeService : IThemeService
 
     public void ApplyBuiltIn(string theme)
     {
-        Current = theme switch
-        {
-            "light" => new ThemeDefinition
-            {
-                Background = Color.White,
-                Foreground = Color.Black,
-                TextDim = Color.DarkGray,
-                Border = Color.Blue,
-                PanelTitle = Color.Blue,
-                Selection = Color.Blue,
-                SelectionText = Color.White,
-                StatusBar = Color.Blue,
-                StatusBarText = Color.White,
-                Warning = Color.Yellow,
-                Error = Color.Red,
-                Success = Color.Green,
-                Header = Color.DarkGray,
-                Accent = Color.Blue,
-            },
-            "nord" => new ThemeDefinition
-            {
-                Background = Color.Default,
-                Foreground = Color.White,
-                TextDim = Color.BrightBlack,
-                Border = Color.Cyan,
-                PanelTitle = Color.Cyan,
-                Selection = Color.Cyan,
-                SelectionText = Color.Black,
-                StatusBar = Color.Cyan,
-                StatusBarText = Color.Black,
-                Warning = Color.BrightYellow,
-                Error = Color.BrightRed,
-                Success = Color.BrightGreen,
-                Header = Color.BrightBlack,
-                Accent = Color.BrightCyan,
-            },
-            _ => new ThemeDefinition(),
-        };
+        Current = new ThemeDefinition();
         CurrentThemeName = null;
         _changes.OnNext(Current);
-    }
-
-    public void SetTerminalBackground()
-    {
-        if (Current.Background == Color.Default)
-            return;
-
-        var code = Current.Background == Color.White ? "47" : "40";
-        Console.Write($"\x1b[{code}m\x1b[2J\x1b[H");
-    }
-
-    public static void ResetTerminalBackground()
-    {
-        Console.Write("\x1b[0m\x1b[2J\x1b[H");
     }
 
     public void LoadFromDirectory(string directory)

@@ -96,7 +96,7 @@ public sealed class ThemeServiceTests : IDisposable
     {
         var service = new ThemeService();
 
-        service.ApplyBuiltIn("nord");
+        service.ApplyBuiltIn("dark");
 
         Assert.Null(service.CurrentThemeName);
     }

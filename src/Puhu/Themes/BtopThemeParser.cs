@@ -56,7 +56,7 @@ public static partial class BtopThemeParser
     private static Gradient GetGradient(Dictionary<string, string> values, string prefix)
     {
         if (!values.ContainsKey($"{prefix}_start"))
-            return Gradient.Create(Color.FromHex("#50fa7b"), Color.FromHex("#f1fa8c"), Color.FromHex("#ff5555"));
+            return new ThemeDefinition().GraphGradient;
 
         var start = GetColor(values, $"{prefix}_start", Color.FromHex("#50fa7b"));
         var mid = GetColor(values, $"{prefix}_mid", Color.FromHex("#f1fa8c"));
