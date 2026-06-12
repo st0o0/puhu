@@ -51,5 +51,5 @@ jobs:
 
       - name: Test
         working-directory: ./src
-        run: dotnet test -c Release --no-build --solution *.slnx
+        run: dotnet test --solution Puhu.slnx -c Release --no-build
         timeout-minutes: 5
