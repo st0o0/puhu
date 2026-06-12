@@ -1,46 +1,22 @@
-﻿using Akka.Actor;
+using Akka.Actor;
+using Akka.DependencyInjection;
 using Akka.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Puhu.Plugin;
-using IActorContext = Puhu.Plugin.IActorContext;
+using Termina.Hosting;
 
 namespace Puhu;
 
-public sealed record ActorRegistrationInfo(
-    string Name,
-    Props Props,
-    TimeSpan? MinInterval,
-    bool AlwaysOn,
-    Action<IActorRegistry, IActorRef>? RegistryAction = null);
-
-public sealed class PuhuPluginBuilder(IServiceCollection services, ITickSource tickSource) : IPuhuPluginBuilder
+public sealed class PuhuPluginBuilder(IServiceCollection services) : IPuhuPluginBuilder
 {
-    public IServiceCollection Services { get; } = services;
-    public ITickSource TickSource { get; } = tickSource;
     public PluginTabInfo? Tab { get; private set; }
-    public Action<IActorContext>? ActorSetup { get; private set; }
-    public Action<IRouteContext>? RouteSetup { get; private set; }
     public Action<IServiceCollection>? ServiceSetup { get; private set; }
-    public Action<IThemeContext>? ThemeSetup { get; private set; }
-    public Action<INotificationContext>? NotificationSetup { get; private set; }
-    public List<(string Key, Type Type)> SettingsRegistrations { get; } = [];
-    public List<ActorRegistrationInfo> ActorRegistrations { get; } = [];
+    public Action<ActorSystem, IActorRegistry, IDependencyResolver>? ActorSetup { get; private set; }
+    public Action<TerminaBuilder>? RouteSetup { get; private set; }
 
-    public IPuhuPluginBuilder WithTab(string label, string route, ConsoleKey? hotKey = null)
+    public IPuhuPluginBuilder WithTab(string label, string route)
     {
-        Tab = new PluginTabInfo(label, route, hotKey);
-        return this;
-    }
-
-    public IPuhuPluginBuilder ConfigureRoutes(Action<IRouteContext> configure)
-    {
-        RouteSetup = configure;
-        return this;
-    }
-
-    public IPuhuPluginBuilder ConfigureActors(Action<IActorContext> configure)
-    {
-        ActorSetup = configure;
+        Tab = new PluginTabInfo(label, route);
         return this;
     }
 
@@ -50,21 +26,15 @@ public sealed class PuhuPluginBuilder(IServiceCollection services, ITickSource t
         return this;
     }
 
-    public IPuhuPluginBuilder WithSettings<T>(string sectionKey) where T : class, new()
+    public IPuhuPluginBuilder WithActors(Action<ActorSystem, IActorRegistry, IDependencyResolver> configure)
     {
-        SettingsRegistrations.Add((sectionKey, typeof(T)));
+        ActorSetup = configure;
         return this;
     }
 
-    public IPuhuPluginBuilder WithTheme(Action<IThemeContext> configure)
+    public IPuhuPluginBuilder WithRoutes(Action<TerminaBuilder> configure)
     {
-        ThemeSetup = configure;
-        return this;
-    }
-
-    public IPuhuPluginBuilder WithNotifications(Action<INotificationContext> configure)
-    {
-        NotificationSetup = configure;
+        RouteSetup = configure;
         return this;
     }
 }

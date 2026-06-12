@@ -21,7 +21,7 @@ public sealed class ServicesSetup : IServiceSetupContainer
         services.AddSingleton(themeService);
         services.AddSingleton<IThemeService>(themeService);
 
-        var ctx = new SetupContext { TickSource = refreshService };
+        var ctx = new SetupContext();
         services.AddSingleton(ctx);
     }
 }

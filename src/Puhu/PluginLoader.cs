@@ -9,7 +9,6 @@ public static class PluginLoader
 {
     public static PluginRegistry DiscoverAndConfigure(
         IServiceCollection services,
-        ITickSource tickSource,
         IReadOnlyList<IPuhuPlugin> builtInPlugins)
     {
         var allPlugins = new List<IPuhuPlugin>(builtInPlugins);
@@ -18,7 +17,7 @@ public static class PluginLoader
         var builders = new List<PuhuPluginBuilder>();
         foreach (var plugin in allPlugins)
         {
-            var builder = new PuhuPluginBuilder(services, tickSource);
+            var builder = new PuhuPluginBuilder(services);
             try
             {
                 plugin.Configure(builder);

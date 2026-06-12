@@ -1,4 +1,4 @@
-﻿using Akka.Actor;
+using Akka.Actor;
 using Akka.Hosting;
 using Akka.Logger.Serilog;
 using Microsoft.Extensions.Configuration;
@@ -33,7 +33,7 @@ public sealed class AkkaSetup : IServiceSetupContainer
             });
 
             builder.AddHocon("akka.stdout-loglevel = Off", HoconAddMode.Prepend);
-            
+
             builder.WithActors((system, registry, resolver) =>
             {
                 var tickRouter = system.ActorOf(Props.Create<TickRouter>(), "tick-router");
@@ -41,30 +41,10 @@ public sealed class AkkaSetup : IServiceSetupContainer
 
                 var refreshService = resolver.GetService<RefreshService>();
                 refreshService.Ticks.Subscribe(t => tickRouter.Tell(t));
-                var sp = resolver.GetService<IServiceProvider>();
 
                 foreach (var plugin in pluginRegistry.LoadedPlugins)
                 {
-                    if (plugin.ActorSetup is null)
-                    {
-                        continue;
-                    }
-
-                    var actorCtx = new PluginActorContextImpl(sp, plugin.ActorRegistrations);
-                    plugin.ActorSetup.Invoke(actorCtx);
-
-                    foreach (var reg in plugin.ActorRegistrations)
-                    {
-                        var actorRef = system.ActorOf(reg.Props, reg.Name);
-
-                        reg.RegistryAction?.Invoke(registry, actorRef);
-
-                        if (reg is { AlwaysOn: true } or { MinInterval: not null })
-                        {
-                            tickRouter.Tell(new RegisterMonitor(
-                                reg.Name, actorRef, reg.AlwaysOn, reg.MinInterval));
-                        }
-                    }
+                    plugin.ActorSetup?.Invoke(system, registry, resolver);
                 }
             });
         });

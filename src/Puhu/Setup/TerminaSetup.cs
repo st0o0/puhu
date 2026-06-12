@@ -7,7 +7,6 @@ using Servus.Application.Startup;
 using Termina;
 using Termina.Hosting;
 using Termina.Input;
-using Termina.Pages;
 
 namespace Puhu.Setup;
 
@@ -30,10 +29,9 @@ public sealed class TerminaSetup : IServiceSetupContainer
 
             if (pluginRegistry is not null)
             {
-                var routeCtx = new PluginRouteContext(termina);
                 foreach (var plugin in pluginRegistry.LoadedPlugins)
                 {
-                    plugin.RouteSetup?.Invoke(routeCtx);
+                    plugin.RouteSetup?.Invoke(termina);
                 }
             }
 
