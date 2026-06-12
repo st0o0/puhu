@@ -36,7 +36,12 @@ namespace Puhu.Plugin
     }
     public interface IThemeService
     {
+        System.Collections.Generic.IReadOnlyCollection<string> AvailableThemes { get; }
+        R3.Observable<Puhu.Plugin.ThemeDefinition> Changes { get; }
         Puhu.Plugin.ThemeDefinition Current { get; }
+        string? CurrentThemeName { get; }
+        bool ApplyByName(string name);
+        void SaveCurrent();
     }
     public interface ITickSource
     {

@@ -86,5 +86,10 @@ public sealed class SubNavNodeTests
     private sealed class FakeThemeService : IThemeService
     {
         public ThemeDefinition Current { get; } = new();
+        public string? CurrentThemeName => null;
+        public Observable<ThemeDefinition> Changes => Observable.Empty<ThemeDefinition>();
+        public IReadOnlyCollection<string> AvailableThemes => [];
+        public bool ApplyByName(string name) => false;
+        public void SaveCurrent() { }
     }
 }

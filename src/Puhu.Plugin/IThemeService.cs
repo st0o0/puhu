@@ -1,3 +1,4 @@
+using R3;
 using Termina.Terminal;
 
 namespace Puhu.Plugin;
@@ -5,6 +6,21 @@ namespace Puhu.Plugin;
 public interface IThemeService
 {
     ThemeDefinition Current { get; }
+
+    /// <summary>Name des aktiven Themes (null bei direktem Apply einer Definition).</summary>
+    string? CurrentThemeName { get; }
+
+    /// <summary>Feuert bei jedem Theme-Wechsel — UI nutzt das für Live-Rerender.</summary>
+    Observable<ThemeDefinition> Changes { get; }
+
+    /// <summary>Namen aller geladenen .theme-Dateien.</summary>
+    IReadOnlyCollection<string> AvailableThemes { get; }
+
+    /// <summary>Theme live anwenden (ohne Persistenz). False wenn unbekannt.</summary>
+    bool ApplyByName(string name);
+
+    /// <summary>Aktives Theme als Nutzer-Auswahl persistieren.</summary>
+    void SaveCurrent();
 }
 
 public sealed record ThemeDefinition
