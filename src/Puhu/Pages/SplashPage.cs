@@ -1,6 +1,5 @@
 using Puhu.Themes;
 using R3;
-using Termina.Input;
 using Termina.Layout;
 using Termina.Reactive;
 using Termina.Terminal;
@@ -52,11 +51,6 @@ public sealed class SplashPage : ReactivePage<SplashViewModel>
 
         ViewModel.Progress
             .Subscribe(v => _progressBar.WithValue(v))
-            .DisposeWith(Subscriptions);
-
-        ViewModel.Input.OfType<IInputEvent, KeyPressed>()
-            .Where(k => k.KeyInfo.Key == ConsoleKey.Escape)
-            .Subscribe(_ => ViewModel.RequestShutdown())
             .DisposeWith(Subscriptions);
     }
 
