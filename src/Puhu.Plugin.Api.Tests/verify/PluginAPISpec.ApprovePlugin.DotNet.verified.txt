@@ -1,0 +1,122 @@
+﻿[assembly: System.Runtime.Versioning.TargetFramework(".NETCoreApp,Version=v10.0", FrameworkDisplayName=".NET 10.0")]
+namespace Puhu.Plugin
+{
+    public static class GlobalKeyExtensions
+    {
+        public static void RegisterGlobalKeys(this Termina.Input.PageKeyBindings keyBindings, System.Action requestShutdown, System.Action<string> navigate, Puhu.Plugin.ITabNavigator tabNavigator) { }
+    }
+    public interface IKeyHintProvider
+    {
+        string[] GetKeyHints();
+    }
+    public interface IPuhuPlugin
+    {
+        string Name { get; }
+        void Configure(Puhu.Plugin.IPuhuPluginBuilder builder);
+    }
+    public interface IPuhuPluginBuilder
+    {
+        Puhu.Plugin.IPuhuPluginBuilder WithActors(System.Action<Akka.Actor.ActorSystem, Akka.Hosting.IActorRegistry, Akka.DependencyInjection.IDependencyResolver> configure);
+        Puhu.Plugin.IPuhuPluginBuilder WithRoutes(System.Action<Termina.Hosting.TerminaBuilder> configure);
+        Puhu.Plugin.IPuhuPluginBuilder WithServices(System.Action<Microsoft.Extensions.DependencyInjection.IServiceCollection> configure);
+        Puhu.Plugin.IPuhuPluginBuilder WithSettings(string label, string route);
+        Puhu.Plugin.IPuhuPluginBuilder WithTab(string label, string route);
+    }
+    public interface ISettingsStore
+    {
+        T? Get<T>(string key);
+        R3.Observable<T> Observe<T>(string key);
+        void Remove(string key);
+        void Set<T>(string key, T value);
+    }
+    public interface ITabNavigator
+    {
+        bool HasTabs { get; }
+        void CycleTab(System.Action<string> navigate, int delta);
+    }
+    public interface IThemeService
+    {
+        Puhu.Plugin.ThemeDefinition Current { get; }
+    }
+    public interface ITickSource
+    {
+        System.TimeSpan CurrentInterval { get; }
+        R3.Observable<Puhu.Plugin.Tick> Ticks { get; }
+        System.IDisposable Subscribe(System.Action onTick);
+    }
+    public static class PluginBuilderExtensions
+    {
+        public static Puhu.Plugin.IPuhuPluginBuilder WithSettings<TPage, TViewModel>(this Puhu.Plugin.IPuhuPluginBuilder builder, string label)
+            where TPage : Termina.Reactive.ReactivePage<TViewModel>
+            where TViewModel : Termina.Reactive.ReactiveViewModel { }
+    }
+    public sealed class PluginSettingsInfo : System.IEquatable<Puhu.Plugin.PluginSettingsInfo>
+    {
+        public PluginSettingsInfo(string Label, string Route, string PluginName) { }
+        public string Label { get; init; }
+        public string PluginName { get; init; }
+        public string Route { get; init; }
+    }
+    public sealed class PluginTabInfo : System.IEquatable<Puhu.Plugin.PluginTabInfo>
+    {
+        public PluginTabInfo(string Label, string Route) { }
+        public string Label { get; init; }
+        public string Route { get; init; }
+    }
+    public sealed class RegisterMonitor : System.IEquatable<Puhu.Plugin.RegisterMonitor>
+    {
+        public RegisterMonitor(string Key, Akka.Actor.IActorRef Actor, bool AlwaysOn, System.TimeSpan? MinInterval) { }
+        public Akka.Actor.IActorRef Actor { get; init; }
+        public bool AlwaysOn { get; init; }
+        public string Key { get; init; }
+        public System.TimeSpan? MinInterval { get; init; }
+    }
+    public sealed class ThemeDefinition : System.IEquatable<Puhu.Plugin.ThemeDefinition>
+    {
+        public ThemeDefinition() { }
+        public Termina.Terminal.Color Accent { get; init; }
+        public Termina.Terminal.Color Background { get; init; }
+        public Termina.Terminal.Color Border { get; init; }
+        public Termina.Terminal.Color Error { get; init; }
+        public Termina.Terminal.Color Foreground { get; init; }
+        public Termina.Terminal.Color Header { get; init; }
+        public Termina.Terminal.Color PanelTitle { get; init; }
+        public Termina.Terminal.Color Selection { get; init; }
+        public Termina.Terminal.Color SelectionText { get; init; }
+        public Termina.Terminal.Color StatusBar { get; init; }
+        public Termina.Terminal.Color StatusBarText { get; init; }
+        public Termina.Terminal.Color Success { get; init; }
+        public Termina.Terminal.Color TextDim { get; init; }
+        public Termina.Terminal.Color Warning { get; init; }
+    }
+    public sealed class Tick : System.IEquatable<Puhu.Plugin.Tick>
+    {
+        public Tick(long Seq, System.TimeSpan BaseInterval) { }
+        public System.TimeSpan BaseInterval { get; init; }
+        public long Seq { get; init; }
+    }
+    public sealed class TickRouterKey
+    {
+        public TickRouterKey() { }
+    }
+}
+namespace Puhu.Plugin.Nodes
+{
+    public sealed class SubNavNode<TView> : Termina.Layout.LayoutNode
+        where TView :  struct, System.Enum
+    {
+        public SubNavNode(R3.ReactiveProperty<TView> activeView, Termina.Input.PageKeyBindings keyBindings, Puhu.Plugin.IThemeService themeService, [System.Runtime.CompilerServices.TupleElementNames(new string[] {
+                "Key",
+                "Label",
+                "Value"})] params System.ValueTuple<System.ConsoleKey, string, TView>[] items) { }
+        public SubNavNode(R3.ReactiveProperty<TView> activeView, Termina.Input.PageKeyBindings keyBindings, Puhu.Plugin.ThemeDefinition theme, [System.Runtime.CompilerServices.TupleElementNames(new string[] {
+                "Key",
+                "Label",
+                "Value"})] params System.ValueTuple<System.ConsoleKey, string, TView>[] items) { }
+        public int ItemCount { get; }
+        public override Termina.Layout.Size Measure(Termina.Layout.Size available) { }
+        public override void OnActivate() { }
+        public override void OnDeactivate() { }
+        public override void Render(Termina.Rendering.IRenderContext context, Termina.Layout.Rect bounds) { }
+    }
+}

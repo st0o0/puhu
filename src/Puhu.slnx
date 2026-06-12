@@ -4,12 +4,15 @@
   <Folder Name="/Items/">
     <File Path="../.github/workflows/ci.yml" />
     <File Path="../.github/workflows/release.yml" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
   </Folder>
   <Folder Name="/Termina/">
     <Project Path="../lib/termina/src/Termina/Termina.csproj" />
   </Folder>
   <Folder Name="/Tests/">
     <Project Path="Puhu.Marketplace.Tests/Puhu.Marketplace.Tests.csproj" />
+    <Project Path="Puhu.Plugin.Api.Tests/Puhu.Plugin.Api.Tests.csproj" />
     <Project Path="Puhu.Plugin.Tests/Puhu.Plugin.Tests.csproj" />
     <Project Path="Puhu.Tests/Puhu.Tests.csproj" />
   </Folder>
