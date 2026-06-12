@@ -2,6 +2,7 @@
 using System.Runtime.Loader;
 using Microsoft.Extensions.DependencyInjection;
 using Puhu.Plugin;
+using Puhu.Services;
 
 namespace Puhu;
 
@@ -24,6 +25,9 @@ public static class PluginLoader
                 plugin.Configure(builder);
                 builder.ServiceSetup?.Invoke(services);
                 builders.Add(builder);
+
+                services.AddKeyedSingleton<ISettingsStore>(pluginName, (sp, _) =>
+                    new ScopedSettingsStore(sp.GetRequiredService<SettingsStore>(), pluginName));
             }
             catch (Exception)
             {
