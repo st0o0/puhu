@@ -335,3 +335,5 @@ docs/superpowers/specs/
 
 docs/superpowers/plans/
 ./superpowers
+# Verify - ignore received files (only commit verified)
+*.received.*
