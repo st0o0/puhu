@@ -21,4 +21,14 @@ public sealed class PluginTabInfoTests
         Assert.Equal(42, tick.Seq);
         Assert.Equal(TimeSpan.FromSeconds(1), tick.BaseInterval);
     }
+
+    [Fact]
+    public void PluginSettingsInfo_SetsProperties()
+    {
+        var info = new PluginSettingsInfo("Marketplace", "/settings/marketplace", "marketplace");
+
+        Assert.Equal("Marketplace", info.Label);
+        Assert.Equal("/settings/marketplace", info.Route);
+        Assert.Equal("marketplace", info.PluginName);
+    }
 }
