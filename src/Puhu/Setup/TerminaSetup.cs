@@ -42,8 +42,7 @@ public sealed class TerminaSetup : IServiceSetupContainer
             {
                 if (page is IKeyHintProvider hintProvider)
                 {
-                    var hints = hintProvider.GetKeyHints();
-                    return new AppShellNode(themeService.Current, TabRegistry.CurrentTabIndex, layout, hints);
+                    return new AppShellNode(themeService, layout, hintProvider.GetKeyHints());
                 }
 
                 return layout;
