@@ -25,7 +25,7 @@ public sealed class SplashViewModelTests : IDisposable
     {
         _vm.OnActivated();
 
-        for (var i = 0; i < 10; i++)
+        for (var i = 0; i < 20; i++)
         {
             _time.Advance(TimeSpan.FromMilliseconds(50));
         }
@@ -38,7 +38,7 @@ public sealed class SplashViewModelTests : IDisposable
     {
         _vm.OnActivated();
 
-        for (var i = 0; i < 10; i++)
+        for (var i = 0; i < 20; i++)
         {
             _time.Advance(TimeSpan.FromMilliseconds(50));
         }

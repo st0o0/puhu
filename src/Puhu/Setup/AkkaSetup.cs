@@ -4,6 +4,7 @@ using Akka.Logger.Serilog;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Puhu.Actors;
+using Puhu.Plugin;
 using Puhu.Services;
 using R3;
 using Servus.Application.Startup;
@@ -37,7 +38,7 @@ public sealed class AkkaSetup : IServiceSetupContainer
             builder.WithActors((system, registry, resolver) =>
             {
                 var tickRouter = system.ActorOf(Props.Create<TickRouter>(), "tick-router");
-                registry.Register<TickRouter>(tickRouter);
+                registry.Register<TickRouterKey>(tickRouter);
 
                 var refreshService = resolver.GetService<RefreshService>();
                 refreshService.Ticks.Subscribe(t => tickRouter.Tell(t));
