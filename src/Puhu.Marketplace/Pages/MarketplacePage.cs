@@ -17,6 +17,7 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>
     private readonly IThemeService _themeService;
     private KeyedDynamicLayoutNode<MarketplaceView>? _viewSwitcher;
     private int _expandedIndex = -1;
+    private SubNavNode<MarketplaceView>? _subNav;
 
     public MarketplacePage(IToastService toastService, IThemeService themeService)
     {
@@ -27,6 +28,14 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>
 
     protected override void OnBound()
     {
+        _subNav = new SubNavNode<MarketplaceView>(
+            ViewModel.ActiveView,
+            KeyBindings,
+            _themeService,
+            (ConsoleKey.B, "Browse", MarketplaceView.Browse),
+            (ConsoleKey.I, "Installed", MarketplaceView.Installed),
+            (ConsoleKey.S, "Sources", MarketplaceView.Sources));
+
         _viewSwitcher = Layouts.KeyedDynamic(
             () => ViewModel.ActiveView.Value,
             view => view switch
@@ -48,7 +57,11 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>
             _ => Array.Empty<string>()
         };
 
-        return AppShell.Wrap(_themeService.Current, 0, _viewSwitcher!.Fill(), hints);
+        var content = Layouts.Vertical(
+            _subNav!.Height(1),
+            _viewSwitcher!.Fill());
+
+        return AppShell.Wrap(_themeService.Current, 0, content, hints);
     }
 
     public override void OnNavigatedTo()
@@ -58,11 +71,6 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>
         KeyBindings.RegisterGlobalKeys(
             () => ViewModel.RequestShutdown(),
             path => Navigate(path));
-
-        // View switching
-        KeyBindings.Register(ConsoleKey.D1, () => ViewModel.SwitchView(MarketplaceView.Browse));
-        KeyBindings.Register(ConsoleKey.D2, () => ViewModel.SwitchView(MarketplaceView.Installed));
-        KeyBindings.Register(ConsoleKey.D3, () => ViewModel.SwitchView(MarketplaceView.Sources));
 
         // Navigation
         KeyBindings.Register(ConsoleKey.UpArrow, () =>

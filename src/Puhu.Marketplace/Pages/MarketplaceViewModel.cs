@@ -54,6 +54,12 @@ public sealed class MarketplaceViewModel : ReactiveViewModel
 
         store.State.Select(s => s.ActiveOperations).DistinctUntilChanged()
             .Subscribe(ops => ActiveOperations.Value = ops);
+
+        ActiveView.Subscribe(_ =>
+        {
+            SelectedIndex.Value = 0;
+            UpdateSelectedPlugin();
+        });
     }
 
     public override void OnActivated() => _actor.Tell(new RefreshMarketplace());
@@ -61,8 +67,6 @@ public sealed class MarketplaceViewModel : ReactiveViewModel
     public void SwitchView(MarketplaceView view)
     {
         ActiveView.Value = view;
-        SelectedIndex.Value = 0;
-        UpdateSelectedPlugin();
     }
 
     public void MoveSelection(int delta)
