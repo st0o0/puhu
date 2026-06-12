@@ -87,4 +87,38 @@ public sealed class PluginRegistryTests
         Assert.Equal("/settings/test-plugin", builder.Settings.Route);
         Assert.Equal("test-plugin", builder.Settings.PluginName);
     }
+
+    [Fact]
+    public void Empty_Registry_HasNoSettings()
+    {
+        var registry = new PluginRegistry([]);
+        Assert.Empty(registry.PluginSettings);
+    }
+
+    [Fact]
+    public void Registry_CollectsSettingsFromBuilders()
+    {
+        var services = new ServiceCollection();
+        var b1 = new PuhuPluginBuilder(services, "plugin-a");
+        b1.WithSettings("Plugin A", "/settings/plugin-a");
+        var b2 = new PuhuPluginBuilder(services, "plugin-b");
+        b2.WithSettings("Plugin B", "/settings/plugin-b");
+
+        var registry = new PluginRegistry([b1, b2]);
+
+        Assert.Equal(2, registry.PluginSettings.Count);
+        Assert.Equal("Plugin A", registry.PluginSettings[0].Label);
+        Assert.Equal("Plugin B", registry.PluginSettings[1].Label);
+    }
+
+    [Fact]
+    public void Builder_WithoutSettings_IsNotInPluginSettings()
+    {
+        var services = new ServiceCollection();
+        var builder = new PuhuPluginBuilder(services, "test");
+        builder.WithTab("Overview", "/overview");
+
+        var registry = new PluginRegistry([builder]);
+        Assert.Empty(registry.PluginSettings);
+    }
 }
