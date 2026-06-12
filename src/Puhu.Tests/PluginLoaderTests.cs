@@ -54,4 +54,27 @@ public sealed class PluginLoaderTests
         public string Name => "Broken";
         public void Configure(IPuhuPluginBuilder builder) => throw new Exception("boom");
     }
+
+    private sealed class SettingsAwarePlugin : IPuhuPlugin
+    {
+        public string Name => "My Plugin";
+        public void Configure(IPuhuPluginBuilder builder)
+        {
+            builder.WithSettings("My Settings", "/settings/my-plugin");
+        }
+    }
+
+    [Fact]
+    public void DiscoverAndConfigure_CollectsSettings()
+    {
+        var services = new ServiceCollection();
+        var builtIns = new List<IPuhuPlugin> { new SettingsAwarePlugin() };
+
+        var registry = PluginLoader.DiscoverAndConfigure(services, builtIns);
+
+        Assert.Single(registry.PluginSettings);
+        Assert.Equal("My Settings", registry.PluginSettings[0].Label);
+        Assert.Equal("/settings/my-plugin", registry.PluginSettings[0].Route);
+        Assert.Equal("my-plugin", registry.PluginSettings[0].PluginName);
+    }
 }

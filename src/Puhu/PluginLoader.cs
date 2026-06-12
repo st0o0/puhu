@@ -17,7 +17,8 @@ public static class PluginLoader
         var builders = new List<PuhuPluginBuilder>();
         foreach (var plugin in allPlugins)
         {
-            var builder = new PuhuPluginBuilder(services, plugin.Name.ToLowerInvariant().Replace(' ', '-'));
+            var pluginName = ToKebabCase(plugin.Name);
+            var builder = new PuhuPluginBuilder(services, pluginName);
             try
             {
                 plugin.Configure(builder);
@@ -73,6 +74,29 @@ public static class PluginLoader
         {
             yield return localDir;
         }
+    }
+
+    private static string ToKebabCase(string name)
+    {
+        var result = new System.Text.StringBuilder();
+        for (var i = 0; i < name.Length; i++)
+        {
+            var c = name[i];
+            if (c == ' ' || c == '_')
+            {
+                result.Append('-');
+            }
+            else if (char.IsUpper(c) && i > 0 && name[i - 1] != ' ' && name[i - 1] != '_' && !char.IsUpper(name[i - 1]))
+            {
+                result.Append('-');
+                result.Append(char.ToLowerInvariant(c));
+            }
+            else
+            {
+                result.Append(char.ToLowerInvariant(c));
+            }
+        }
+        return result.ToString();
     }
 
     private static void DiscoverInAssembly(Assembly assembly, List<IPuhuPlugin> plugins)
