@@ -30,6 +30,8 @@ public sealed class TabBarNode : LayoutNode
 
     public static int TabCount => _allRoutes.Count;
 
+    public static int CurrentTabIndex { get; set; }
+
     public override Size Measure(Size available) => available with { Height = 1 };
 
     public override void Render(IRenderContext context, Rect bounds)

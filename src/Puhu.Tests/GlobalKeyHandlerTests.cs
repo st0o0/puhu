@@ -1,83 +1,76 @@
-using System.Reflection;
-using System.Threading.Channels;
 using Puhu.Plugin;
 using Puhu.Plugin.Nodes;
-using Puhu.Setup;
-using Termina;
 using Termina.Input;
-using Termina.Layout;
-using Termina.Navigation;
-using Termina.Reactive;
-using Termina.Terminal;
 
 namespace Puhu.Tests;
 
-public sealed class GlobalKeyHandlerTests : IDisposable
+public sealed class GlobalKeyExtensionsTests
 {
-    private readonly TerminaApplication _app;
-    private readonly GlobalKeyHandler _handler;
-    private readonly R3.Subject<IInputEvent> _inputSubject;
-
-    public GlobalKeyHandlerTests()
+    [Fact]
+    public void Escape_CallsShutdown()
     {
-        _app = new TerminaApplication(new VirtualTerminal());
-        _app.RegisterRoute<StubPage, StubViewModel>("/a");
-        _app.RegisterRoute<StubPage, StubViewModel>("/b");
+        var bindings = new PageKeyBindings();
+        var shutdownCalled = false;
 
+        bindings.RegisterGlobalKeys(() => shutdownCalled = true, _ => { });
+        bindings.TryHandle(new ConsoleKeyInfo('\0', ConsoleKey.Escape, false, false, false));
+
+        Assert.True(shutdownCalled);
+    }
+
+    [Fact]
+    public void Tab_NavigatesToNextTab()
+    {
         TabBarNode.RegisterTabs([
             new PluginTabInfo("A", "/a"),
             new PluginTabInfo("B", "/b")
         ]);
+        TabBarNode.CurrentTabIndex = 0;
 
-        _app.NavigateTo("/a");
+        var bindings = new PageKeyBindings();
+        string? navigatedTo = null;
 
-        _inputSubject = (R3.Subject<IInputEvent>)typeof(TerminaApplication)
-            .GetField("_inputSubject", BindingFlags.NonPublic | BindingFlags.Instance)!
-            .GetValue(_app)!;
+        bindings.RegisterGlobalKeys(() => { }, path => navigatedTo = path);
+        bindings.TryHandle(new ConsoleKeyInfo('\0', ConsoleKey.Tab, false, false, false));
 
-        _handler = new GlobalKeyHandler(_app);
-        _handler.StartAsync(CancellationToken.None).GetAwaiter().GetResult();
+        Assert.Equal("/b", navigatedTo);
+        Assert.Equal(1, TabBarNode.CurrentTabIndex);
     }
 
     [Fact]
-    public void Tab_NavigatesToNextRoute()
+    public void ShiftTab_NavigatesToPreviousTab()
     {
-        SendKey(ConsoleKey.Tab);
-        Assert.Equal("/b", _app.CurrentPath);
+        TabBarNode.RegisterTabs([
+            new PluginTabInfo("A", "/a"),
+            new PluginTabInfo("B", "/b")
+        ]);
+        TabBarNode.CurrentTabIndex = 0;
+
+        var bindings = new PageKeyBindings();
+        string? navigatedTo = null;
+
+        bindings.RegisterGlobalKeys(() => { }, path => navigatedTo = path);
+        bindings.TryHandle(new ConsoleKeyInfo('\0', ConsoleKey.Tab, true, false, false));
+
+        Assert.Equal("/b", navigatedTo);
     }
 
     [Fact]
-    public void ShiftTab_NavigatesToPreviousRoute()
+    public void Tab_WrapsAround()
     {
-        SendKey(ConsoleKey.Tab, shift: true);
-        Assert.Equal("/b", _app.CurrentPath);
-    }
+        TabBarNode.RegisterTabs([
+            new PluginTabInfo("A", "/a"),
+            new PluginTabInfo("B", "/b")
+        ]);
+        TabBarNode.CurrentTabIndex = 1;
 
-    [Fact]
-    public void Tab_WrapsForward()
-    {
-        SendKey(ConsoleKey.Tab);
-        SendKey(ConsoleKey.Tab);
-        Assert.Equal("/a", _app.CurrentPath);
-    }
+        var bindings = new PageKeyBindings();
+        string? navigatedTo = null;
 
-    [Fact]
-    public void Escape_DoesNotThrow()
-    {
-        SendKey(ConsoleKey.Escape);
-    }
+        bindings.RegisterGlobalKeys(() => { }, path => navigatedTo = path);
+        bindings.TryHandle(new ConsoleKeyInfo('\0', ConsoleKey.Tab, false, false, false));
 
-    private void SendKey(ConsoleKey key, bool shift = false)
-    {
-        _inputSubject.OnNext(new KeyPressed(
-            new ConsoleKeyInfo('\0', key, shift, alt: false, control: false)));
-    }
-
-    public void Dispose() => _handler.Dispose();
-
-    private sealed class StubViewModel : ReactiveViewModel;
-    private sealed class StubPage : ReactivePage<StubViewModel>
-    {
-        public override ILayoutNode BuildLayout() => new TextNode("stub");
+        Assert.Equal("/a", navigatedTo);
+        Assert.Equal(0, TabBarNode.CurrentTabIndex);
     }
 }

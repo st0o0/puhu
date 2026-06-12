@@ -54,6 +54,8 @@ public sealed class SplashPage : ReactivePage<SplashViewModel>
     {
         base.OnNavigatedTo();
 
+        KeyBindings.Register(ConsoleKey.Escape, () => ViewModel.RequestShutdown());
+
         ViewModel.Progress
             .Subscribe(v => _progressBar.WithValue(v))
             .DisposeWith(Subscriptions);

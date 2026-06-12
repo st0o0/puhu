@@ -55,6 +55,10 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>
     {
         base.OnNavigatedTo();
 
+        KeyBindings.RegisterGlobalKeys(
+            () => ViewModel.RequestShutdown(),
+            path => Navigate(path));
+
         // View switching
         KeyBindings.Register(ConsoleKey.D1, () => ViewModel.SwitchView(MarketplaceView.Browse));
         KeyBindings.Register(ConsoleKey.D2, () => ViewModel.SwitchView(MarketplaceView.Installed));
