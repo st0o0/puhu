@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <ItemGroup>
+        <ProjectReference Include="..\Puhu.Plugin\Puhu.Plugin.csproj"/>
+    </ItemGroup>
+</Project>

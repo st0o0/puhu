@@ -59,6 +59,9 @@ public interface IActorContext
 
     /// <summary>Register an actor with the given name and props. Returns a registration handle for optional tick configuration.</summary>
     IActorRegistration RegisterActor(string name, Props props);
+
+    /// <summary>Register an actor with a type key for DI resolution via IRequiredActor&lt;TActor&gt;.</summary>
+    IActorRegistration RegisterActor<TActor>(string name, Props props) where TActor : ActorBase;
 }
 
 /// <summary>
