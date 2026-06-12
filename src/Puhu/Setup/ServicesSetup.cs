@@ -23,5 +23,11 @@ public sealed class ServicesSetup : IServiceSetupContainer
 
         var ctx = new SetupContext();
         services.AddSingleton(ctx);
+
+        var settingsPath = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+            ".servus", "settings.json");
+        var settingsStore = new SettingsStore(settingsPath);
+        services.AddSingleton(settingsStore);
     }
 }
