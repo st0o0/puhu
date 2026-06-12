@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Puhu.Plugin;
 using Puhu.Services;
+using Puhu.Themes;
 using Servus.Application.Startup;
 
 namespace Puhu.Setup;
@@ -13,6 +14,11 @@ public sealed class ServicesSetup : IServiceSetupContainer
         var refreshService = new RefreshService(TimeSpan.FromMilliseconds(1000));
         services.AddSingleton(refreshService);
         services.AddSingleton<ITickSource>(refreshService);
+
+        var themeService = new ThemeService();
+        themeService.LoadFromDirectory(Path.Combine(AppContext.BaseDirectory, "themes"));
+        themeService.ApplyBuiltIn("dark");
+        services.AddSingleton(themeService);
 
         var ctx = new SetupContext { TickSource = refreshService };
         services.AddSingleton(ctx);

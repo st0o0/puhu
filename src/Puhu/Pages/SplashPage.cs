@@ -1,4 +1,6 @@
+using Puhu.Themes;
 using R3;
+using Termina.Input;
 using Termina.Layout;
 using Termina.Reactive;
 using Termina.Terminal;
@@ -15,23 +17,32 @@ public sealed class SplashPage : ReactivePage<SplashViewModel>
         |_|    \__,_|_| |_|\__,_|
         """;
 
-    private readonly ProgressBarNode _progressBar = new ProgressBarNode()
-        .WithGradient(Gradient.Create(Color.Cyan, Color.Blue))
-        .WithLabel(" {0:P0}");
+    private readonly ProgressBarNode _progressBar;
+
+    public SplashPage()
+    {
+        var theme = ThemeService.Instance.Current;
+        _progressBar = new ProgressBarNode()
+            .WithGradient(Gradient.Create(theme.Accent, theme.Selection))
+            .WithLabel(" {0:P0}");
+    }
 
     public override ILayoutNode BuildLayout()
     {
+        var theme = ThemeService.Instance.Current;
+
         return Layouts.Vertical(
             new TextNode("").Fill(),
-            new TextNode(Logo).AlignCenter(),
+            new TextNode(Logo).WithForeground(theme.Accent).AlignCenter(),
             new TextNode(""),
             Layouts.Horizontal(
                 new TextNode("  "),
                 _progressBar,
                 new TextNode("  ")
             ),
-            new TextNode(ViewModel.StatusText.Value).AlignCenter(),
-            new TextNode("").Fill()
+            new TextNode(ViewModel.StatusText.Value).WithForeground(theme.TextDim).AlignCenter(),
+            new TextNode("").Fill(),
+            new TextNode("Press ESC to quit").WithForeground(theme.TextDim).AlignCenter()
         );
     }
 
@@ -41,6 +52,11 @@ public sealed class SplashPage : ReactivePage<SplashViewModel>
 
         ViewModel.Progress
             .Subscribe(v => _progressBar.WithValue(v))
+            .DisposeWith(Subscriptions);
+
+        ViewModel.Input.OfType<IInputEvent, KeyPressed>()
+            .Where(k => k.KeyInfo.Key == ConsoleKey.Escape)
+            .Subscribe(_ => ViewModel.RequestShutdown())
             .DisposeWith(Subscriptions);
     }
 
