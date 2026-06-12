@@ -9,7 +9,7 @@ public sealed record PluginManifest
     [JsonPropertyName("description")] public required string Description { get; init; }
     [JsonPropertyName("author")] public required string Author { get; init; }
     [JsonPropertyName("version")] public required string Version { get; init; }
-    [JsonPropertyName("minServusVersion")] public required string MinServusVersion { get; init; }
+    [JsonPropertyName("minPuhuVersion")] public required string MinPuhuVersion { get; init; }
     [JsonPropertyName("license")] public required string License { get; init; }
     [JsonPropertyName("repository")] public required string Repository { get; init; }
     [JsonPropertyName("delivery")] public required PluginDelivery Delivery { get; init; }

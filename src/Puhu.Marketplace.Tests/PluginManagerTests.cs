@@ -105,7 +105,7 @@ public sealed class PluginManagerTests : IDisposable
     private static PluginManifest CreateManifest(string id, string version) => new()
     {
         Id = id, Name = id, Description = "Test", Author = "test", Version = version,
-        MinServusVersion = "1.0.0", License = "MIT",
+        MinPuhuVersion = "1.0.0", License = "MIT",
         Repository = $"https://github.com/test/{id}",
         Delivery = new PluginDelivery { Type = DeliveryType.GitHubRelease, Asset = $"{id}.dll" }
     };
@@ -114,7 +114,7 @@ public sealed class PluginManagerTests : IDisposable
     {
         private readonly Dictionary<string, string> _responses = new();
         public void AddRegistryIndex(string url, RegistryIndex index) => _responses[url] = JsonSerializer.Serialize(index);
-        public void AddManifest(string repoPath, PluginManifest manifest) => _responses[$"https://raw.githubusercontent.com/{repoPath}/main/servus-plugin.json"] = JsonSerializer.Serialize(manifest);
+        public void AddManifest(string repoPath, PluginManifest manifest) => _responses[$"https://raw.githubusercontent.com/{repoPath}/main/puhu-manifest.json"] = JsonSerializer.Serialize(manifest);
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken ct)
         {
             var url = request.RequestUri!.ToString();

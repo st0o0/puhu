@@ -72,7 +72,7 @@ public sealed class PluginConfigStoreTests : IDisposable
         await _store.EnsureDefaultSourcesAsync();
         var sources = await _store.LoadSourcesAsync();
         Assert.Single(sources.Registries);
-        Assert.Contains("servus.registry", sources.Registries[0]);
+        Assert.Contains("puhu.registry", sources.Registries[0]);
     }
 
     [Fact]

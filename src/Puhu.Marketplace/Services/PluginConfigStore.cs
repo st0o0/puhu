@@ -55,7 +55,7 @@ public sealed class PluginConfigStore(string basePath)
 
         var defaults = new PluginSources
         {
-            Registries = ["https://raw.githubusercontent.com/st0o0/servus.registry/main/index.json"]
+            Registries = ["https://raw.githubusercontent.com/st0o0/puhu.registry/main/index.json"]
         };
         await SaveSourcesAsync(defaults);
     }

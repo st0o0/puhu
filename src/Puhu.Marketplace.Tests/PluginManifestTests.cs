@@ -12,7 +12,7 @@ public sealed class PluginManifestTests
           "description": "System monitoring",
           "author": "st0o0",
           "version": "1.2.0",
-          "minServusVersion": "1.0.0",
+          "minPuhuVersion": "1.0.0",
           "license": "MIT",
           "repository": "https://github.com/st0o0/dtop",
           "delivery": { "type": "github-release", "asset": "Puhu.Plugin.Dtop.dll" },
@@ -45,7 +45,7 @@ public sealed class PluginManifestTests
         var json = """
             {
               "id": "servus.plugin.k8s", "name": "Kubernetes", "description": "K8s",
-              "author": "st0o0", "version": "0.1.0", "minServusVersion": "1.0.0",
+              "author": "st0o0", "version": "0.1.0", "minPuhuVersion": "1.0.0",
               "license": "MIT", "repository": "https://github.com/st0o0/servus.plugin.k8s",
               "delivery": { "type": "nuget", "packageId": "Puhu.Plugin.K8s" },
               "tags": ["kubernetes"]

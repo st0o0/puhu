@@ -33,7 +33,7 @@ public sealed class PluginInfoTests
     private static PluginManifest CreateManifest(string id, string version) => new()
     {
         Id = id, Name = id, Description = "Test", Author = "test", Version = version,
-        MinServusVersion = "1.0.0", License = "MIT",
+        MinPuhuVersion = "1.0.0", License = "MIT",
         Repository = $"https://github.com/test/{id}",
         Delivery = new PluginDelivery { Type = DeliveryType.GitHubRelease, Asset = $"{id}.dll" }
     };

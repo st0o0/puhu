@@ -61,9 +61,9 @@ public sealed class PluginMetadataFetcher(HttpClient httpClient, PluginCache cac
         var uri = new Uri(repositoryUrl.TrimEnd('/'));
         if (uri.Host == "github.com")
         {
-            return $"https://raw.githubusercontent.com{uri.AbsolutePath}/main/servus-plugin.json";
+            return $"https://raw.githubusercontent.com{uri.AbsolutePath}/main/puhu-manifest.json";
         }
 
-        return $"{repositoryUrl.TrimEnd('/')}/servus-plugin.json";
+        return $"{repositoryUrl.TrimEnd('/')}/puhu-manifest.json";
     }
 }

@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <IsPackable>true</IsPackable>
-    <Description>Plugin SDK for building Servus TUI plugins</Description>
-    <PackageTags>servus;tui;plugin;sdk</PackageTags>
+    <Description>Plugin SDK for building Puhu TUI plugins</Description>
+    <PackageTags>puhu;tui;plugin;sdk</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
   <ItemGroup>
