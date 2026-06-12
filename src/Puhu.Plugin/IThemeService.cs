@@ -23,4 +23,6 @@ public sealed record ThemeDefinition
     public Color Success { get; init; } = Color.BrightGreen;
     public Color Header { get; init; } = Color.BrightBlack;
     public Color Accent { get; init; } = Color.Cyan;
+    public Gradient GraphGradient { get; init; } =
+        Gradient.Create(Color.FromHex("#50fa7b"), Color.FromHex("#f1fa8c"), Color.FromHex("#ff5555"));
 }

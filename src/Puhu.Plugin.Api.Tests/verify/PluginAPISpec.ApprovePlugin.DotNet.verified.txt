@@ -79,6 +79,7 @@ namespace Puhu.Plugin
         public Termina.Terminal.Color Border { get; init; }
         public Termina.Terminal.Color Error { get; init; }
         public Termina.Terminal.Color Foreground { get; init; }
+        public Termina.Terminal.Gradient GraphGradient { get; init; }
         public Termina.Terminal.Color Header { get; init; }
         public Termina.Terminal.Color PanelTitle { get; init; }
         public Termina.Terminal.Color Selection { get; init; }

@@ -38,6 +38,7 @@ public static partial class BtopThemeParser
             Success = Color.BrightGreen,
             Header = GetColor(values, "inactive_fg", Color.BrightBlack),
             Accent = GetColor(values, "hi_fg", Color.Cyan),
+            GraphGradient = GetGradient(values, "graph"),
         };
     }
 
