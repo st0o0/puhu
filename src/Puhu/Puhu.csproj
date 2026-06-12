@@ -17,4 +17,7 @@
     <PackageReference Include="Serilog.Sinks.File" />
     <PackageReference Include="Servus" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="themes\**\*.theme" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
 </Project>

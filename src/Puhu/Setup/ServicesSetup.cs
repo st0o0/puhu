@@ -16,9 +16,19 @@ public sealed class ServicesSetup : IServiceSetupContainer
         services.AddSingleton(refreshService);
         services.AddSingleton<ITickSource>(refreshService);
 
-        var themeService = new ThemeService();
+        var settingsPath = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+            ".servus", "settings.json");
+        var settingsStore = new SettingsStore(settingsPath);
+        services.AddSingleton(settingsStore);
+
+        var themeService = new ThemeService(settingsStore);
         themeService.LoadFromDirectory(Path.Combine(AppContext.BaseDirectory, "themes"));
-        themeService.ApplyBuiltIn("dark");
+        if (!themeService.RestoreSaved() && !themeService.ApplyByName("btop-default"))
+        {
+            themeService.ApplyBuiltIn("dark");
+        }
+
         services.AddSingleton(themeService);
         services.AddSingleton<IThemeService>(themeService);
 
@@ -26,11 +36,5 @@ public sealed class ServicesSetup : IServiceSetupContainer
 
         var ctx = new SetupContext();
         services.AddSingleton(ctx);
-
-        var settingsPath = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-            ".servus", "settings.json");
-        var settingsStore = new SettingsStore(settingsPath);
-        services.AddSingleton(settingsStore);
     }
 }

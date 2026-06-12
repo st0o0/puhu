@@ -1,0 +1,12 @@
+# Puhu default theme (btop-inspired)
+theme[main_bg]="#0a0e14"
+theme[main_fg]="#cdd6f4"
+theme[title]="#56d364"
+theme[hi_fg]="#e3b341"
+theme[inactive_fg]="#565f89"
+theme[div_line]="#3b4252"
+theme[selected_bg]="#2f81f7"
+theme[selected_fg]="#0a0e14"
+theme[graph_start]="#39d353"
+theme[graph_mid]="#ffea7f"
+theme[graph_end]="#ff7b72"

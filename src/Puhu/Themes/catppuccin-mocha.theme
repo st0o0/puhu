@@ -1,0 +1,12 @@
+# Catppuccin Mocha
+theme[main_bg]="#1e1e2e"
+theme[main_fg]="#cdd6f4"
+theme[title]="#a6e3a1"
+theme[hi_fg]="#f9e2af"
+theme[inactive_fg]="#6c7086"
+theme[div_line]="#45475a"
+theme[selected_bg]="#cba6f7"
+theme[selected_fg]="#1e1e2e"
+theme[graph_start]="#a6e3a1"
+theme[graph_mid]="#94e2d5"
+theme[graph_end]="#f38ba8"
