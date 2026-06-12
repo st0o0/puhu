@@ -1,0 +1,6 @@
+<Project>
+  <!-- Prevent submodule projects from producing NuGet packages in this repo -->
+  <PropertyGroup Condition="$(MSBuildProjectFullPath.Contains('lib'))">
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+</Project>
