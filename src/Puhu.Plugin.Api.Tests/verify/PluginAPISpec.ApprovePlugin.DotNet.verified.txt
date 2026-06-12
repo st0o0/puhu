@@ -4,6 +4,7 @@ namespace Puhu.Plugin
     public static class GlobalKeyExtensions
     {
         public static void RegisterGlobalKeys(this Termina.Input.PageKeyBindings keyBindings, System.Action requestShutdown, System.Action<string> navigate, Puhu.Plugin.ITabNavigator tabNavigator) { }
+        public static void RegisterGlobalKeys(this Termina.Input.PageKeyBindings keyBindings, System.Action requestShutdown, System.Action<string> navigate, Puhu.Plugin.ITabNavigator tabNavigator, Puhu.Plugin.IRefreshController refreshController) { }
     }
     public interface IKeyHintProvider
     {

@@ -16,15 +16,17 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHi
     private readonly IToastService _toastService;
     private readonly IThemeService _themeService;
     private readonly ITabNavigator _tabNavigator;
+    private readonly IRefreshController _refreshController;
     private KeyedDynamicLayoutNode<MarketplaceView>? _viewSwitcher;
     private int _expandedIndex = -1;
     private SubNavNode<MarketplaceView>? _subNav;
 
-    public MarketplacePage(IToastService toastService, IThemeService themeService, ITabNavigator tabNavigator)
+    public MarketplacePage(IToastService toastService, IThemeService themeService, ITabNavigator tabNavigator, IRefreshController refreshController)
     {
         _toastService = toastService;
         _themeService = themeService;
         _tabNavigator = tabNavigator;
+        _refreshController = refreshController;
         FocusPolicy = FocusPolicy.FirstFocusable;
     }
 
@@ -52,7 +54,7 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHi
     public string[] GetKeyHints() => ViewModel.ActiveView.Value switch
     {
         MarketplaceView.Browse => ["↑↓:Navigate", "Enter:Expand", "i:Install", "r:Refresh", "Esc:Quit", "Tab:Switch"],
-        MarketplaceView.Installed => ["↑↓:Navigate", "u:Update", "x:Uninstall", "p:Policy", "Esc:Quit", "Tab:Switch"],
+        MarketplaceView.Installed => ["↑↓:Navigate", "u:Update", "x:Uninstall", "c:Policy", "Esc:Quit", "Tab:Switch"],
         MarketplaceView.Sources => ["↑↓:Navigate", "a:Add", "x:Remove", "Esc:Quit", "Tab:Switch"],
         _ => []
     };
@@ -71,7 +73,8 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHi
         KeyBindings.RegisterGlobalKeys(
             () => ViewModel.RequestShutdown(),
             path => Navigate(path),
-            _tabNavigator);
+            _tabNavigator,
+            _refreshController);
 
         // Navigation
         KeyBindings.Register(ConsoleKey.UpArrow, () =>
@@ -122,7 +125,7 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHi
         });
 
         // Cycle policy (Installed view)
-        KeyBindings.Register(ConsoleKey.P, () =>
+        KeyBindings.Register(ConsoleKey.C, () =>
         {
             if (ViewModel.ActiveView.Value == MarketplaceView.Installed &&
                 ViewModel.SelectedPlugin.Value is { } plugin)

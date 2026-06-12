@@ -9,11 +9,13 @@ public sealed class SettingsPage : ReactivePage<SettingsViewModel>, IKeyHintProv
 {
     private readonly ITabNavigator _tabNavigator;
     private readonly IThemeService _themeService;
+    private readonly IRefreshController _refreshController;
 
-    public SettingsPage(ITabNavigator tabNavigator, IThemeService themeService)
+    public SettingsPage(ITabNavigator tabNavigator, IThemeService themeService, IRefreshController refreshController)
     {
         _tabNavigator = tabNavigator;
         _themeService = themeService;
+        _refreshController = refreshController;
     }
 
     public string[] GetKeyHints() => ["↑↓:Theme", "Enter:Save", "Esc:Quit", "Tab:Switch"];
@@ -54,7 +56,8 @@ public sealed class SettingsPage : ReactivePage<SettingsViewModel>, IKeyHintProv
         KeyBindings.RegisterGlobalKeys(
             () => ViewModel.RequestShutdown(),
             path => Navigate(path),
-            _tabNavigator);
+            _tabNavigator,
+            _refreshController);
 
         KeyBindings.Register(ConsoleKey.UpArrow, () => ViewModel.MoveSelection(-1));
         KeyBindings.Register(ConsoleKey.DownArrow, () => ViewModel.MoveSelection(1));
