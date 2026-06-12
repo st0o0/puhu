@@ -1,4 +1,5 @@
 using Puhu.Services;
+using R3;
 
 namespace Puhu.Tests;
 
@@ -55,5 +56,30 @@ public sealed class SettingsStoreTests : IDisposable
         var store = new SettingsStore(_filePath);
         store.Set("marketplace.refresh-interval", 30);
         Assert.Equal(30, store.Get<int>("marketplace.refresh-interval"));
+    }
+
+    [Fact]
+    public void Observe_EmitsOnSet()
+    {
+        var store = new SettingsStore(_filePath);
+        var received = new List<int>();
+
+        store.Observe<int>("section.key").Subscribe(v => received.Add(v));
+        store.Set("section.key", 10);
+        store.Set("section.key", 20);
+
+        Assert.Equal([10, 20], received);
+    }
+
+    [Fact]
+    public void Observe_EmitsCurrentValue_IfAlreadySet()
+    {
+        var store = new SettingsStore(_filePath);
+        store.Set("section.key", 42);
+
+        var received = new List<int>();
+        store.Observe<int>("section.key").Subscribe(v => received.Add(v));
+
+        Assert.Equal([42], received);
     }
 }
