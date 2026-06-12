@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Puhu.Nodes;
 using Puhu.Plugin;
@@ -12,15 +12,18 @@ public sealed class ServicesSetup : IServiceSetupContainer
 {
     public void SetupServices(IServiceCollection services, IConfiguration configuration)
     {
-        var refreshService = new RefreshService(TimeSpan.FromMilliseconds(1000));
-        services.AddSingleton(refreshService);
-        services.AddSingleton<ITickSource>(refreshService);
-
         var settingsPath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
             ".servus", "settings.json");
         var settingsStore = new SettingsStore(settingsPath);
         services.AddSingleton(settingsStore);
+
+        var savedMs = settingsStore.Get<int?>("puhu.refresh-interval");
+        var refreshService = new RefreshService(
+            TimeSpan.FromMilliseconds(savedMs ?? 1000), settingsStore);
+        services.AddSingleton(refreshService);
+        services.AddSingleton<ITickSource>(refreshService);
+        services.AddSingleton<IRefreshController>(refreshService);
 
         var themeService = new ThemeService(settingsStore);
         themeService.LoadFromDirectory(Path.Combine(AppContext.BaseDirectory, "Themes"));

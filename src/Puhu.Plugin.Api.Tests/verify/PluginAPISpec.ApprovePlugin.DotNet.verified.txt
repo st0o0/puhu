@@ -1,4 +1,4 @@
-﻿[assembly: System.Runtime.Versioning.TargetFramework(".NETCoreApp,Version=v10.0", FrameworkDisplayName=".NET 10.0")]
+[assembly: System.Runtime.Versioning.TargetFramework(".NETCoreApp,Version=v10.0", FrameworkDisplayName=".NET 10.0")]
 namespace Puhu.Plugin
 {
     public static class GlobalKeyExtensions
@@ -21,6 +21,16 @@ namespace Puhu.Plugin
         Puhu.Plugin.IPuhuPluginBuilder WithServices(System.Action<Microsoft.Extensions.DependencyInjection.IServiceCollection> configure);
         Puhu.Plugin.IPuhuPluginBuilder WithSettings(string label, string route);
         Puhu.Plugin.IPuhuPluginBuilder WithTab(string label, string route);
+    }
+    public interface IRefreshController
+    {
+        R3.ReadOnlyReactiveProperty<System.TimeSpan> Interval { get; }
+        R3.ReadOnlyReactiveProperty<bool> IsPaused { get; }
+        System.Collections.Generic.IReadOnlyList<System.TimeSpan> Steps { get; }
+        void SetInterval(System.TimeSpan interval);
+        void SlowDown();
+        void SpeedUp();
+        void TogglePause();
     }
     public interface ISettingsStore
     {
@@ -48,6 +58,10 @@ namespace Puhu.Plugin
         System.TimeSpan CurrentInterval { get; }
         R3.Observable<Puhu.Plugin.Tick> Ticks { get; }
         System.IDisposable Subscribe(System.Action onTick);
+    }
+    public static class IntervalFormat
+    {
+        public static string Format(System.TimeSpan interval) { }
     }
     public static class PluginBuilderExtensions
     {
