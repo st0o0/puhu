@@ -12,11 +12,13 @@ internal sealed class TopBarNode : LayoutNode
     private const string Logo = "⏻ puhu";
 
     private readonly IThemeService _themeService;
+    private readonly IRefreshController _refreshController;
     private readonly TimeProvider _timeProvider;
 
-    public TopBarNode(IThemeService themeService, TimeProvider? timeProvider = null)
+    public TopBarNode(IThemeService themeService, IRefreshController refreshController, TimeProvider? timeProvider = null)
     {
         _themeService = themeService;
+        _refreshController = refreshController;
         _timeProvider = timeProvider ?? TimeProvider.System;
         HeightConstraint = new SizeConstraint.Fixed(1);
         WidthConstraint = new SizeConstraint.Fill();
@@ -48,17 +50,28 @@ internal sealed class TopBarNode : LayoutNode
         // tabsStart: one '─' separator after logo
         var tabsStart = 2 + Logo.Length + 1;
 
-        // 3. Clock – written at fixed position near the right edge
+        // 3. Clock and interval — written near the right edge
+        // layout: ...─{interval}─{clock}─╮
         var clock = _timeProvider.GetLocalNow().ToString("HH:mm:ss");
-        // layout: ...─HH:mm:ss─╮  → clockStart = w - 1 - clock.Length - 1
+        var paused = _refreshController.IsPaused.CurrentValue;
+        var intervalText = paused ? "⏸" : IntervalFormat.Format(_refreshController.Interval.CurrentValue);
+
         var clockStart = w - 1 - clock.Length - 1;
+        var intervalStart = clockStart - 1 - intervalText.Length;
 
         int tabsEnd;
-        if (clockStart > tabsStart + 4)
+        if (intervalStart > tabsStart + 4)
+        {
+            ctx.SetForeground(paused ? theme.Warning : theme.TextDim);
+            ctx.WriteAt(intervalStart, 0, intervalText);
+            ctx.SetForeground(theme.TextDim);
+            ctx.WriteAt(clockStart, 0, clock);
+            tabsEnd = intervalStart - 1;
+        }
+        else if (clockStart > tabsStart + 4)
         {
             ctx.SetForeground(theme.TextDim);
             ctx.WriteAt(clockStart, 0, clock);
-            // tabs fill the region between logo and the '─' before clock
             tabsEnd = clockStart - 1;
         }
         else

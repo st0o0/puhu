@@ -12,7 +12,7 @@ public sealed class AppShellNodeTests
     private static RenderTestContext Render(int w, int h, ILayoutNode content, params string[] hints)
     {
         TabRegistry.RegisterTabs([new PluginTabInfo("Alpha", "/alpha")]);
-        var node = new AppShellNode(new FakeThemeService(), content, hints);
+        var node = new AppShellNode(new FakeThemeService(), new FakeRefreshController(), content, hints);
         var ctx = new RenderTestContext(w, h);
         node.Render(ctx, new Rect(0, 0, w, h));
         return ctx;

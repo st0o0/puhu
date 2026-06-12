@@ -15,10 +15,10 @@ internal sealed class AppShellNode : LayoutNode
     private readonly ILayoutNode _content;
     private readonly string[] _keyHints;
 
-    public AppShellNode(IThemeService themeService, ILayoutNode content, params string[] keyHints)
+    public AppShellNode(IThemeService themeService, IRefreshController refreshController, ILayoutNode content, params string[] keyHints)
     {
         _themeService = themeService;
-        _topBar = new TopBarNode(themeService);
+        _topBar = new TopBarNode(themeService, refreshController);
         _content = content;
         _keyHints = keyHints;
         HeightConstraint = new SizeConstraint.Fill();

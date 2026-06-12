@@ -11,6 +11,7 @@ namespace Puhu.Services;
 internal sealed class ShellRedrawService(
     ITickSource tickSource,
     IThemeService themeService,
+    IRefreshController refreshController,
     Action requestRedraw) : IHostedService, IDisposable
 {
     private IDisposable? _subscriptions;
@@ -19,7 +20,8 @@ internal sealed class ShellRedrawService(
     {
         var tickSub = tickSource.Ticks.Subscribe(_ => requestRedraw());
         var themeSub = themeService.Changes.Subscribe(_ => requestRedraw());
-        _subscriptions = Disposable.Combine(tickSub, themeSub);
+        var pauseSub = refreshController.IsPaused.Skip(1).Subscribe(_ => requestRedraw());
+        _subscriptions = Disposable.Combine(tickSub, themeSub, pauseSub);
         return Task.CompletedTask;
     }
 

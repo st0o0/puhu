@@ -13,7 +13,7 @@ public sealed class ShellRedrawServiceTests
         var ticks = new Subject<Tick>();
         var themeService = new ThemeService();
         var redraws = 0;
-        var service = new ShellRedrawService(new FakeTickSource(ticks), themeService, () => redraws++);
+        var service = new ShellRedrawService(new FakeTickSource(ticks), themeService, new FakeRefreshController(), () => redraws++);
 
         await service.StartAsync(CancellationToken.None);
         ticks.OnNext(new Tick(1, TimeSpan.FromSeconds(1)));
@@ -27,7 +27,7 @@ public sealed class ShellRedrawServiceTests
     {
         var themeService = new ThemeService();
         var redraws = 0;
-        var service = new ShellRedrawService(new FakeTickSource(new Subject<Tick>()), themeService, () => redraws++);
+        var service = new ShellRedrawService(new FakeTickSource(new Subject<Tick>()), themeService, new FakeRefreshController(), () => redraws++);
 
         await service.StartAsync(CancellationToken.None);
         themeService.Apply(new ThemeDefinition());
@@ -40,11 +40,26 @@ public sealed class ShellRedrawServiceTests
     public async Task AfterStop_NoMoreRedraws()
     {
         var ticks = new Subject<Tick>();
-        var service = new ShellRedrawService(new FakeTickSource(ticks), new ThemeService(), () => Assert.Fail("redraw after stop"));
+        var service = new ShellRedrawService(new FakeTickSource(ticks), new ThemeService(), new FakeRefreshController(), () => Assert.Fail("redraw after stop"));
 
         await service.StartAsync(CancellationToken.None);
         await service.StopAsync(CancellationToken.None);
         ticks.OnNext(new Tick(1, TimeSpan.FromSeconds(1)));
+    }
+
+    [Fact]
+    public async Task PauseToggle_TriggersRedraw()
+    {
+        var controller = new FakeRefreshController();
+        var redraws = 0;
+        var service = new ShellRedrawService(
+            new FakeTickSource(new Subject<Tick>()), new ThemeService(), controller, () => redraws++);
+
+        await service.StartAsync(CancellationToken.None);
+        controller.TogglePause();
+
+        Assert.Equal(1, redraws);
+        await service.StopAsync(CancellationToken.None);
     }
 
     private sealed class FakeTickSource(Subject<Tick> ticks) : ITickSource

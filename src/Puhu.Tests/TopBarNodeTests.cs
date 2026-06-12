@@ -16,12 +16,12 @@ public sealed class TopBarNodeTests
         return tp;
     }
 
-    private static RenderTestContext Render(int width, string[] labels, int active)
+    private static RenderTestContext Render(int width, string[] labels, int active, FakeRefreshController? controller = null)
     {
         TabRegistry.RegisterTabs(labels.Select(l => new PluginTabInfo(l, $"/{l}")).ToList());
         TabRegistry.CurrentTabIndex = active;
 
-        var node = new TopBarNode(new FakeThemeService(), CreateTime());
+        var node = new TopBarNode(new FakeThemeService(), controller ?? new FakeRefreshController(), CreateTime());
         var ctx = new RenderTestContext(width, 1);
         node.Render(ctx, new Rect(0, 0, width, 1));
         return ctx;
@@ -92,6 +92,34 @@ public sealed class TopBarNodeTests
         Assert.Contains("12:04:33", row);
         // Corner must be intact
         Assert.Equal('╮', row[^1]);
+    }
+
+    [Fact]
+    public void Render_ShowsIntervalNextToClock()
+    {
+        var ctx = Render(60, ["Alpha"], 0); // default fake: 1s
+
+        Assert.EndsWith("─1s─12:04:33─╮", ctx.Row(0));
+    }
+
+    [Fact]
+    public void Render_Paused_ShowsPauseSymbolInsteadOfInterval()
+    {
+        var controller = new FakeRefreshController();
+        controller.TogglePause();
+        var ctx = Render(60, ["Alpha"], 0, controller);
+
+        Assert.EndsWith("─⏸─12:04:33─╮", ctx.Row(0));
+    }
+
+    [Fact]
+    public void Render_250ms_FormatsAsMilliseconds()
+    {
+        var controller = new FakeRefreshController();
+        controller.SetInterval(TimeSpan.FromMilliseconds(250));
+        var ctx = Render(60, ["Alpha"], 0, controller);
+
+        Assert.EndsWith("─250ms─12:04:33─╮", ctx.Row(0));
     }
 
     private sealed class FakeThemeService : IThemeService
