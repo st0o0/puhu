@@ -1,0 +1,14 @@
+<Solution>
+  <Project Path="Puhu.Plugin/Puhu.Plugin.csproj" />
+  <Project Path="Puhu.TUI/Puhu.TUI.csproj" />
+  <Project Path="Puhu.Plugin.Marketplace/Puhu.Plugin.Marketplace.csproj" />
+  <Project Path="Puhu.Plugin.Settings/Puhu.Plugin.Settings.csproj" />
+  <Folder Name="/Termina/">
+    <Project Path="../lib/termina/src/Termina/Termina.csproj" />
+  </Folder>
+  <Folder Name="/Tests/">
+    <Project Path="Puhu.Plugin.Tests/Puhu.Plugin.Tests.csproj" />
+    <Project Path="Puhu.TUI.Tests/Puhu.TUI.Tests.csproj" />
+    <Project Path="Puhu.Plugin.Marketplace.Tests/Puhu.Plugin.Marketplace.Tests.csproj" />
+  </Folder>
+</Solution>

@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>puhu</AssemblyName>
+    <IsPackable>false</IsPackable>
+    <PackageId>Puhu.TUI</PackageId>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Puhu.Plugin\Puhu.Plugin.csproj" />
+    <ProjectReference Include="..\Puhu.Plugin.Marketplace\Puhu.Plugin.Marketplace.csproj" />
+    <ProjectReference Include="..\Puhu.Plugin.Settings\Puhu.Plugin.Settings.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Akka.Logger.Serilog" />
+    <PackageReference Include="Akka.Hosting" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" />
+    <PackageReference Include="R3" />
+    <PackageReference Include="Serilog.Extensions.Hosting" />
+    <PackageReference Include="Serilog.Sinks.File" />
+    <PackageReference Include="Servus" />
+  </ItemGroup>
+</Project>

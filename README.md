@@ -1,1 +1,1 @@
-# Servus.TUI
+# Puhu.TUI
