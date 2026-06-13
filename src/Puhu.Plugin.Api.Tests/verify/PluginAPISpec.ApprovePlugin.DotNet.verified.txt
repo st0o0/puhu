@@ -1,4 +1,4 @@
-[assembly: System.Runtime.Versioning.TargetFramework(".NETCoreApp,Version=v10.0", FrameworkDisplayName=".NET 10.0")]
+﻿[assembly: System.Runtime.Versioning.TargetFramework(".NETCoreApp,Version=v10.0", FrameworkDisplayName=".NET 10.0")]
 namespace Puhu.Plugin
 {
     public static class GlobalKeyExtensions
@@ -45,6 +45,12 @@ namespace Puhu.Plugin
         bool HasTabs { get; }
         void CycleTab(System.Action<string> navigate, int delta);
     }
+    public interface ITabOrderService
+    {
+        R3.Observable<R3.Unit> Changed { get; }
+        System.Collections.Generic.IReadOnlyList<Puhu.Plugin.TabDescriptor> Tabs { get; }
+        void Move(int index, int delta);
+    }
     public interface IThemeService
     {
         System.Collections.Generic.IReadOnlyCollection<string> AvailableThemes { get; }
@@ -90,6 +96,12 @@ namespace Puhu.Plugin
         public bool AlwaysOn { get; init; }
         public string Key { get; init; }
         public System.TimeSpan? MinInterval { get; init; }
+    }
+    public sealed class TabDescriptor : System.IEquatable<Puhu.Plugin.TabDescriptor>
+    {
+        public TabDescriptor(string Label, string Route) { }
+        public string Label { get; init; }
+        public string Route { get; init; }
     }
     public sealed class ThemeDefinition : System.IEquatable<Puhu.Plugin.ThemeDefinition>
     {
