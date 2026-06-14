@@ -14,13 +14,15 @@ public sealed class SetupWizardPageRenderTests
     private const int Height = 16;
 
     [Fact]
-    public void RendersWelcomeStepWithProgress()
+    public void RendersShell_BreadcrumbAndStatusBar()
     {
         var (page, _) = CreateBoundPage();
 
         var view = RenderLayout(page.BuildLayout());
 
-        Assert.Contains("Step 1 of", view);
+        Assert.Contains("welcome", view);   // breadcrumb
+        Assert.Contains("1/6", view);        // status bar
+        Assert.Contains("Puhu Setup", view); // panel title
     }
 
     private static (SetupWizardPage Page, SetupWizardViewModel Vm) CreateBoundPage()

@@ -29,8 +29,6 @@ public sealed class SetupWizardPage : ReactivePage<SetupWizardViewModel>
 
     protected override void OnBound()
     {
-        var borderColor = _themeService.Current.Border;
-
         _themeStep = new DynamicLayoutNode(() => Layouts.Vertical(
             SettingsRows.ThemeRows(ViewModel.Themes, ViewModel.ThemeIndex, _themeService.CurrentThemeName, _themeService.Current).ToArray()));
         _refreshStep = new DynamicLayoutNode(() => Layouts.Vertical(
@@ -39,32 +37,47 @@ public sealed class SetupWizardPage : ReactivePage<SetupWizardViewModel>
         _pluginStep = new DynamicLayoutNode(() => Layouts.Vertical(BuildPluginRows()));
 
         _wizard = new WizardNode<SetupStep>()
-            .WithTitle("Puhu Setup")
-            .WithProgressStyle(WizardProgressStyle.BlockBar)
-            .WithBorder(BorderStyle.Rounded, borderColor)
             .WithStep(SetupStep.Welcome, "Welcome",
-                () => new TextNode("Welcome to Puhu. Let's get you set up.\nEnter: next   Esc: back   S: skip"),
-                helpText: "Enter Next · S Skip")
-            .WithStep(SetupStep.Theme, "Theme", () => _themeStep!,
-                helpText: "↑/↓ choose · Enter next · Esc back · S skip")
-            .WithStep(SetupStep.Refresh, "Refresh", () => _refreshStep!,
-                helpText: "↑/↓ choose · Enter next · Esc back · S skip")
-            .WithStep(SetupStep.TabOrder, "Tabs", () => _tabStep!,
-                helpText: "↑/↓ select · ⇧↑/↓ move · Enter next · Esc back · S skip")
-            .WithStep(SetupStep.Plugins, "Plugins", () => _pluginStep!,
-                helpText: "O toggle open-marketplace · Enter next · Esc back · S skip")
+                () => new TextNode("Welcome to Puhu. Let's get you set up."),
+                helpText: null)
+            .WithStep(SetupStep.Theme, "Theme", () => _themeStep!, helpText: null)
+            .WithStep(SetupStep.Refresh, "Refresh", () => _refreshStep!, helpText: null)
+            .WithStep(SetupStep.TabOrder, "Tabs", () => _tabStep!, helpText: null)
+            .WithStep(SetupStep.Plugins, "Plugins", () => _pluginStep!, helpText: null)
             .WithStep(SetupStep.Done, "Done",
                 () => new TextNode("You're all set. Press Enter to finish."),
-                helpText: "Enter Finish");
+                helpText: null);
     }
 
-    public override ILayoutNode BuildLayout() => _wizard!;
+    public override ILayoutNode BuildLayout()
+    {
+        var theme = _themeService.Current;
+        var step = _wizard!.CurrentStep;
+
+        var breadcrumb = (LayoutNode)WizardChrome.Breadcrumb(step, theme);
+        var statusBar = (LayoutNode)WizardChrome.StatusBar((int)step, WizardChrome.StepCount, WizardChrome.HintsFor(step), theme);
+
+        var content = Layouts.Vertical(
+            breadcrumb.Height(1),
+            new RuleNode(theme.Border).Height(1),
+            _wizard!.Fill(),
+            new RuleNode(theme.Border).Height(1),
+            statusBar.Height(1));
+
+        return new PanelNode()
+            .WithBorder(BorderStyle.Rounded)
+            .WithBorderColor(theme.Border)
+            .WithTitle(" Puhu Setup ")
+            .WithTitleColor(theme.PanelTitle)
+            .WithContent(content);
+    }
 
     public override void OnNavigatedTo()
     {
         base.OnNavigatedTo();
 
         _wizard!.Completed.Subscribe(_ => ViewModel.Finish()).DisposeWith(Subscriptions);
+        _wizard!.StepChanged.Subscribe(_ => InvalidateLayout()).DisposeWith(Subscriptions);
 
         KeyBindings.Register(ConsoleKey.UpArrow, () => OnArrow(-1));
         KeyBindings.Register(ConsoleKey.DownArrow, () => OnArrow(1));
@@ -77,6 +90,7 @@ public sealed class SetupWizardPage : ReactivePage<SetupWizardViewModel>
             {
                 ViewModel.ToggleOpenMarketplace();
                 _pluginStep!.Invalidate();
+                ViewModel.RequestRedraw();
             }
         });
     }
@@ -97,7 +111,11 @@ public sealed class SetupWizardPage : ReactivePage<SetupWizardViewModel>
                 ViewModel.MoveTabSelection(delta);
                 _tabStep!.Invalidate();
                 break;
+            default:
+                return;
         }
+
+        ViewModel.RequestRedraw();
     }
 
     private void OnShiftArrow(int delta)
@@ -106,6 +124,7 @@ public sealed class SetupWizardPage : ReactivePage<SetupWizardViewModel>
         {
             ViewModel.MoveTab(delta);
             _tabStep!.Invalidate();
+            ViewModel.RequestRedraw();
         }
     }
 
