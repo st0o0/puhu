@@ -4,6 +4,7 @@ using Puhu.Nodes;
 using Puhu.Pages;
 using Puhu.Plugin;
 using Puhu.Services;
+using Puhu.Settings;
 using Servus.Application.Startup;
 using Termina;
 using Termina.Hosting;
@@ -21,7 +22,11 @@ public sealed class TerminaSetup : IServiceSetupContainer
         var pluginRegistry = ctx.PluginRegistry;
         var themeService = sp.GetRequiredService<IThemeService>();
         var refreshController = sp.GetRequiredService<IRefreshController>();
-        var firstRoute = pluginRegistry?.PluginTabs.FirstOrDefault()?.Route ?? "/marketplace";
+        var settings = sp.GetRequiredService<ISettingsStore>();
+        var tabOrder = sp.GetRequiredService<ITabOrderService>();
+
+        var firstTab = tabOrder.Tabs.FirstOrDefault()?.Route ?? "/marketplace";
+        var firstRoute = StartRouteDecider.Decide(SetupWizardState.IsComplete(settings), firstTab);
 
         services.AddTermina("/splash", termina =>
         {
