@@ -84,13 +84,14 @@ public sealed class SettingsPageRenderTests
 
     private static (SettingsPage Page, SettingsViewModel ViewModel) CreateBoundPage(
         IReadOnlyList<string>? themes = null,
-        FakeRefreshController? controller = null)
+        FakeRefreshController? controller = null,
+        FakeTabOrderService? tabOrder = null)
     {
         var themeService = new FakeThemeService(themes ?? []);
         controller ??= new FakeRefreshController();
 
         var page = new SettingsPage(new FakeTabNavigator(), themeService, controller);
-        var vm = new SettingsViewModel(themeService, controller);
+        var vm = new SettingsViewModel(themeService, controller, tabOrder ?? new FakeTabOrderService());
 
         // Bind is internal to Termina (normally invoked by the framework during
         // page initialization) — reflection is the only way to bind in isolation.

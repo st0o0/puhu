@@ -101,13 +101,50 @@ public sealed class SettingsViewModelTests
         Assert.Equal(0, vm.RefreshSelectedIndex);
     }
 
+    [Fact]
+    public void Tabs_ExposesServiceOrder()
+    {
+        var tabs = new FakeTabOrderService(("Marketplace", "/marketplace"), ("System", "/system"));
+        var vm = CreateVm(tabOrder: tabs);
+
+        Assert.Equal(["/marketplace", "/system"], vm.Tabs.Select(t => t.Route));
+    }
+
+    [Fact]
+    public void MoveTabSelection_ClampsAtEnds()
+    {
+        var tabs = new FakeTabOrderService(("A", "/a"), ("B", "/b"));
+        var vm = CreateVm(tabOrder: tabs);
+
+        vm.MoveTabSelection(-1);
+        Assert.Equal(0, vm.TabSelectedIndex.Value);
+
+        vm.MoveTabSelection(5);
+        Assert.Equal(1, vm.TabSelectedIndex.Value);
+    }
+
+    [Fact]
+    public void MoveTab_DelegatesToServiceAndFollowsSelection()
+    {
+        var tabs = new FakeTabOrderService(("A", "/a"), ("B", "/b"), ("C", "/c"));
+        var vm = CreateVm(tabOrder: tabs);
+        // select A (index 0), move it down one
+        vm.MoveTab(1);
+
+        Assert.Equal(1, tabs.MoveCount);
+        Assert.Equal(["/b", "/a", "/c"], tabs.Tabs.Select(t => t.Route));
+        Assert.Equal(1, vm.TabSelectedIndex.Value); // selection followed A to index 1
+    }
+
     private static SettingsViewModel CreateVm(
         FakeThemeService? themeService = null,
-        FakeRefreshController? controller = null)
+        FakeRefreshController? controller = null,
+        FakeTabOrderService? tabOrder = null)
     {
         themeService ??= new FakeThemeService([]);
         controller ??= new FakeRefreshController();
-        return new SettingsViewModel(themeService, controller);
+        tabOrder ??= new FakeTabOrderService();
+        return new SettingsViewModel(themeService, controller, tabOrder);
     }
 
     private sealed class FakeThemeService(IReadOnlyList<string> themes) : IThemeService
