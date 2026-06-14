@@ -39,6 +39,7 @@ public sealed class SetupWizardPage : ReactivePage<SetupWizardViewModel>
         _doneStep = new DynamicLayoutNode(BuildDone);
 
         _wizard = new WizardNode<SetupStep>()
+            .WithProgressStyle(WizardProgressStyle.None)
             .WithStep(SetupStep.Welcome, "Welcome", () => WizardSteps.Welcome(_themeService.Current), helpText: null)
             .WithStep(SetupStep.Theme, "Theme", () => _themeStep!, helpText: null)
             .WithStep(SetupStep.Refresh, "Refresh", () => _refreshStep!, helpText: null)

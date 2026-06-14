@@ -23,6 +23,7 @@ public sealed class SetupWizardPageRenderTests
         Assert.Contains("welcome", view);   // breadcrumb
         Assert.Contains("1/6", view);        // status bar
         Assert.Contains("Puhu Setup", view); // panel title
+        Assert.DoesNotContain("Step 1 of", view); // no legacy WizardNode block-bar progress
     }
 
     [Fact]
