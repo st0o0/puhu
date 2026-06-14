@@ -4,6 +4,14 @@
     <AssemblyName>puhu</AssemblyName>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
+  <!-- Keep the published release clean: no own .pdb and no transitive .pdb/.xml
+       from referenced projects (Termina ships XML docs) next to the single-file exe.
+       Release-only so local Debug builds keep their symbols. -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+    <AllowedReferenceRelatedFileExtensions>none</AllowedReferenceRelatedFileExtensions>
+  </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Puhu.Plugin\Puhu.Plugin.csproj" />
     <ProjectReference Include="..\Puhu.Marketplace\Puhu.Marketplace.csproj" />
