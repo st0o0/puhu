@@ -4,6 +4,14 @@
     <AssemblyName>puhu</AssemblyName>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
+  <!-- Keep the published release clean: no own .pdb and no transitive .pdb/.xml
+       from referenced projects (Termina ships XML docs) next to the single-file exe.
+       Release-only so local Debug builds keep their symbols. -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <DebugType>none</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+    <AllowedReferenceRelatedFileExtensions>none</AllowedReferenceRelatedFileExtensions>
+  </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Puhu.Plugin\Puhu.Plugin.csproj" />
     <ProjectReference Include="..\Puhu.Marketplace\Puhu.Marketplace.csproj" />
@@ -18,11 +26,12 @@
     <PackageReference Include="Servus" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Themes\**\*.theme" CopyToOutputDirectory="PreserveNewest" />
+    <!-- Built-in themes are embedded into the assembly so the release ships as a
+         single puhu.exe. Users extend via a themes/ folder (see ThemeService). -->
+    <EmbeddedResource Include="Themes\**\*.theme" />
   </ItemGroup>
   <ItemGroup>
-    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
-      <_Parameter1>Puhu.Tests</_Parameter1>
-    </AssemblyAttribute>
+    <InternalsVisibleTo Include="Puhu.Tests" />
+    <InternalsVisibleTo Include="Puhu.Settings" />
   </ItemGroup>
 </Project>

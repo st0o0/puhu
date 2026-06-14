@@ -12,6 +12,9 @@ public sealed class SettingsPlugin : IPuhuPlugin
         builder
             .WithTab("Settings", "/settings")
             .WithRoutes(termina =>
-                termina.RegisterRoute<SettingsPage, SettingsViewModel>("/settings"));
+            {
+                termina.RegisterRoute<SettingsPage, SettingsViewModel>("/settings");
+                termina.RegisterRoute<SetupWizardPage, SetupWizardViewModel>("/setup");
+            });
     }
 }

@@ -15,4 +15,9 @@
   <ItemGroup>
     <ProjectReference Include="..\..\lib\termina\src\Termina\Termina.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="Puhu" />
+    <InternalsVisibleTo Include="Puhu.Tests" />
+    <InternalsVisibleTo Include="Puhu.Settings" />
+  </ItemGroup>
 </Project>

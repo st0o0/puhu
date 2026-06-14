@@ -18,9 +18,9 @@ public sealed class MarketplaceActor : ReceiveActor
         Receive<RefreshMarketplace>(_ =>
         {
             PushState(store, _state with { IsBusy = true });
-            pluginManager.FetchAvailableAsync()
+            RefreshAllAsync(pluginManager)
                 .PipeTo(Self,
-                    success: plugins => new RefreshCompleted(plugins),
+                    success: result => result,
                     failure: ex => new OperationFailed("", ex.Message));
         });
 
@@ -29,6 +29,7 @@ public sealed class MarketplaceActor : ReceiveActor
             PushState(store, _state with
             {
                 AvailablePlugins = msg.Plugins,
+                Sources = msg.Sources,
                 IsBusy = false,
                 StatusMessage = null
             });
@@ -106,9 +107,9 @@ public sealed class MarketplaceActor : ReceiveActor
 
         Receive<LoadSources>(_ =>
         {
-            pluginManager.FetchAvailableAsync()
+            RefreshAllAsync(pluginManager)
                 .PipeTo(Self,
-                    success: plugins => new RefreshCompleted(plugins),
+                    success: result => result,
                     failure: ex => new OperationFailed("", ex.Message));
         });
 
@@ -132,6 +133,18 @@ public sealed class MarketplaceActor : ReceiveActor
         });
 
         Receive<Tick>(_ => Self.Tell(new SyncAll()));
+    }
+
+    /// <summary>
+    /// Seeds the default registry on first run, then loads both the current sources
+    /// and the available plugins so the UI can render them together.
+    /// </summary>
+    private static async Task<RefreshCompleted> RefreshAllAsync(IPluginManager pluginManager)
+    {
+        await pluginManager.EnsureDefaultSourcesAsync();
+        var sources = await pluginManager.GetSourcesAsync();
+        var plugins = await pluginManager.FetchAvailableAsync();
+        return new RefreshCompleted(plugins, sources);
     }
 
     private void SetActiveOp(MarketplaceStore store, string pluginId, string label)

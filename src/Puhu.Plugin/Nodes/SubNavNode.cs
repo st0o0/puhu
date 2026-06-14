@@ -10,12 +10,11 @@ public sealed class SubNavNode<TView> : LayoutNode
 {
     private readonly ReactiveProperty<TView> _activeView;
     private readonly PageKeyBindings _keyBindings;
-    private readonly ThemeDefinition _theme;
     private readonly IThemeService? _themeService;
     private readonly (ConsoleKey Key, string Label, TView Value)[] _items;
     private IDisposable? _subscription;
 
-    private ThemeDefinition CurrentTheme => _themeService?.Current ?? _theme;
+    private ThemeDefinition CurrentTheme => _themeService?.Current ?? field;
 
     public int ItemCount => _items.Length;
 
@@ -27,7 +26,7 @@ public sealed class SubNavNode<TView> : LayoutNode
     {
         _activeView = activeView;
         _keyBindings = keyBindings;
-        _theme = theme;
+        CurrentTheme = theme;
         _items = items;
 
         HeightConstraint = new SizeConstraint.Fixed(1);
@@ -105,10 +104,9 @@ public sealed class SubNavNode<TView> : LayoutNode
 
     private void RegisterKeys()
     {
-        foreach (var item in _items)
+        foreach (var (key, _, value) in _items)
         {
-            var value = item.Value;
-            _keyBindings.Register(item.Key, () => _activeView.Value = value);
+            _keyBindings.Register(key, () => _activeView.Value = value);
         }
     }
 }

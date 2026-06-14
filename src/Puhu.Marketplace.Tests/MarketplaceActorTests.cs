@@ -64,6 +64,36 @@ public sealed class MarketplaceActorTests : TestKit
     }
 
     [Fact]
+    public async Task RefreshMarketplace_PushesSourcesIntoState()
+    {
+        _pluginManager.SourcesResult = new PluginSources
+        {
+            Registries = ["https://example.com/index.json"]
+        };
+        var actor = Sys.ActorOf(Props.Create(() => new MarketplaceActor(_pluginManager, _store)));
+
+        actor.Tell(new RefreshMarketplace());
+
+        await AwaitConditionAsync(
+            () => _store.Current.Sources.Registries.Count == 1,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.Equal("https://example.com/index.json", _store.Current.Sources.Registries[0]);
+    }
+
+    [Fact]
+    public async Task RefreshMarketplace_EnsuresDefaultSources()
+    {
+        var actor = Sys.ActorOf(Props.Create(() => new MarketplaceActor(_pluginManager, _store)));
+
+        actor.Tell(new RefreshMarketplace());
+
+        await AwaitConditionAsync(
+            () => _pluginManager.EnsureDefaultCalled,
+            cancellationToken: TestContext.Current.CancellationToken);
+    }
+
+    [Fact]
     public async Task CycleUpdatePolicy_CyclesAutoToManual()
     {
         var plugin = new PluginInfo
@@ -103,6 +133,8 @@ public sealed class MarketplaceActorTests : TestKit
         private TaskCompletionSource _installTcs = new();
 
         public IReadOnlyList<PluginInfo> FetchResult { get; set; } = [];
+        public PluginSources SourcesResult { get; set; } = new();
+        public bool EnsureDefaultCalled { get; private set; }
         public List<string> AddedSources { get; } = [];
         public List<string> RemovedSources { get; } = [];
         public (string PluginId, UpdatePolicy Policy)? LastSetPolicy { get; private set; }
@@ -111,6 +143,14 @@ public sealed class MarketplaceActorTests : TestKit
 
         public Task<IReadOnlyList<PluginInfo>> FetchAvailableAsync(bool ignoreCache = false)
             => Task.FromResult(FetchResult);
+
+        public Task<PluginSources> GetSourcesAsync() => Task.FromResult(SourcesResult);
+
+        public Task EnsureDefaultSourcesAsync()
+        {
+            EnsureDefaultCalled = true;
+            return Task.CompletedTask;
+        }
 
         public Task AddSourceAsync(string repoUrl)
         {

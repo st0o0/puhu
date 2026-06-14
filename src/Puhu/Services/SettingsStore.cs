@@ -22,7 +22,10 @@ public sealed class SettingsStore : ISettingsStore
     public T? Get<T>(string key)
     {
         if (!_data.TryGetValue(key, out var element))
+        {
             return default;
+        }
+
         return element.Deserialize<T>(JsonOptions);
     }
 
@@ -54,7 +57,10 @@ public sealed class SettingsStore : ISettingsStore
     private Subject<T> GetOrCreateSubject<T>(string key)
     {
         if (_subjects.TryGetValue(key, out var existing))
+        {
             return (Subject<T>)existing;
+        }
+
         var subject = new Subject<T>();
         _subjects[key] = subject;
         return subject;
@@ -63,7 +69,10 @@ public sealed class SettingsStore : ISettingsStore
     private void NotifyObservers(string key, JsonElement element)
     {
         if (!_subjects.TryGetValue(key, out var subject))
+        {
             return;
+        }
+
         var subjectType = subject.GetType();
         var genericArg = subjectType.GetGenericArguments()[0];
         var value = element.Deserialize(genericArg, JsonOptions);
@@ -74,7 +83,10 @@ public sealed class SettingsStore : ISettingsStore
     private void Load()
     {
         if (!File.Exists(_filePath))
+        {
             return;
+        }
+
         var json = File.ReadAllText(_filePath);
         var doc = JsonDocument.Parse(json);
         foreach (var section in doc.RootElement.EnumerateObject())
@@ -98,7 +110,11 @@ public sealed class SettingsStore : ISettingsStore
             foreach (var (key, value) in _data)
             {
                 var dotIndex = key.IndexOf('.');
-                if (dotIndex < 0) continue;
+                if (dotIndex < 0)
+                {
+                    continue;
+                }
+
                 var section = key[..dotIndex];
                 var prop = key[(dotIndex + 1)..];
                 if (!grouped.TryGetValue(section, out var dict))
@@ -111,7 +127,9 @@ public sealed class SettingsStore : ISettingsStore
 
             var dir = Path.GetDirectoryName(_filePath);
             if (dir is not null && !Directory.Exists(dir))
+            {
                 Directory.CreateDirectory(dir);
+            }
 
             var tempPath = _filePath + ".tmp";
             var jsonBytes = JsonSerializer.SerializeToUtf8Bytes(grouped, JsonOptions);

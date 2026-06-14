@@ -7,19 +7,50 @@ namespace Puhu.Settings.Pages;
 public enum SettingsView
 {
     Themes,
-    Refresh
+    Refresh,
+    Tabs,
+    Setup
 }
 
 public sealed class SettingsViewModel : ReactiveViewModel
 {
     private readonly IThemeService _themeService;
     private readonly IRefreshController _refreshController;
+    private readonly ITabOrderService _tabOrderService;
 
     public IReadOnlyList<string> Themes { get; }
     public ReactiveProperty<int> SelectedIndex { get; }
     public ReactiveProperty<string?> SavedTheme { get; }
 
     public ReactiveProperty<SettingsView> ActiveView { get; } = new(SettingsView.Themes);
+
+    public ReactiveProperty<int> TabSelectedIndex { get; } = new(0);
+
+    public IReadOnlyList<TabDescriptor> Tabs => _tabOrderService.Tabs;
+
+    public Observable<Unit> TabOrderChanged => _tabOrderService.Changed;
+
+    public void MoveTabSelection(int delta)
+    {
+        if (Tabs.Count == 0)
+        {
+            return;
+        }
+
+        TabSelectedIndex.Value = Math.Clamp(TabSelectedIndex.Value + delta, 0, Tabs.Count - 1);
+    }
+
+    public void MoveTab(int delta)
+    {
+        if (Tabs.Count == 0)
+        {
+            return;
+        }
+
+        var index = TabSelectedIndex.Value;
+        _tabOrderService.Move(index, delta);
+        TabSelectedIndex.Value = Math.Clamp(index + delta, 0, Tabs.Count - 1);
+    }
 
     public IReadOnlyList<TimeSpan> RefreshSteps => _refreshController.Steps;
 
@@ -41,10 +72,14 @@ public sealed class SettingsViewModel : ReactiveViewModel
 
     public bool IsPaused => _refreshController.IsPaused.CurrentValue;
 
-    public SettingsViewModel(IThemeService themeService, IRefreshController refreshController)
+    public SettingsViewModel(
+        IThemeService themeService,
+        IRefreshController refreshController,
+        ITabOrderService tabOrderService)
     {
         _themeService = themeService;
         _refreshController = refreshController;
+        _tabOrderService = tabOrderService;
 
         Themes = themeService.AvailableThemes
             .OrderBy(t => t, StringComparer.OrdinalIgnoreCase)
@@ -97,6 +132,7 @@ public sealed class SettingsViewModel : ReactiveViewModel
         SelectedIndex.Dispose();
         SavedTheme.Dispose();
         ActiveView.Dispose();
+        TabSelectedIndex.Dispose();
         base.Dispose();
     }
 }

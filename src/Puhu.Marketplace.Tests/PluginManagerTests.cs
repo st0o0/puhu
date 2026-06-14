@@ -53,6 +53,36 @@ public sealed class PluginManagerTests : IDisposable
     }
 
     [Fact]
+    public async Task GetSourcesAsync_ReturnsConfiguredSources()
+    {
+        await _configStore.SaveSourcesAsync(new PluginSources
+        {
+            Registries = ["https://example.com/index.json"],
+            Repositories = ["https://github.com/test/manual"]
+        });
+        var manager = CreateManager(new TestHandler());
+
+        var sources = await manager.GetSourcesAsync();
+
+        Assert.Single(sources.Registries);
+        Assert.Equal("https://example.com/index.json", sources.Registries[0]);
+        Assert.Single(sources.Repositories);
+        Assert.Equal("https://github.com/test/manual", sources.Repositories[0]);
+    }
+
+    [Fact]
+    public async Task EnsureDefaultSourcesAsync_SeedsDefaultRegistry()
+    {
+        var manager = CreateManager(new TestHandler());
+
+        await manager.EnsureDefaultSourcesAsync();
+
+        var sources = await manager.GetSourcesAsync();
+        Assert.Single(sources.Registries);
+        Assert.Contains("puhu.registry", sources.Registries[0]);
+    }
+
+    [Fact]
     public async Task AddSource_PersistsToFile()
     {
         var manager = CreateManager(new TestHandler());

@@ -65,7 +65,7 @@ RefreshService emits `Tick(Seq, BaseInterval)` at configurable intervals. Plugin
 ## Workflow Rules
 
 - **Do NOT commit** unless the user explicitly asks
-- **Always respond in the user's language** — if they write German, respond in German
+- **Always work in English** — all chat responses, code, comments, UI strings, and commit messages in English, even when the user writes in another language
 
 ## Code Style
 

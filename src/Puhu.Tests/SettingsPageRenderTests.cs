@@ -82,15 +82,41 @@ public sealed class SettingsPageRenderTests
         Assert.DoesNotContain("▸ alpha", refreshView);
     }
 
+    [Fact]
+    public void TabsView_RendersTabsWithSelectionMarker()
+    {
+        var tabs = new FakeTabOrderService(("Marketplace", "/marketplace"), ("System", "/system"));
+        var (page, vm) = CreateBoundPage(tabOrder: tabs);
+        vm.ActiveView.Value = SettingsView.Tabs;
+
+        var view = RenderLayout(page.BuildLayout());
+
+        Assert.Contains("tab order", view);
+        Assert.Contains("▸ marketplace", view);
+        Assert.Contains("system", view);
+    }
+
+    [Fact]
+    public void SetupView_RendersRerunAction()
+    {
+        var (page, vm) = CreateBoundPage();
+        vm.ActiveView.Value = SettingsView.Setup;
+
+        var view = RenderLayout(page.BuildLayout());
+
+        Assert.Contains("re-run setup wizard", view);
+    }
+
     private static (SettingsPage Page, SettingsViewModel ViewModel) CreateBoundPage(
         IReadOnlyList<string>? themes = null,
-        FakeRefreshController? controller = null)
+        FakeRefreshController? controller = null,
+        FakeTabOrderService? tabOrder = null)
     {
         var themeService = new FakeThemeService(themes ?? []);
         controller ??= new FakeRefreshController();
 
         var page = new SettingsPage(new FakeTabNavigator(), themeService, controller);
-        var vm = new SettingsViewModel(themeService, controller);
+        var vm = new SettingsViewModel(themeService, controller, tabOrder ?? new FakeTabOrderService());
 
         // Bind is internal to Termina (normally invoked by the framework during
         // page initialization) — reflection is the only way to bind in isolation.

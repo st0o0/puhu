@@ -4,6 +4,7 @@
   <Folder Name="/Items/">
     <File Path="../.github/workflows/ci.yml" />
     <File Path="../.github/workflows/release.yml" />
+    <File Path="../CLAUDE.md" />
     <File Path="Directory.Build.props" />
     <File Path="Directory.Packages.props" />
   </Folder>

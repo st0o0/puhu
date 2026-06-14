@@ -3,6 +3,8 @@
 public interface IPluginManager
 {
     Task<IReadOnlyList<PluginInfo>> FetchAvailableAsync(bool ignoreCache = false);
+    Task<PluginSources> GetSourcesAsync();
+    Task EnsureDefaultSourcesAsync();
     Task AddSourceAsync(string repoUrl);
     Task RemoveSourceAsync(string repoUrl);
     Task InstallAsync(string pluginId);

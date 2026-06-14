@@ -27,12 +27,16 @@ public sealed class SettingsPage : ReactivePage<SettingsViewModel>, IKeyHintProv
             KeyBindings,
             _themeService,
             (ConsoleKey.D1, "Themes", SettingsView.Themes),
-            (ConsoleKey.D2, "Refresh", SettingsView.Refresh));
+            (ConsoleKey.D2, "Refresh", SettingsView.Refresh),
+            (ConsoleKey.D3, "Tabs", SettingsView.Tabs),
+            (ConsoleKey.D4, "Setup", SettingsView.Setup));
     }
 
     public string[] GetKeyHints() => ViewModel.ActiveView.Value switch
     {
         SettingsView.Themes => ["↑↓:Theme", "Enter:Save", "Esc:Quit", "Tab:Switch"],
+        SettingsView.Tabs => ["↑↓:Select", "⇧↑↓:Move", "Esc:Quit", "Tab:Switch"],
+        SettingsView.Setup => ["Enter:Run", "Esc:Quit", "Tab:Switch"],
         _ => ["↑↓:Rate", "p:Pause", "Esc:Quit", "Tab:Switch"],
     };
 
@@ -41,9 +45,13 @@ public sealed class SettingsPage : ReactivePage<SettingsViewModel>, IKeyHintProv
         // Views are rebuilt fresh on every layout pass: they are static TextNode
         // snapshots of ViewModel state, so caching them (e.g. via KeyedDynamic)
         // would freeze selection markers and the paused line after first paint.
-        LayoutNode activeView = ViewModel.ActiveView.Value == SettingsView.Themes
-            ? BuildThemesView()
-            : BuildRefreshView();
+        LayoutNode activeView = ViewModel.ActiveView.Value switch
+        {
+            SettingsView.Themes => BuildThemesView(),
+            SettingsView.Tabs => BuildTabsView(),
+            SettingsView.Setup => BuildSetupView(),
+            _ => BuildRefreshView(),
+        };
 
         return Layouts.Vertical(
             _subNav!.Height(1),
@@ -62,17 +70,34 @@ public sealed class SettingsPage : ReactivePage<SettingsViewModel>, IKeyHintProv
 
         KeyBindings.Register(ConsoleKey.UpArrow, () =>
         {
-            if (ViewModel.ActiveView.Value == SettingsView.Themes) ViewModel.MoveSelection(-1);
-            else ViewModel.MoveRefreshSelection(-1);
+            switch (ViewModel.ActiveView.Value)
+            {
+                case SettingsView.Themes: ViewModel.MoveSelection(-1); break;
+                case SettingsView.Refresh: ViewModel.MoveRefreshSelection(-1); break;
+                case SettingsView.Tabs: ViewModel.MoveTabSelection(-1); break;
+            }
         });
         KeyBindings.Register(ConsoleKey.DownArrow, () =>
         {
-            if (ViewModel.ActiveView.Value == SettingsView.Themes) ViewModel.MoveSelection(1);
-            else ViewModel.MoveRefreshSelection(1);
+            switch (ViewModel.ActiveView.Value)
+            {
+                case SettingsView.Themes: ViewModel.MoveSelection(1); break;
+                case SettingsView.Refresh: ViewModel.MoveRefreshSelection(1); break;
+                case SettingsView.Tabs: ViewModel.MoveTabSelection(1); break;
+            }
+        });
+        KeyBindings.Register(ConsoleKey.UpArrow, ConsoleModifiers.Shift, () =>
+        {
+            if (ViewModel.ActiveView.Value == SettingsView.Tabs) ViewModel.MoveTab(-1);
+        });
+        KeyBindings.Register(ConsoleKey.DownArrow, ConsoleModifiers.Shift, () =>
+        {
+            if (ViewModel.ActiveView.Value == SettingsView.Tabs) ViewModel.MoveTab(1);
         });
         KeyBindings.Register(ConsoleKey.Enter, () =>
         {
             if (ViewModel.ActiveView.Value == SettingsView.Themes) ViewModel.SaveSelected();
+            else if (ViewModel.ActiveView.Value == SettingsView.Setup) Navigate("/setup");
         });
 
         ViewModel.SelectedIndex.Subscribe(_ => InvalidateLayout()).DisposeWith(Subscriptions);
@@ -82,6 +107,8 @@ public sealed class SettingsPage : ReactivePage<SettingsViewModel>, IKeyHintProv
             .DisposeWith(Subscriptions);
         _refreshController.Interval.Skip(1).Subscribe(_ => InvalidateLayout()).DisposeWith(Subscriptions);
         _refreshController.IsPaused.Skip(1).Subscribe(_ => InvalidateLayout()).DisposeWith(Subscriptions);
+        ViewModel.TabSelectedIndex.Subscribe(_ => InvalidateLayout()).DisposeWith(Subscriptions);
+        ViewModel.TabOrderChanged.Subscribe(_ => InvalidateLayout()).DisposeWith(Subscriptions);
     }
 
     private LayoutNode BuildThemesView()
@@ -91,26 +118,43 @@ public sealed class SettingsPage : ReactivePage<SettingsViewModel>, IKeyHintProv
         {
             new TextNode("themes").WithForeground(theme.TextDim).Bold().Height(1),
         };
+        rows.AddRange(SettingsRows.ThemeRows(
+            ViewModel.Themes, ViewModel.SelectedIndex.Value, ViewModel.SavedTheme.Value, theme));
 
-        for (var i = 0; i < ViewModel.Themes.Count; i++)
+        return Layouts.Vertical(rows.ToArray());
+    }
+
+    private LayoutNode BuildTabsView()
+    {
+        var theme = _themeService.Current;
+        var rows = new List<ILayoutNode>
         {
-            var name = ViewModel.Themes[i];
-            var isSelected = i == ViewModel.SelectedIndex.Value;
-            var isSaved = string.Equals(name, ViewModel.SavedTheme.Value, StringComparison.OrdinalIgnoreCase);
-            var marker = isSelected ? "▸" : " ";
-            var suffix = isSaved ? "  ●" : "";
+            new TextNode("tab order").WithForeground(theme.TextDim).Bold().Height(1),
+        };
 
-            rows.Add(new TextNode($"{marker} {name}{suffix}")
+        for (var i = 0; i < ViewModel.Tabs.Count; i++)
+        {
+            var isSelected = i == ViewModel.TabSelectedIndex.Value;
+            var marker = isSelected ? "▸" : " ";
+            rows.Add(new TextNode($"{marker} {ViewModel.Tabs[i].Label.ToLowerInvariant()}")
                 .WithForeground(isSelected ? theme.Foreground : theme.TextDim)
                 .Height(1));
         }
 
-        if (ViewModel.Themes.Count == 0)
+        if (ViewModel.Tabs.Count == 0)
         {
-            rows.Add(new TextNode("no themes found").WithForeground(theme.TextDim).Height(1));
+            rows.Add(new TextNode("no tabs").WithForeground(theme.TextDim).Height(1));
         }
 
         return Layouts.Vertical(rows.ToArray());
+    }
+
+    private LayoutNode BuildSetupView()
+    {
+        var theme = _themeService.Current;
+        return Layouts.Vertical(
+            new TextNode("setup").WithForeground(theme.TextDim).Bold().Height(1),
+            new TextNode("▸ re-run setup wizard").WithForeground(theme.Foreground).Height(1));
     }
 
     private LayoutNode BuildRefreshView()
@@ -120,15 +164,7 @@ public sealed class SettingsPage : ReactivePage<SettingsViewModel>, IKeyHintProv
         {
             new TextNode("refresh rate").WithForeground(theme.TextDim).Bold().Height(1),
         };
-
-        for (var i = 0; i < ViewModel.RefreshSteps.Count; i++)
-        {
-            var isSelected = i == ViewModel.RefreshSelectedIndex;
-            var marker = isSelected ? "▸" : " ";
-            rows.Add(new TextNode($"{marker} {IntervalFormat.Format(ViewModel.RefreshSteps[i])}")
-                .WithForeground(isSelected ? theme.Foreground : theme.TextDim)
-                .Height(1));
-        }
+        rows.AddRange(SettingsRows.RefreshRows(ViewModel.RefreshSteps, ViewModel.RefreshSelectedIndex, theme));
 
         rows.Add(Layouts.Empty().Height(1));
         rows.Add(new TextNode($"paused: {(ViewModel.IsPaused ? "yes" : "no")}  (p toggles)")

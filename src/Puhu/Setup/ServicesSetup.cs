@@ -16,7 +16,7 @@ public sealed class ServicesSetup : IServiceSetupContainer
             Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
             ".servus", "settings.json");
         var settingsStore = new SettingsStore(settingsPath);
-        services.AddSingleton(settingsStore);
+        services.AddSingleton<ISettingsStore>(settingsStore);
 
         var savedMs = settingsStore.Get<int?>("puhu.refresh-interval");
         var refreshService = new RefreshService(
@@ -26,7 +26,13 @@ public sealed class ServicesSetup : IServiceSetupContainer
         services.AddSingleton<IRefreshController>(refreshService);
 
         var themeService = new ThemeService(settingsStore);
-        themeService.LoadFromDirectory(Path.Combine(AppContext.BaseDirectory, "Themes"));
+        themeService.LoadBuiltIns();
+        // User themes extend (and may override) the built-ins. Later loads win, so the
+        // per-user config folder takes precedence over a portable themes/ next to the exe.
+        themeService.LoadFromDirectory(Path.Combine(AppContext.BaseDirectory, "themes"));
+        themeService.LoadFromDirectory(Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+            ".servus", "themes"));
         if (!themeService.RestoreSaved() && !themeService.ApplyByName("btop-default"))
         {
             themeService.ApplyBuiltIn("dark");

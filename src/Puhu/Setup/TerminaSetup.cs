@@ -4,11 +4,10 @@ using Puhu.Nodes;
 using Puhu.Pages;
 using Puhu.Plugin;
 using Puhu.Services;
+using Puhu.Settings;
 using Servus.Application.Startup;
 using Termina;
 using Termina.Hosting;
-using Termina.Layout;
-using Termina.Pages;
 
 namespace Puhu.Setup;
 
@@ -21,7 +20,11 @@ public sealed class TerminaSetup : IServiceSetupContainer
         var pluginRegistry = ctx.PluginRegistry;
         var themeService = sp.GetRequiredService<IThemeService>();
         var refreshController = sp.GetRequiredService<IRefreshController>();
-        var firstRoute = pluginRegistry?.PluginTabs.FirstOrDefault()?.Route ?? "/marketplace";
+        var settings = sp.GetRequiredService<ISettingsStore>();
+        var tabOrder = sp.GetRequiredService<ITabOrderService>();
+
+        var firstTab = tabOrder.Tabs.FirstOrDefault()?.Route ?? "/marketplace";
+        var firstRoute = StartRouteDecider.Decide(settings.IsWizardComplete(), firstTab);
 
         services.AddTermina("/splash", termina =>
         {
@@ -53,11 +56,11 @@ public sealed class TerminaSetup : IServiceSetupContainer
             });
         });
 
-        services.AddHostedService(sp => new ShellRedrawService(
-            sp.GetRequiredService<ITickSource>(),
-            sp.GetRequiredService<IThemeService>(),
-            sp.GetRequiredService<IRefreshController>(),
-            () => sp.GetRequiredService<TerminaApplication>().RequestRedraw()));
+        services.AddHostedService(provider => new ShellRedrawService(
+            provider.GetRequiredService<ITickSource>(),
+            provider.GetRequiredService<IThemeService>(),
+            provider.GetRequiredService<IRefreshController>(),
+            () => provider.GetRequiredService<TerminaApplication>().RequestRedraw()));
 
         services.AddSingleton(new StartPageRoute(firstRoute));
     }

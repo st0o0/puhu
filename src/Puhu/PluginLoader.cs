@@ -86,7 +86,7 @@ public static class PluginLoader
         for (var i = 0; i < name.Length; i++)
         {
             var c = name[i];
-            if (c == ' ' || c == '_')
+            if (c is ' ' or '_')
             {
                 result.Append('-');
             }
