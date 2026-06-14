@@ -25,6 +25,16 @@ public sealed class SetupWizardPageRenderTests
         Assert.Contains("Puhu Setup", view); // panel title
     }
 
+    [Fact]
+    public void WelcomeStep_DescribesPuhu()
+    {
+        var (page, _) = CreateBoundPage();
+
+        var view = RenderLayout(page.BuildLayout());
+
+        Assert.Contains("terminal dashboard", view);
+    }
+
     private static (SetupWizardPage Page, SetupWizardViewModel Vm) CreateBoundPage()
     {
         var theme = new FakeThemeService(["alpha", "beta"]);

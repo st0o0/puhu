@@ -20,6 +20,24 @@ public sealed class WizardStepsTests
         Assert.Contains("#0a0e14", output);        // hex value
     }
 
+    [Fact]
+    public void Welcome_DescribesPuhu()
+    {
+        var output = Render(WizardSteps.Welcome(new ThemeDefinition()), 60, 14);
+
+        Assert.Contains("terminal dashboard", output);
+    }
+
+    [Fact]
+    public void Done_ShowsSummary()
+    {
+        var output = Render(WizardSteps.Done(new ThemeDefinition(), "btop-default", "1s"), 60, 8);
+
+        Assert.Contains("You're all set", output);
+        Assert.Contains("theme: btop-default", output);
+        Assert.Contains("refresh: 1s", output);
+    }
+
     internal static string Render(ILayoutNode node, int w, int h)
     {
         var ctx = new RenderTestContext(w, h);

@@ -20,6 +20,7 @@ public sealed class SetupWizardPage : ReactivePage<SetupWizardViewModel>
     private DynamicLayoutNode? _refreshStep;
     private DynamicLayoutNode? _tabStep;
     private DynamicLayoutNode? _pluginStep;
+    private DynamicLayoutNode? _doneStep;
 
     public SetupWizardPage(IThemeService themeService)
     {
@@ -35,18 +36,15 @@ public sealed class SetupWizardPage : ReactivePage<SetupWizardViewModel>
             SettingsRows.RefreshRows(ViewModel.RefreshSteps, ViewModel.RefreshIndex, _themeService.Current).ToArray()));
         _tabStep = new DynamicLayoutNode(() => Layouts.Vertical(BuildTabRows()));
         _pluginStep = new DynamicLayoutNode(() => Layouts.Vertical(BuildPluginRows()));
+        _doneStep = new DynamicLayoutNode(BuildDone);
 
         _wizard = new WizardNode<SetupStep>()
-            .WithStep(SetupStep.Welcome, "Welcome",
-                () => new TextNode("Welcome to Puhu. Let's get you set up."),
-                helpText: null)
+            .WithStep(SetupStep.Welcome, "Welcome", () => WizardSteps.Welcome(_themeService.Current), helpText: null)
             .WithStep(SetupStep.Theme, "Theme", () => _themeStep!, helpText: null)
             .WithStep(SetupStep.Refresh, "Refresh", () => _refreshStep!, helpText: null)
             .WithStep(SetupStep.TabOrder, "Tabs", () => _tabStep!, helpText: null)
             .WithStep(SetupStep.Plugins, "Plugins", () => _pluginStep!, helpText: null)
-            .WithStep(SetupStep.Done, "Done",
-                () => new TextNode("You're all set. Press Enter to finish."),
-                helpText: null);
+            .WithStep(SetupStep.Done, "Done", () => _doneStep!, helpText: null);
     }
 
     public override ILayoutNode BuildLayout()
@@ -77,7 +75,15 @@ public sealed class SetupWizardPage : ReactivePage<SetupWizardViewModel>
         base.OnNavigatedTo();
 
         _wizard!.Completed.Subscribe(_ => ViewModel.Finish()).DisposeWith(Subscriptions);
-        _wizard!.StepChanged.Subscribe(_ => InvalidateLayout()).DisposeWith(Subscriptions);
+        _wizard!.StepChanged.Subscribe(step =>
+        {
+            if (step == SetupStep.Done)
+            {
+                _doneStep!.Invalidate();
+            }
+
+            InvalidateLayout();
+        }).DisposeWith(Subscriptions);
 
         KeyBindings.Register(ConsoleKey.UpArrow, () => OnArrow(-1));
         KeyBindings.Register(ConsoleKey.DownArrow, () => OnArrow(1));
@@ -126,6 +132,13 @@ public sealed class SetupWizardPage : ReactivePage<SetupWizardViewModel>
             _tabStep!.Invalidate();
             ViewModel.RequestRedraw();
         }
+    }
+
+    private ILayoutNode BuildDone()
+    {
+        var themeName = ViewModel.Themes.Count > 0 ? ViewModel.Themes[ViewModel.ThemeIndex] : "default";
+        var refresh = IntervalFormat.Format(ViewModel.RefreshSteps[ViewModel.RefreshIndex]);
+        return WizardSteps.Done(_themeService.Current, themeName, refresh);
     }
 
     private ILayoutNode[] BuildTabRows()
