@@ -8,7 +8,8 @@ public enum SettingsView
 {
     Themes,
     Refresh,
-    Tabs
+    Tabs,
+    Setup
 }
 
 public sealed class SettingsViewModel : ReactiveViewModel

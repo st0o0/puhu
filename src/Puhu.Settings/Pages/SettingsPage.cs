@@ -28,13 +28,15 @@ public sealed class SettingsPage : ReactivePage<SettingsViewModel>, IKeyHintProv
             _themeService,
             (ConsoleKey.D1, "Themes", SettingsView.Themes),
             (ConsoleKey.D2, "Refresh", SettingsView.Refresh),
-            (ConsoleKey.D3, "Tabs", SettingsView.Tabs));
+            (ConsoleKey.D3, "Tabs", SettingsView.Tabs),
+            (ConsoleKey.D4, "Setup", SettingsView.Setup));
     }
 
     public string[] GetKeyHints() => ViewModel.ActiveView.Value switch
     {
         SettingsView.Themes => ["↑↓:Theme", "Enter:Save", "Esc:Quit", "Tab:Switch"],
         SettingsView.Tabs => ["↑↓:Select", "⇧↑↓:Move", "Esc:Quit", "Tab:Switch"],
+        SettingsView.Setup => ["Enter:Run", "Esc:Quit", "Tab:Switch"],
         _ => ["↑↓:Rate", "p:Pause", "Esc:Quit", "Tab:Switch"],
     };
 
@@ -47,6 +49,7 @@ public sealed class SettingsPage : ReactivePage<SettingsViewModel>, IKeyHintProv
         {
             SettingsView.Themes => BuildThemesView(),
             SettingsView.Tabs => BuildTabsView(),
+            SettingsView.Setup => BuildSetupView(),
             _ => BuildRefreshView(),
         };
 
@@ -94,6 +97,7 @@ public sealed class SettingsPage : ReactivePage<SettingsViewModel>, IKeyHintProv
         KeyBindings.Register(ConsoleKey.Enter, () =>
         {
             if (ViewModel.ActiveView.Value == SettingsView.Themes) ViewModel.SaveSelected();
+            else if (ViewModel.ActiveView.Value == SettingsView.Setup) Navigate("/setup");
         });
 
         ViewModel.SelectedIndex.Subscribe(_ => InvalidateLayout()).DisposeWith(Subscriptions);
@@ -143,6 +147,14 @@ public sealed class SettingsPage : ReactivePage<SettingsViewModel>, IKeyHintProv
         }
 
         return Layouts.Vertical(rows.ToArray());
+    }
+
+    private LayoutNode BuildSetupView()
+    {
+        var theme = _themeService.Current;
+        return Layouts.Vertical(
+            new TextNode("setup").WithForeground(theme.TextDim).Bold().Height(1),
+            new TextNode("▸ re-run setup wizard").WithForeground(theme.Foreground).Height(1));
     }
 
     private LayoutNode BuildRefreshView()

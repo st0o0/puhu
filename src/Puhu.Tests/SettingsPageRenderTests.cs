@@ -96,6 +96,17 @@ public sealed class SettingsPageRenderTests
         Assert.Contains("system", view);
     }
 
+    [Fact]
+    public void SetupView_RendersRerunAction()
+    {
+        var (page, vm) = CreateBoundPage();
+        vm.ActiveView.Value = SettingsView.Setup;
+
+        var view = RenderLayout(page.BuildLayout());
+
+        Assert.Contains("re-run setup wizard", view);
+    }
+
     private static (SettingsPage Page, SettingsViewModel ViewModel) CreateBoundPage(
         IReadOnlyList<string>? themes = null,
         FakeRefreshController? controller = null,
