@@ -94,12 +94,11 @@ public sealed class SubNavNodeTests
             (ConsoleKey.D1, "Alpha", TestView.Alpha),
             (ConsoleKey.D2, "Beta", TestView.Beta));
 
-        var ctx = new RenderTestContext(40, 1);
-        node.Render(ctx, new Rect(0, 0, 40, 1));
+        var term = Tui.Render(node, 40, 1);
 
-        Assert.Contains(" 1 alpha ", ctx.Row(0));
-        Assert.Contains("2 beta", ctx.Row(0));
-        Assert.Equal("  1 alpha   2 beta", ctx.Row(0).TrimEnd());
+        Assert.Contains(" 1 alpha ", term.Row(0));
+        Assert.Contains("2 beta", term.Row(0));
+        Assert.Equal("  1 alpha   2 beta", term.Row(0).TrimEnd());
     }
 
     [Fact]
@@ -110,12 +109,12 @@ public sealed class SubNavNodeTests
         var node = new SubNavNode<TestView>(view, new PageKeyBindings(), theme,
             (ConsoleKey.D1, "Alpha", TestView.Alpha));
 
-        var ctx = new RenderTestContext(40, 1);
-        node.Render(ctx, new Rect(0, 0, 40, 1));
+        var term = Tui.Render(node, 40, 1);
 
-        var activeWrite = ctx.Writes.Single(w => w.Text == " 1 alpha ");
-        Assert.Equal(theme.Selection, activeWrite.Bg);
-        Assert.Equal(theme.SelectionText, activeWrite.Fg);
+        // The active item " 1 alpha " is drawn with selection colors; sample a cell inside it.
+        var x = term.Row(0).IndexOf("1 alpha", StringComparison.Ordinal);
+        Assert.Equal(theme.Selection, term.GetBackground(x, 0));
+        Assert.Equal(theme.SelectionText, term.GetForeground(x, 0));
     }
 
     [Fact]
@@ -127,11 +126,10 @@ public sealed class SubNavNodeTests
             (ConsoleKey.D1, "Alpha", TestView.Alpha));
 
         themeService.Current = new ThemeDefinition { Selection = Color.FromHex("#123456") };
-        var ctx = new RenderTestContext(40, 1);
-        node.Render(ctx, new Rect(0, 0, 40, 1));
+        var term = Tui.Render(node, 40, 1);
 
-        var activeWrite = ctx.Writes.Single(w => w.Text == " 1 alpha ");
-        Assert.Equal(Color.FromHex("#123456"), activeWrite.Bg);
+        var x = term.Row(0).IndexOf("1 alpha", StringComparison.Ordinal);
+        Assert.Equal(Color.FromHex("#123456"), term.GetBackground(x, 0));
     }
 
     private sealed class FakeThemeService : IThemeService
