@@ -45,7 +45,7 @@ public static class PluginLoader
 
         foreach (var dir in scanDirs)
         {
-            foreach (var dll in Directory.GetFiles(dir, "Puhu.*.dll"))
+            foreach (var dll in Directory.GetFiles(dir, "*.dll"))
             {
                 try
                 {
@@ -71,12 +71,16 @@ public static class PluginLoader
         if (Directory.Exists(userDir))
         {
             yield return userDir;
+            foreach (var subDir in Directory.GetDirectories(userDir))
+                yield return subDir;
         }
 
         var localDir = Path.Combine(AppContext.BaseDirectory, "plugins");
         if (Directory.Exists(localDir))
         {
             yield return localDir;
+            foreach (var subDir in Directory.GetDirectories(localDir))
+                yield return subDir;
         }
     }
 
