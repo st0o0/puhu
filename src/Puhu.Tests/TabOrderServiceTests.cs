@@ -45,7 +45,7 @@ public sealed class TabOrderServiceTests
 
         Assert.Equal(
             ["/marketplace", "/system", "/settings"],
-            store.Get<string[]>("puhu.tab-order"));
+            store.Get<string[]>("puhu.tab-order")!);
     }
 
     [Fact]

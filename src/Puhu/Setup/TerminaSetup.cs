@@ -8,8 +8,6 @@ using Puhu.Settings;
 using Servus.Application.Startup;
 using Termina;
 using Termina.Hosting;
-using Termina.Layout;
-using Termina.Pages;
 
 namespace Puhu.Setup;
 
@@ -58,11 +56,11 @@ public sealed class TerminaSetup : IServiceSetupContainer
             });
         });
 
-        services.AddHostedService(sp => new ShellRedrawService(
-            sp.GetRequiredService<ITickSource>(),
-            sp.GetRequiredService<IThemeService>(),
-            sp.GetRequiredService<IRefreshController>(),
-            () => sp.GetRequiredService<TerminaApplication>().RequestRedraw()));
+        services.AddHostedService(provider => new ShellRedrawService(
+            provider.GetRequiredService<ITickSource>(),
+            provider.GetRequiredService<IThemeService>(),
+            provider.GetRequiredService<IRefreshController>(),
+            () => provider.GetRequiredService<TerminaApplication>().RequestRedraw()));
 
         services.AddSingleton(new StartPageRoute(firstRoute));
     }
