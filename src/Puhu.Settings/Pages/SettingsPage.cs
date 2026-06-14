@@ -114,24 +114,8 @@ public sealed class SettingsPage : ReactivePage<SettingsViewModel>, IKeyHintProv
         {
             new TextNode("themes").WithForeground(theme.TextDim).Bold().Height(1),
         };
-
-        for (var i = 0; i < ViewModel.Themes.Count; i++)
-        {
-            var name = ViewModel.Themes[i];
-            var isSelected = i == ViewModel.SelectedIndex.Value;
-            var isSaved = string.Equals(name, ViewModel.SavedTheme.Value, StringComparison.OrdinalIgnoreCase);
-            var marker = isSelected ? "▸" : " ";
-            var suffix = isSaved ? "  ●" : "";
-
-            rows.Add(new TextNode($"{marker} {name}{suffix}")
-                .WithForeground(isSelected ? theme.Foreground : theme.TextDim)
-                .Height(1));
-        }
-
-        if (ViewModel.Themes.Count == 0)
-        {
-            rows.Add(new TextNode("no themes found").WithForeground(theme.TextDim).Height(1));
-        }
+        rows.AddRange(SettingsRows.ThemeRows(
+            ViewModel.Themes, ViewModel.SelectedIndex.Value, ViewModel.SavedTheme.Value, theme));
 
         return Layouts.Vertical(rows.ToArray());
     }
@@ -168,15 +152,7 @@ public sealed class SettingsPage : ReactivePage<SettingsViewModel>, IKeyHintProv
         {
             new TextNode("refresh rate").WithForeground(theme.TextDim).Bold().Height(1),
         };
-
-        for (var i = 0; i < ViewModel.RefreshSteps.Count; i++)
-        {
-            var isSelected = i == ViewModel.RefreshSelectedIndex;
-            var marker = isSelected ? "▸" : " ";
-            rows.Add(new TextNode($"{marker} {IntervalFormat.Format(ViewModel.RefreshSteps[i])}")
-                .WithForeground(isSelected ? theme.Foreground : theme.TextDim)
-                .Height(1));
-        }
+        rows.AddRange(SettingsRows.RefreshRows(ViewModel.RefreshSteps, ViewModel.RefreshSelectedIndex, theme));
 
         rows.Add(Layouts.Empty().Height(1));
         rows.Add(new TextNode($"paused: {(ViewModel.IsPaused ? "yes" : "no")}  (p toggles)")
