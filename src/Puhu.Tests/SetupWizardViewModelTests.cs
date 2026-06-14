@@ -33,7 +33,7 @@ public sealed class SetupWizardViewModelTests
 
         vm.Finish();
 
-        Assert.True(SetupWizardState.IsComplete(store));
+        Assert.True(store.IsWizardComplete());
         Assert.True(theme.Saved);
         Assert.Equal("/system", navigated);
     }
@@ -62,7 +62,7 @@ public sealed class SetupWizardViewModelTests
 
         vm.Skip();
 
-        Assert.True(SetupWizardState.IsComplete(store));
+        Assert.True(store.IsWizardComplete());
         Assert.Equal("/system", navigated);
     }
 

@@ -131,7 +131,7 @@ public sealed class SetupWizardViewModel : ReactiveViewModel
 
     private void Complete()
     {
-        SetupWizardState.MarkComplete(_settings);
+        _settings.MarkWizardComplete();
 
         var target = OpenMarketplaceAfter
             ? "/marketplace"

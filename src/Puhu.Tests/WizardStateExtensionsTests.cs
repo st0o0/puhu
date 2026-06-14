@@ -4,21 +4,21 @@ using R3;
 
 namespace Puhu.Tests;
 
-public sealed class SetupWizardStateTests
+public sealed class WizardStateExtensionsTests
 {
     [Fact]
     public void IsComplete_FalseWhenUnset()
     {
-        Assert.False(SetupWizardState.IsComplete(new FakeStore()));
+        Assert.False(new FakeStore().IsWizardComplete());
     }
 
     [Fact]
     public void IsComplete_TrueWhenVersionAtOrAboveCurrent()
     {
         var store = new FakeStore();
-        store.Set(SetupWizardState.VersionKey, SetupWizardState.CurrentVersion);
+        store.Set(WizardStateExtensions.VersionKey, WizardStateExtensions.CurrentVersion);
 
-        Assert.True(SetupWizardState.IsComplete(store));
+        Assert.True(store.IsWizardComplete());
     }
 
     [Fact]
@@ -26,9 +26,9 @@ public sealed class SetupWizardStateTests
     {
         var store = new FakeStore();
 
-        SetupWizardState.MarkComplete(store);
+        store.MarkWizardComplete();
 
-        Assert.Equal(SetupWizardState.CurrentVersion, store.Get<int?>(SetupWizardState.VersionKey));
+        Assert.Equal(WizardStateExtensions.CurrentVersion, store.Get<int?>(WizardStateExtensions.VersionKey));
     }
 
     private sealed class FakeStore : ISettingsStore

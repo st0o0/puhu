@@ -24,7 +24,7 @@ public sealed class TerminaSetup : IServiceSetupContainer
         var tabOrder = sp.GetRequiredService<ITabOrderService>();
 
         var firstTab = tabOrder.Tabs.FirstOrDefault()?.Route ?? "/marketplace";
-        var firstRoute = StartRouteDecider.Decide(SetupWizardState.IsComplete(settings), firstTab);
+        var firstRoute = StartRouteDecider.Decide(settings.IsWizardComplete(), firstTab);
 
         services.AddTermina("/splash", termina =>
         {

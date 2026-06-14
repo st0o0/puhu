@@ -10,7 +10,7 @@ internal static class WizardSteps
     {
         return Layouts.Vertical(
             new TextNode("").Fill(),
-            new TextNode(PuhuBranding.Logo).WithForeground(theme.Accent).AlignCenter(),
+            new TextNode(PuhuBranding.LogoBlock).NoWrap().WithForeground(theme.Accent).AlignCenter(),
             new TextNode(""),
             new TextNode("A terminal dashboard, made yours.").WithForeground(theme.Foreground).AlignCenter(),
             new TextNode(""),

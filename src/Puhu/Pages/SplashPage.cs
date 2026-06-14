@@ -24,7 +24,7 @@ public sealed class SplashPage : ReactivePage<SplashViewModel>
     {
         var content = Layouts.Vertical(
             new TextNode("").Fill(),
-            new TextNode(PuhuBranding.Logo).WithForeground(_theme.Accent).AlignCenter(),
+            new TextNode(PuhuBranding.LogoBlock).NoWrap().WithForeground(_theme.Accent).AlignCenter(),
             new TextNode(""),
             Layouts.Horizontal(
                 new TextNode("  "),

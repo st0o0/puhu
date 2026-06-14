@@ -1,4 +1,7 @@
-﻿[assembly: System.Runtime.Versioning.TargetFramework(".NETCoreApp,Version=v10.0", FrameworkDisplayName=".NET 10.0")]
+﻿[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Puhu")]
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Puhu.Settings")]
+[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("Puhu.Tests")]
+[assembly: System.Runtime.Versioning.TargetFramework(".NETCoreApp,Version=v10.0", FrameworkDisplayName=".NET 10.0")]
 namespace Puhu.Plugin
 {
     public static class GlobalKeyExtensions
@@ -88,11 +91,6 @@ namespace Puhu.Plugin
         public PluginTabInfo(string Label, string Route) { }
         public string Label { get; init; }
         public string Route { get; init; }
-    }
-    public static class PuhuBranding
-    {
-        public const string Logo = " ____        _\n|  _ \\ _   _| |__  _   _\n| |_) | | | | \'_ \\| | | |\n|  __/| |_| | |" +
-            " | | |_| |\n|_|    \\__,_|_| |_|\\__,_|";
     }
     public sealed class RegisterMonitor : System.IEquatable<Puhu.Plugin.RegisterMonitor>
     {

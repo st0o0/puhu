@@ -21,8 +21,7 @@
     <Content Include="Themes\**\*.theme" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
   <ItemGroup>
-    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
-      <_Parameter1>Puhu.Tests</_Parameter1>
-    </AssemblyAttribute>
+    <InternalsVisibleTo Include="Puhu.Tests" />
+    <InternalsVisibleTo Include="Puhu.Settings" />
   </ItemGroup>
 </Project>
