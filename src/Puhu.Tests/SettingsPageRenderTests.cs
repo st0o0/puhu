@@ -82,6 +82,20 @@ public sealed class SettingsPageRenderTests
         Assert.DoesNotContain("▸ alpha", refreshView);
     }
 
+    [Fact]
+    public void TabsView_RendersTabsWithSelectionMarker()
+    {
+        var tabs = new FakeTabOrderService(("Marketplace", "/marketplace"), ("System", "/system"));
+        var (page, vm) = CreateBoundPage(tabOrder: tabs);
+        vm.ActiveView.Value = SettingsView.Tabs;
+
+        var view = RenderLayout(page.BuildLayout());
+
+        Assert.Contains("tab order", view);
+        Assert.Contains("▸ marketplace", view);
+        Assert.Contains("system", view);
+    }
+
     private static (SettingsPage Page, SettingsViewModel ViewModel) CreateBoundPage(
         IReadOnlyList<string>? themes = null,
         FakeRefreshController? controller = null,
