@@ -35,6 +35,26 @@ public sealed class AkkaSetup : IServiceSetupContainer
 
             builder.AddHocon("akka.stdout-loglevel = Off", HoconAddMode.Prepend);
 
+            // Puhu is a near-idle, tick-driven dashboard: it does not need Akka's
+            // default thread pools (default-dispatcher fork-join defaults to
+            // parallelism-min 8 / max 64). Capping both the user and internal
+            // dispatchers to a small pool cuts reserved thread stacks and the
+            // per-thread runtime overhead, lowering the process working set.
+            builder.AddHocon(
+                """
+                akka.actor.default-dispatcher.fork-join-executor {
+                    parallelism-min = 2
+                    parallelism-factor = 1.0
+                    parallelism-max = 6
+                }
+                akka.actor.internal-dispatcher.fork-join-executor {
+                    parallelism-min = 2
+                    parallelism-factor = 1.0
+                    parallelism-max = 6
+                }
+                """,
+                HoconAddMode.Prepend);
+
             builder.WithActors((system, registry, resolver) =>
             {
                 var tickRouter = system.ActorOf(Props.Create<TickRouter>(), "tick-router");
