@@ -26,7 +26,9 @@
     <PackageReference Include="Servus" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Themes\**\*.theme" CopyToOutputDirectory="PreserveNewest" />
+    <!-- Built-in themes are embedded into the assembly so the release ships as a
+         single puhu.exe. Users extend via a themes/ folder (see ThemeService). -->
+    <EmbeddedResource Include="Themes\**\*.theme" />
   </ItemGroup>
   <ItemGroup>
     <InternalsVisibleTo Include="Puhu.Tests" />

@@ -17,11 +17,15 @@ public static partial class BtopThemeParser
         {
             var trimmed = line.Trim();
             if (string.IsNullOrEmpty(trimmed) || trimmed.StartsWith('#'))
+            {
                 continue;
+            }
 
             var match = ThemeLineRegex().Match(trimmed);
             if (match.Success)
+            {
                 values[match.Groups[1].Value] = match.Groups[2].Value;
+            }
         }
 
         return new ThemeDefinition
@@ -42,12 +46,6 @@ public static partial class BtopThemeParser
         };
     }
 
-    public static ThemeDefinition ParseFile(string path)
-    {
-        var content = File.ReadAllText(path);
-        return Parse(content);
-    }
-
     private static Color GetColor(Dictionary<string, string> values, string key, Color fallback)
     {
         return values.TryGetValue(key, out var hex) ? Color.FromHex(hex) : fallback;
@@ -56,7 +54,9 @@ public static partial class BtopThemeParser
     private static Gradient GetGradient(Dictionary<string, string> values, string prefix)
     {
         if (!values.ContainsKey($"{prefix}_start"))
+        {
             return new ThemeDefinition().GraphGradient;
+        }
 
         var start = GetColor(values, $"{prefix}_start", Color.FromHex("#50fa7b"));
         var mid = GetColor(values, $"{prefix}_mid", Color.FromHex("#f1fa8c"));

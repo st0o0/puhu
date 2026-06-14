@@ -1,3 +1,4 @@
+using System.Reflection;
 using Puhu.Plugin;
 using R3;
 
@@ -7,7 +8,10 @@ public sealed class ThemeService : IThemeService
 {
     private const string ThemeSettingKey = "puhu.theme";
 
-    private readonly Dictionary<string, string> _themePaths = new(StringComparer.OrdinalIgnoreCase);
+    // name -> a provider that yields the raw .theme content. Built-ins read an
+    // embedded resource; user themes read a file. A later registration of the
+    // same name wins, so user folders can override a built-in.
+    private readonly Dictionary<string, Func<string>> _themeSources = new(StringComparer.OrdinalIgnoreCase);
     private readonly ISettingsStore? _settings;
     private readonly Subject<ThemeDefinition> _changes = new();
 
@@ -22,7 +26,7 @@ public sealed class ThemeService : IThemeService
 
     public Observable<ThemeDefinition> Changes => _changes.AsObservable();
 
-    public IReadOnlyCollection<string> AvailableThemes => _themePaths.Keys;
+    public IReadOnlyCollection<string> AvailableThemes => _themeSources.Keys;
 
     public void Apply(ThemeDefinition theme)
     {
@@ -38,29 +42,62 @@ public sealed class ThemeService : IThemeService
         _changes.OnNext(Current);
     }
 
+    /// <summary>
+    /// Registers the themes embedded in this assembly (resource path
+    /// <c>*.Themes.&lt;name&gt;.theme</c>). Call before <see cref="LoadFromDirectory"/>
+    /// so user folders can override a built-in of the same name.
+    /// </summary>
+    public void LoadBuiltIns()
+    {
+        var assembly = typeof(ThemeService).Assembly;
+
+        foreach (var resource in assembly.GetManifestResourceNames())
+        {
+            if (!resource.EndsWith(".theme", StringComparison.OrdinalIgnoreCase))
+            {
+                continue;
+            }
+
+            // "Puhu.Themes.gruvbox-dark.theme" -> "gruvbox-dark"
+            var stem = resource[..^".theme".Length];
+            var name = stem[(stem.LastIndexOf('.') + 1)..];
+            _themeSources[name] = () => ReadResource(assembly, resource);
+        }
+    }
+
     public void LoadFromDirectory(string directory)
     {
         if (!Directory.Exists(directory))
+        {
             return;
+        }
 
         foreach (var file in Directory.GetFiles(directory, "*.theme"))
         {
             var name = Path.GetFileNameWithoutExtension(file);
-            _themePaths[name] = file;
+            _themeSources[name] = () => File.ReadAllText(file);
         }
     }
 
     public bool ApplyByName(string name)
     {
-        if (!_themePaths.TryGetValue(name, out var path))
+        if (!_themeSources.TryGetValue(name, out var source))
         {
             return false;
         }
 
-        Current = BtopThemeParser.ParseFile(path);
+        Current = BtopThemeParser.Parse(source());
         CurrentThemeName = name;
         _changes.OnNext(Current);
         return true;
+    }
+
+    private static string ReadResource(Assembly assembly, string resource)
+    {
+        using var stream = assembly.GetManifestResourceStream(resource)
+            ?? throw new InvalidOperationException($"Embedded theme '{resource}' not found.");
+        using var reader = new StreamReader(stream);
+        return reader.ReadToEnd();
     }
 
     public void SaveCurrent()

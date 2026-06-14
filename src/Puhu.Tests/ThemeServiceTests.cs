@@ -1,6 +1,7 @@
 using Puhu.Plugin;
 using Puhu.Themes;
 using R3;
+using Termina.Terminal;
 
 namespace Puhu.Tests;
 
@@ -30,6 +31,33 @@ public sealed class ThemeServiceTests : IDisposable
         Assert.True(applied);
         Assert.NotNull(observed);
         Assert.Equal("testtheme", service.CurrentThemeName);
+    }
+
+    [Fact]
+    public void LoadBuiltIns_RegistersEmbeddedThemes()
+    {
+        var service = new ThemeService();
+        service.LoadBuiltIns();
+
+        Assert.Contains("btop-default", service.AvailableThemes);
+        Assert.Contains("catppuccin-mocha", service.AvailableThemes);
+        Assert.Contains("gruvbox-dark", service.AvailableThemes);
+        Assert.Contains("tokyo-night", service.AvailableThemes);
+        Assert.True(service.ApplyByName("gruvbox-dark"));
+    }
+
+    [Fact]
+    public void LoadFromDirectory_OverridesBuiltInOfSameName()
+    {
+        File.WriteAllText(Path.Combine(_themeDir, "gruvbox-dark.theme"),
+            """theme[main_fg]="#abcdef" """);
+
+        var service = new ThemeService();
+        service.LoadBuiltIns();
+        service.LoadFromDirectory(_themeDir);
+
+        Assert.True(service.ApplyByName("gruvbox-dark"));
+        Assert.Equal(Color.FromHex("#abcdef"), service.Current.Foreground);
     }
 
     [Fact]
