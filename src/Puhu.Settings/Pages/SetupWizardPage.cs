@@ -29,8 +29,8 @@ public sealed class SetupWizardPage : ReactivePage<SetupWizardViewModel>
 
     protected override void OnBound()
     {
-        _themeStep = new DynamicLayoutNode(() => Layouts.Vertical(
-            SettingsRows.ThemeRows(ViewModel.Themes, ViewModel.ThemeIndex, _themeService.CurrentThemeName, _themeService.Current).ToArray()));
+        _themeStep = new DynamicLayoutNode(() => WizardSteps.Theme(
+            ViewModel.Themes, ViewModel.ThemeIndex, _themeService.CurrentThemeName, _themeService.Current));
         _refreshStep = new DynamicLayoutNode(() => Layouts.Vertical(
             SettingsRows.RefreshRows(ViewModel.RefreshSteps, ViewModel.RefreshIndex, _themeService.Current).ToArray()));
         _tabStep = new DynamicLayoutNode(() => Layouts.Vertical(BuildTabRows()));
