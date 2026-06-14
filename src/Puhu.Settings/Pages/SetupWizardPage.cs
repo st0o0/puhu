@@ -32,10 +32,10 @@ public sealed class SetupWizardPage : ReactivePage<SetupWizardViewModel>
     {
         _themeStep = new DynamicLayoutNode(() => WizardSteps.Theme(
             ViewModel.Themes, ViewModel.ThemeIndex, _themeService.CurrentThemeName, _themeService.Current));
-        _refreshStep = new DynamicLayoutNode(() => Layouts.Vertical(
-            SettingsRows.RefreshRows(ViewModel.RefreshSteps, ViewModel.RefreshIndex, _themeService.Current).ToArray()));
-        _tabStep = new DynamicLayoutNode(() => Layouts.Vertical(BuildTabRows()));
-        _pluginStep = new DynamicLayoutNode(() => Layouts.Vertical(BuildPluginRows()));
+        _refreshStep = new DynamicLayoutNode(() => WizardSteps.CenteredRows(
+            SettingsRows.RefreshRows(ViewModel.RefreshSteps, ViewModel.RefreshIndex, _themeService.Current)));
+        _tabStep = new DynamicLayoutNode(() => WizardSteps.CenteredRows(BuildTabRows()));
+        _pluginStep = new DynamicLayoutNode(() => WizardSteps.CenteredRows(BuildPluginRows()));
         _doneStep = new DynamicLayoutNode(BuildDone);
 
         _wizard = new WizardNode<SetupStep>()

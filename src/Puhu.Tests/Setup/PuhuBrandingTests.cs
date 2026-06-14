@@ -13,4 +13,12 @@ public sealed class PuhuBrandingTests
         // every line padded to one width → centering keeps the figlet aligned
         Assert.Single(lines.Select(l => l.Length).Distinct());
     }
+
+    [Fact]
+    public void LogoBlock_IncludesOwlMascot()
+    {
+        // the owl from the README banner must travel with the wordmark
+        Assert.Contains("{o,o}", PuhuBranding.LogoBlock);
+        Assert.Contains("|)__)", PuhuBranding.LogoBlock);
+    }
 }
