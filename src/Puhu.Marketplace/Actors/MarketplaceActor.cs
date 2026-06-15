@@ -91,7 +91,7 @@ public sealed class MarketplaceActor : ReceiveActor
 
         Receive<AddSource>(msg =>
         {
-            pluginManager.AddSourceAsync(msg.Url)
+            pluginManager.AddSourceAsync(msg.Url, msg.Type)
                 .PipeTo(Self,
                     success: () => new LoadSources(),
                     failure: ex => new OperationFailed("", ex.Message));

@@ -100,7 +100,7 @@ public sealed class MarketplaceViewModel : ReactiveViewModel
 
     public void Sync() => _actor.Tell(new SyncAll());
 
-    public void AddSource(string url) => _actor.Tell(new AddSource(url));
+    public void AddSource(string url, SourceType type) => _actor.Tell(new AddSource(url, type));
 
     public void RemoveSource(string url) => _actor.Tell(new RemoveSource(url));
 

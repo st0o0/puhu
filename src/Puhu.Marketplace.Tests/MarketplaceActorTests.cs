@@ -56,7 +56,7 @@ public sealed class MarketplaceActorTests : TestKit
     {
         var actor = Sys.ActorOf(Props.Create(() => new MarketplaceActor(_pluginManager, _store)));
 
-        actor.Tell(new AddSource("https://github.com/test/repo"));
+        actor.Tell(new AddSource("https://github.com/test/repo", SourceType.Repository));
 
         await AwaitConditionAsync(
             () => _pluginManager.AddedSources.Contains("https://github.com/test/repo"),
@@ -152,9 +152,9 @@ public sealed class MarketplaceActorTests : TestKit
             return Task.CompletedTask;
         }
 
-        public Task AddSourceAsync(string repoUrl)
+        public Task AddSourceAsync(string url, SourceType type)
         {
-            AddedSources.Add(repoUrl);
+            AddedSources.Add(url);
             return Task.CompletedTask;
         }
 

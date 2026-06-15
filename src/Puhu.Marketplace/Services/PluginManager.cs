@@ -41,20 +41,22 @@ public sealed class PluginManager(
 
     public Task EnsureDefaultSourcesAsync() => configStore.EnsureDefaultSourcesAsync();
 
-    public async Task AddSourceAsync(string repoUrl)
+    public async Task AddSourceAsync(string url, SourceType type)
     {
         var sources = await configStore.LoadSourcesAsync();
-        if (!sources.Repositories.Contains(repoUrl))
+        var list = type == SourceType.Registry ? sources.Registries : sources.Repositories;
+        if (!list.Contains(url))
         {
-            sources.Repositories.Add(repoUrl);
+            list.Add(url);
             await configStore.SaveSourcesAsync(sources);
         }
     }
 
-    public async Task RemoveSourceAsync(string repoUrl)
+    public async Task RemoveSourceAsync(string url)
     {
         var sources = await configStore.LoadSourcesAsync();
-        sources.Repositories.Remove(repoUrl);
+        sources.Registries.Remove(url);
+        sources.Repositories.Remove(url);
         await configStore.SaveSourcesAsync(sources);
     }
 

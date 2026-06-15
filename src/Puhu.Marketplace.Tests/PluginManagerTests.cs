@@ -86,7 +86,7 @@ public sealed class PluginManagerTests : IDisposable
     public async Task AddSource_PersistsToFile()
     {
         var manager = CreateManager(new TestHandler());
-        await manager.AddSourceAsync("https://github.com/test/new-plugin");
+        await manager.AddSourceAsync("https://github.com/test/new-plugin", SourceType.Repository);
         var sources = await _configStore.LoadSourcesAsync();
         Assert.Contains("https://github.com/test/new-plugin", sources.Repositories);
     }

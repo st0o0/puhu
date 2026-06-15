@@ -15,7 +15,8 @@ internal sealed record OperationCompleted(string PluginId, string Status);
 internal sealed record OperationFailed(string PluginId, string Error);
 
 // Source management commands
-public sealed record AddSource(string Url);
+public enum SourceType { Registry, Repository }
+public sealed record AddSource(string Url, SourceType Type);
 public sealed record RemoveSource(string Url);
 public sealed record CycleUpdatePolicy(string PluginId);
 public sealed record LoadSources;
