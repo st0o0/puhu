@@ -53,9 +53,7 @@ public sealed class TerminaSetup : IServiceSetupContainer
                 var globalHints = Array.Empty<string>();
                 if (hintProvider.ShowGlobalHints)
                 {
-                    globalHints = refreshController is not null
-                        ? ["Esc:Quit", "Tab:Switch", "+/-:Speed", "P:Pause"]
-                        : ["Esc:Quit", "Tab:Switch"];
+                    globalHints = ["Esc:Quit", "Tab:Switch"];
                 }
 
                 return new AppShellNode(
