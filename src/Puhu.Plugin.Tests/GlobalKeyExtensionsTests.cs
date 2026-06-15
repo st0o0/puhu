@@ -14,7 +14,7 @@ public sealed class GlobalKeyExtensionsTests
 
         keys.RegisterGlobalKeys(() => { }, _ => { }, new FakeTabNavigator(), controller);
 
-        keys.TryHandle(new ConsoleKeyInfo('+', ConsoleKey.OemPlus, false, false, false));
+        keys.TryHandle(new ConsoleKeyInfo('+', ConsoleKey.OemPlus, true, false, false));
         Assert.Equal(1, controller.SpeedUps);
 
         keys.TryHandle(new ConsoleKeyInfo('-', ConsoleKey.OemMinus, false, false, false));

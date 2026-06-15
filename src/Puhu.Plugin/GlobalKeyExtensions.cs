@@ -28,7 +28,7 @@ public static class GlobalKeyExtensions
     {
         keyBindings.RegisterGlobalKeys(requestShutdown, navigate, tabNavigator);
 
-        keyBindings.Register(ConsoleKey.OemPlus, refreshController.SpeedUp);
+        keyBindings.Register(ConsoleKey.OemPlus, ConsoleModifiers.Shift, refreshController.SpeedUp);
         keyBindings.Register(ConsoleKey.Add, refreshController.SpeedUp);
         keyBindings.Register(ConsoleKey.OemMinus, refreshController.SlowDown);
         keyBindings.Register(ConsoleKey.Subtract, refreshController.SlowDown);
