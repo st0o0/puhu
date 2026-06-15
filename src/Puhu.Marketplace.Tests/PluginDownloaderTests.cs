@@ -22,9 +22,10 @@ public sealed class PluginDownloaderTests : IDisposable
         var client = new HttpClient(handler);
         var downloader = new PluginDownloader(client, _pluginsDir);
         var delivery = new PluginDelivery { Type = DeliveryType.GitHubRelease, Asset = "Puhu.Plugin.Dtop.dll" };
-        var path = await downloader.DownloadAsync("servus.plugin.dtop", "https://github.com/st0o0/dtop", delivery);
-        Assert.True(File.Exists(path));
-        Assert.Equal(fakeBytes, await File.ReadAllBytesAsync(path, TestContext.Current.CancellationToken));
+        var dir = await downloader.DownloadAsync("servus.plugin.dtop", "https://github.com/st0o0/dtop", delivery);
+        var filePath = Path.Combine(dir, "Puhu.Plugin.Dtop.dll");
+        Assert.True(File.Exists(filePath));
+        Assert.Equal(fakeBytes, await File.ReadAllBytesAsync(filePath, TestContext.Current.CancellationToken));
     }
 
     [Fact]

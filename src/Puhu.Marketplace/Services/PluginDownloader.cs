@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.IO.Compression;
+using System.Text.Json;
 using Puhu.Marketplace.Models;
 
 namespace Puhu.Marketplace.Services;
@@ -9,12 +10,20 @@ public sealed class PluginDownloader(HttpClient httpClient, string pluginsDir)
     {
         var targetDir = Path.Combine(pluginsDir, pluginId);
         Directory.CreateDirectory(targetDir);
-        return delivery.Type switch
+        var path = delivery.Type switch
         {
             DeliveryType.GitHubRelease => await DownloadFromGitHubAsync(repositoryUrl, delivery.Asset!, targetDir),
             DeliveryType.NuGet => throw new NotSupportedException("NuGet delivery not yet implemented"),
             _ => throw new NotSupportedException($"Delivery type {delivery.Type} is not supported")
         };
+
+        if (delivery.Bundle)
+        {
+            ZipFile.ExtractToDirectory(path, targetDir, overwriteFiles: true);
+            File.Delete(path);
+        }
+
+        return targetDir;
     }
 
     public void Remove(string pluginId)

@@ -23,6 +23,7 @@ public sealed record PluginDelivery
     public required DeliveryType Type { get; init; }
     [JsonPropertyName("asset")] public string? Asset { get; init; }
     [JsonPropertyName("packageId")] public string? PackageId { get; init; }
+    [JsonPropertyName("bundle")] public bool Bundle { get; init; }
 }
 
 [JsonConverter(typeof(JsonStringEnumConverter<DeliveryType>))]
