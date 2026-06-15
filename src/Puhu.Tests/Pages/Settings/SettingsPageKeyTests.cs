@@ -22,7 +22,7 @@ public sealed class SettingsPageKeyTests
     {
         await using var app = await StartAsync();
         app.SendKey(ConsoleKey.D1);
-        await app.Terminal.WaitForTextAsync("themes");
+        await app.Terminal.WaitForTextAsync("Theme");
     }
 
     [Fact]
@@ -30,7 +30,7 @@ public sealed class SettingsPageKeyTests
     {
         await using var app = await StartAsync();
         app.SendKey(ConsoleKey.D2);
-        await app.Terminal.WaitForTextAsync("refresh rate");
+        await app.Terminal.WaitForTextAsync("Refresh Rate");
     }
 
     [Fact]
@@ -38,7 +38,7 @@ public sealed class SettingsPageKeyTests
     {
         await using var app = await StartAsync();
         app.SendKey(ConsoleKey.D3);
-        await app.Terminal.WaitForTextAsync("tab order");
+        await app.Terminal.WaitForTextAsync("Tab Order");
     }
 
     [Fact]
@@ -46,7 +46,7 @@ public sealed class SettingsPageKeyTests
     {
         await using var app = await StartAsync();
         app.SendKey(ConsoleKey.D4);
-        await app.Terminal.WaitForTextAsync("re-run setup wizard");
+        await app.Terminal.WaitForTextAsync("Setup Wizard");
     }
 
     [Fact]
@@ -94,11 +94,11 @@ public sealed class SettingsPageKeyTests
     {
         await using var app = await StartAsync();
         app.SendKey(ConsoleKey.D2);
-        await app.Terminal.WaitForTextAsync("paused: no");
+        await app.Terminal.WaitForTextAsync("RUNNING");
 
         app.SendKey(ConsoleKey.P);
 
-        await app.Terminal.WaitForTextAsync("paused: yes");
+        await app.Terminal.WaitForTextAsync("PAUSED");
     }
 
     [Fact]
@@ -130,11 +130,11 @@ public sealed class SettingsPageKeyTests
     {
         await using var app = await StartAsync();
         app.SendKey(ConsoleKey.D3);
-        await app.Terminal.WaitForTextAsync("▸ system");
+        await app.Terminal.WaitForTextAsync("▸ 1");
 
         app.SendKey(ConsoleKey.DownArrow);
 
-        await app.Terminal.WaitForTextAsync("▸ marketplace");
+        await app.Terminal.WaitForTextAsync("▸ 2");
     }
 
     [Fact]
@@ -142,7 +142,7 @@ public sealed class SettingsPageKeyTests
     {
         await using var app = await StartAsync();
         app.SendKey(ConsoleKey.D3);
-        await app.Terminal.WaitForTextAsync("tab order");
+        await app.Terminal.WaitForTextAsync("Tab Order");
 
         app.SendKey(ConsoleKey.DownArrow, shift: true);
 
@@ -156,7 +156,7 @@ public sealed class SettingsPageKeyTests
     {
         await using var app = await StartAsync();
         app.SendKey(ConsoleKey.D4);
-        await app.Terminal.WaitForTextAsync("re-run setup wizard");
+        await app.Terminal.WaitForTextAsync("Setup Wizard");
 
         app.SendKey(ConsoleKey.Enter);
 
