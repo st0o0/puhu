@@ -50,6 +50,8 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHi
 
     public override ILayoutNode BuildLayout()
     {
+        var theme = _themeService.Current;
+
         // Views are rebuilt fresh on every layout pass: they are static snapshots
         // of ViewModel state, so caching them (e.g. via KeyedDynamic) would freeze
         // selection markers and expansion state after the first paint.
@@ -63,6 +65,7 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHi
 
         return Layouts.Vertical(
             _subNav!.Height(1),
+            new SubNavSeparatorNode(theme.Accent).Height(1),
             activeView.Fill());
     }
 
@@ -173,7 +176,15 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHi
         var theme = _themeService.Current;
         var plugins = ViewModel.AvailablePlugins.Value;
         if (plugins.Count == 0)
-            return new TextNode("No plugins available. Press r to refresh.").WithForeground(theme.TextDim);
+        {
+            return new PanelNode()
+                .WithBorder(BorderStyle.Rounded)
+                .WithBorderColor(theme.Accent)
+                .WithTitle("📦 Available Plugins")
+                .WithTitleColor(theme.PanelTitle)
+                .WithPadding(1)
+                .WithContent(new TextNode("No plugins available. Press r to refresh.").WithForeground(theme.TextDim));
+        }
 
         var rows = new List<ILayoutNode>();
         for (var i = 0; i < plugins.Count; i++)
@@ -181,59 +192,65 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHi
             var plugin = plugins[i];
             var isSelected = i == ViewModel.SelectedIndex.Value;
             var isExpanded = i == _expandedIndex;
-            rows.Add(BuildBrowseRow(plugin, isSelected, isExpanded, theme));
+            rows.AddRange(BuildBrowseRow(plugin, isSelected, isExpanded, theme));
+            if (i < plugins.Count - 1) rows.Add(Layouts.Empty().Height(1));
         }
 
-        return Layouts.Vertical(rows.ToArray()).Fill();
+        return new PanelNode()
+            .WithBorder(BorderStyle.Rounded)
+            .WithBorderColor(theme.Accent)
+            .WithTitle("📦 Available Plugins")
+            .WithTitleColor(theme.PanelTitle)
+            .WithPadding(1)
+            .WithContent(Layouts.Vertical(rows.ToArray()));
     }
 
-    private ILayoutNode BuildBrowseRow(PluginInfo plugin, bool isSelected, bool isExpanded, ThemeDefinition theme)
+    private IReadOnlyList<ILayoutNode> BuildBrowseRow(PluginInfo plugin, bool isSelected, bool isExpanded, ThemeDefinition theme)
     {
         var marker = isExpanded ? "▾" : isSelected ? "▸" : " ";
         var activeOp = ViewModel.ActiveOperations.Value.GetValueOrDefault(plugin.Id);
 
-        var header = Layouts.Horizontal(
-            new TextNode($"{marker} {plugin.Name}")
-                .WithForeground(isSelected ? theme.Foreground : theme.TextDim).WidthFill(),
-            new TextNode(plugin.AvailableVersion).WithForeground(theme.TextDim),
-            new TextNode($"  @{plugin.Author}").WithForeground(theme.TextDim),
-            activeOp is not null
-                ? new SpinnerNode()
-                    .WithLabel(activeOp).WithSpinnerColor(theme.Success)
-                : new TextNode($"  {GetActionBadge(plugin)}")
-                    .WithForeground(GetBadgeColor(plugin.Status, theme))
-        ).Height(1);
+        var nameAndVersion = new TextNode($"{marker} {plugin.Name}  {plugin.AvailableVersion}")
+            .WithForeground(isSelected ? theme.Foreground : theme.TextDim).WidthFill();
+        var authorNode = new TextNode($"by {plugin.Author}  ").WithForeground(theme.TextDim).WidthAuto();
 
-        if (!isExpanded) return header;
+        ILayoutNode actionNode = activeOp is not null
+            ? new SpinnerNode().WithLabel(activeOp).WithSpinnerColor(theme.Success)
+            : GetActionBadgeNode(plugin, theme);
 
-        var detail = Layouts.Vertical(
-            new TextNode(plugin.Description).WithForeground(theme.TextDim),
-            new TextNode($"Tags: {string.Join(", ", plugin.Tags)}").WithForeground(theme.TextDim),
-            new TextNode($"Delivery: {plugin.Delivery.Type}").WithForeground(theme.TextDim)
-        );
+        var header = Layouts.Horizontal(nameAndVersion, authorNode, actionNode).Height(1);
+        var desc = new TextNode($"  {plugin.Description}").WithForeground(theme.TextDim).Height(1);
+        var result = new List<ILayoutNode> { header, desc };
 
-        var panel = new PanelNode()
-            .WithBorder(BorderStyle.Rounded)
-            .WithBorderColor(theme.Border)
-            .WithContent(detail);
+        if (isExpanded)
+        {
+            var tagText = string.Join("  ", plugin.Tags.Select(t => $"[{t}]"));
+            var detailContent = Layouts.Vertical(
+                new TextNode(plugin.Description).WithForeground(theme.TextDim).Height(1),
+                Layouts.Empty().Height(1),
+                Layouts.Horizontal(
+                    new TextNode("Tags:  ").WithForeground(theme.TextDim).WidthAuto(),
+                    new TextNode(tagText).WithForeground(theme.Accent).WidthFill()
+                ).Height(1),
+                new KeyValueRowNode("Type", plugin.Delivery.Type.ToString(), labelWidth: 10, labelColor: theme.TextDim, valueColor: theme.Foreground)
+            );
 
-        return Layouts.Vertical(header, panel);
+            result.Add(new PanelNode()
+                .WithBorder(BorderStyle.Rounded)
+                .WithBorderColor(theme.Border)
+                .WithPadding(1)
+                .WithContent(detailContent));
+        }
+
+        return result;
     }
 
-    private static string GetActionBadge(PluginInfo plugin) => plugin.Status switch
+    private static ILayoutNode GetActionBadgeNode(PluginInfo plugin, ThemeDefinition theme) => plugin.Status switch
     {
-        PluginStatus.NotInstalled => "[Install]",
-        PluginStatus.Installed => "[Installed]",
-        PluginStatus.UpdateAvailable => "[Update]",
-        _ => ""
-    };
-
-    private static Color GetBadgeColor(PluginStatus status, ThemeDefinition theme) => status switch
-    {
-        PluginStatus.NotInstalled => theme.Accent,
-        PluginStatus.Installed => theme.Success,
-        PluginStatus.UpdateAvailable => theme.Warning,
-        _ => theme.TextDim
+        PluginStatus.NotInstalled => new BadgeNode("INSTALL", theme.SelectionText, theme.Accent, icon: "↓"),
+        PluginStatus.Installed => new BadgeNode("INSTALLED", theme.SelectionText, theme.Success, icon: "✓"),
+        PluginStatus.UpdateAvailable => new BadgeNode("UPDATE", theme.SelectionText, theme.Warning, icon: "↑"),
+        _ => Layouts.Empty()
     };
 
     // --- Installed View ---
@@ -242,26 +259,35 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHi
     {
         var theme = _themeService.Current;
         var plugins = ViewModel.InstalledPlugins.Value;
-        if (plugins.Count == 0)
-            return new TextNode("No plugins installed.").WithForeground(theme.TextDim);
 
-        var rows = new List<ILayoutNode>
+        if (plugins.Count == 0)
         {
-            Layouts.Horizontal(
-                new TextNode("Plugin").WithForeground(theme.Foreground).Bold().WidthPercent(35),
-                new TextNode("Installed").WithForeground(theme.Foreground).Bold().WidthPercent(15),
-                new TextNode("Available").WithForeground(theme.Foreground).Bold().WidthPercent(15),
-                new TextNode("Policy").WithForeground(theme.Foreground).Bold().WidthPercent(15),
-                new TextNode("Status").WithForeground(theme.Foreground).Bold().WidthPercent(20)
-            ).Height(1),
-            new TextNode(new string('─', 60)).WithForeground(theme.Border).Height(1)
-        };
+            return new PanelNode()
+                .WithBorder(BorderStyle.Rounded)
+                .WithBorderColor(theme.Accent)
+                .WithTitle("📋 Installed Plugins")
+                .WithTitleColor(theme.PanelTitle)
+                .WithPadding(1)
+                .WithContent(new TextNode("No plugins installed.").WithForeground(theme.TextDim));
+        }
+
+        var header = Layouts.Horizontal(
+            new TextNode("  Plugin").WithForeground(theme.Foreground).Bold().WidthPercent(35),
+            new TextNode("Installed").WithForeground(theme.Foreground).Bold().WidthPercent(15),
+            new TextNode("Available").WithForeground(theme.Foreground).Bold().WidthPercent(15),
+            new TextNode("Policy").WithForeground(theme.Foreground).Bold().WidthPercent(15),
+            new TextNode("Status").WithForeground(theme.Foreground).Bold().WidthPercent(20)
+        ).Height(1);
+
+        var separator = new TextNode(new string('─', 60)).WithForeground(theme.Border).Height(1);
+        var rows = new List<ILayoutNode> { header, separator, Layouts.Empty().Height(1) };
 
         for (var i = 0; i < plugins.Count; i++)
         {
             var plugin = plugins[i];
             var isSelected = i == ViewModel.SelectedIndex.Value;
             var marker = isSelected ? "▸" : " ";
+            var versionColor = plugin.Status == PluginStatus.UpdateAvailable ? theme.Warning : theme.TextDim;
 
             rows.Add(Layouts.Horizontal(
                 new TextNode($"{marker} {plugin.Name}")
@@ -269,15 +295,48 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHi
                 new TextNode(plugin.InstalledVersion ?? "")
                     .WithForeground(theme.TextDim).WidthPercent(15),
                 new TextNode(plugin.AvailableVersion)
+                    .WithForeground(versionColor).WidthPercent(15),
+                new TextNode(plugin.UpdatePolicy?.ToString().ToLowerInvariant() ?? "auto")
                     .WithForeground(theme.TextDim).WidthPercent(15),
-                new TextNode(plugin.UpdatePolicy?.ToString() ?? "Auto")
-                    .WithForeground(theme.TextDim).WidthPercent(15),
-                new TextNode(GetStatusIcon(plugin))
+                new TextNode($"{GetStatusIcon(plugin)} {GetStatusLabel(plugin)}")
                     .WithForeground(GetStatusColor(plugin, theme)).WidthPercent(20)
             ).Height(1));
         }
 
-        return Layouts.Vertical(rows.ToArray()).Fill();
+        var tablePanel = new PanelNode()
+            .WithBorder(BorderStyle.Rounded)
+            .WithBorderColor(theme.Accent)
+            .WithTitle("📋 Installed Plugins")
+            .WithTitleColor(theme.PanelTitle)
+            .WithPadding(1)
+            .WithContent(Layouts.Vertical(rows.ToArray()));
+
+        var selected = ViewModel.SelectedPlugin.Value;
+        if (selected is null)
+            return tablePanel;
+
+        var detailRows = new List<ILayoutNode>
+        {
+            Layouts.Horizontal(
+                new TextNode(selected.Name).WithForeground(theme.Foreground).Bold().WidthAuto(),
+                new TextNode("  ").WidthAuto(),
+                GetActionBadgeNode(selected, theme)
+            ).Height(1),
+            Layouts.Empty().Height(1),
+            new KeyValueRowNode("Author", selected.Author, labelWidth: 12, labelColor: theme.TextDim, valueColor: theme.Foreground),
+            new KeyValueRowNode("Tags", string.Join(", ", selected.Tags), labelWidth: 12, labelColor: theme.TextDim, valueColor: theme.Foreground),
+            new KeyValueRowNode("Delivery", selected.Delivery.Type.ToString(), labelWidth: 12, labelColor: theme.TextDim, valueColor: theme.Foreground),
+        };
+
+        var detailPanel = new PanelNode()
+            .WithBorder(BorderStyle.Rounded)
+            .WithBorderColor(theme.Accent)
+            .WithTitle("ℹ Details")
+            .WithTitleColor(theme.PanelTitle)
+            .WithPadding(1)
+            .WithContent(Layouts.Vertical(detailRows.ToArray()));
+
+        return Layouts.Vertical(tablePanel, detailPanel);
     }
 
     private static string GetStatusIcon(PluginInfo plugin) => plugin switch
@@ -294,41 +353,94 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHi
         _ => theme.Success
     };
 
+    private static string GetStatusLabel(PluginInfo plugin) => plugin switch
+    {
+        { UpdatePolicy: UpdatePolicy.Pinned } => "pinned",
+        { Status: PluginStatus.UpdateAvailable } => "update",
+        _ => "current"
+    };
+
     // --- Sources View ---
 
     private LayoutNode BuildSourcesView()
     {
         var theme = _themeService.Current;
         var sources = ViewModel.Sources.Value;
-        var rows = new List<ILayoutNode> { new TextNode("Registries").WithForeground(theme.TextDim).Bold().Height(1) };
 
+        var registryRows = new List<ILayoutNode>();
         if (sources.Registries.Count == 0)
         {
-            rows.Add(new TextNode("  (none)").WithForeground(theme.TextDim).Height(1));
+            registryRows.Add(new TextNode("(none)").WithForeground(theme.TextDim).Height(1));
         }
         else
         {
             foreach (var url in sources.Registries)
             {
-                rows.Add(new TextNode($"  {url}").WithForeground(theme.TextDim).Height(1));
+                registryRows.Add(Layouts.Horizontal(
+                    new TextNode("● ").WithForeground(theme.Success).WidthAuto(),
+                    new TextNode(url).WithForeground(theme.Foreground).Bold().WidthFill()
+                ).Height(1));
+                registryRows.Add(Layouts.Horizontal(
+                    new TextNode("  ").WidthAuto(),
+                    new BadgeNode("CONNECTED", theme.SelectionText, theme.Success).Height(1)
+                ).Height(1));
+                registryRows.Add(Layouts.Empty().Height(1));
             }
         }
 
-        rows.Add(Layouts.Empty().Height(1));
+        var registriesPanel = new PanelNode()
+            .WithBorder(BorderStyle.Rounded)
+            .WithBorderColor(theme.Accent)
+            .WithTitle("🌐 Registries")
+            .WithTitleColor(theme.PanelTitle)
+            .WithPadding(1)
+            .WithContent(Layouts.Vertical(registryRows.ToArray()));
 
-        rows.Add(new TextNode("Manual Repositories").WithForeground(theme.TextDim).Bold().Height(1));
+        var repoRows = new List<ILayoutNode>();
         if (sources.Repositories.Count == 0)
         {
-            rows.Add(new TextNode("  (none)").WithForeground(theme.TextDim).Height(1));
+            repoRows.Add(new TextNode("(none)").WithForeground(theme.TextDim).Height(1));
         }
         else
         {
-            foreach (var url in sources.Repositories)
+            foreach (var path in sources.Repositories)
             {
-                rows.Add(new TextNode($"  {url}").WithForeground(theme.TextDim).Height(1));
+                repoRows.Add(Layouts.Horizontal(
+                    new TextNode("○ ").WithForeground(theme.TextDim).WidthAuto(),
+                    new TextNode(path).WithForeground(theme.Foreground).WidthFill()
+                ).Height(1));
+                repoRows.Add(Layouts.Horizontal(
+                    new TextNode("  ").WidthAuto(),
+                    new BadgeNode("LOCAL", theme.Foreground, theme.TextDim).Height(1)
+                ).Height(1));
+                repoRows.Add(Layouts.Empty().Height(1));
             }
         }
 
-        return Layouts.Vertical(rows.ToArray()).Fill();
+        var reposPanel = new PanelNode()
+            .WithBorder(BorderStyle.Rounded)
+            .WithBorderColor(theme.Accent)
+            .WithTitle("📁 Manual Repositories")
+            .WithTitleColor(theme.PanelTitle)
+            .WithPadding(1)
+            .WithContent(Layouts.Vertical(repoRows.ToArray()));
+
+        var actionsContent = Layouts.Horizontal(
+            new TextNode("Press ").WithForeground(theme.TextDim).WidthAuto(),
+            new TextNode("a").WithForeground(theme.Foreground).Bold().WidthAuto(),
+            new TextNode(" to add registry  │  Press ").WithForeground(theme.TextDim).WidthAuto(),
+            new TextNode("r").WithForeground(theme.Foreground).Bold().WidthAuto(),
+            new TextNode(" to refresh all").WithForeground(theme.TextDim).WidthFill()
+        );
+
+        var actionsPanel = new PanelNode()
+            .WithBorder(BorderStyle.Rounded)
+            .WithBorderColor(theme.Accent)
+            .WithTitle("＋ Actions")
+            .WithTitleColor(theme.PanelTitle)
+            .WithPadding(1)
+            .WithContent(actionsContent);
+
+        return Layouts.Vertical(registriesPanel, reposPanel, actionsPanel);
     }
 }
