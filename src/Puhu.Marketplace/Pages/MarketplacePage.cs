@@ -486,7 +486,7 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHi
         var actionsPanel = new PanelNode()
             .WithBorder(BorderStyle.Rounded)
             .WithBorderColor(theme.Accent)
-            .WithTitle("＋ Actions")
+            .WithTitle("+ Actions")
             .WithTitleColor(theme.PanelTitle)
             .WithPadding(1)
             .WithContent(actionsContent);
