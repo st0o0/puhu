@@ -19,6 +19,8 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHi
     private readonly IRefreshController _refreshController;
     private int _expandedIndex = -1;
     private SubNavNode<MarketplaceView>? _subNav;
+    private ModalNode? _activeModal;
+    private bool _showModal;
 
     public MarketplacePage(IToastService toastService, IThemeService themeService, ITabNavigator tabNavigator, IRefreshController refreshController)
     {
@@ -63,10 +65,15 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHi
             _ => Layouts.Empty()
         };
 
-        return Layouts.Vertical(
+        var main = Layouts.Vertical(
             _subNav!.Height(1),
             new SubNavSeparatorNode(theme.Accent).Height(1),
             activeView.Fill());
+
+        if (_showModal && _activeModal is not null)
+            return Layouts.Stack(main, _activeModal);
+
+        return main;
     }
 
     public override void OnNavigatedTo()
@@ -82,12 +89,18 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHi
         // Navigation
         KeyBindings.Register(ConsoleKey.UpArrow, () =>
         {
-            ViewModel.MoveSelection(-1);
+            if (ViewModel.ActiveView.Value == MarketplaceView.Sources)
+                ViewModel.MoveSourceSelection(-1);
+            else
+                ViewModel.MoveSelection(-1);
             InvalidateLayout();
         });
         KeyBindings.Register(ConsoleKey.DownArrow, () =>
         {
-            ViewModel.MoveSelection(1);
+            if (ViewModel.ActiveView.Value == MarketplaceView.Sources)
+                ViewModel.MoveSourceSelection(1);
+            else
+                ViewModel.MoveSelection(1);
             InvalidateLayout();
         });
 
@@ -120,11 +133,13 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHi
                 ViewModel.UpdateSelected();
         });
 
-        // Uninstall (Installed view)
+        // Uninstall (Installed view) / Remove source (Sources view)
         KeyBindings.Register(ConsoleKey.X, () =>
         {
             if (ViewModel.ActiveView.Value == MarketplaceView.Installed)
                 ViewModel.UninstallSelected();
+            else if (ViewModel.ActiveView.Value == MarketplaceView.Sources)
+                ShowRemoveSourceModal();
         });
 
         // Cycle policy (Installed view)
@@ -133,6 +148,13 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHi
             if (ViewModel.ActiveView.Value == MarketplaceView.Installed &&
                 ViewModel.SelectedPlugin.Value is { } plugin)
                 ViewModel.CyclePolicy(plugin.Id);
+        });
+
+        // Add source (Sources view)
+        KeyBindings.Register(ConsoleKey.A, () =>
+        {
+            if (ViewModel.ActiveView.Value == MarketplaceView.Sources)
+                ShowAddSourceModal();
         });
 
         // Subscriptions
@@ -149,6 +171,10 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHi
             .DisposeWith(Subscriptions);
 
         ViewModel.ActiveOperations
+            .Subscribe(_ => InvalidateLayout())
+            .DisposeWith(Subscriptions);
+
+        ViewModel.SourceSelectedIndex
             .Subscribe(_ => InvalidateLayout())
             .DisposeWith(Subscriptions);
 
@@ -366,6 +392,8 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHi
     {
         var theme = _themeService.Current;
         var sources = ViewModel.Sources.Value;
+        var selectedIndex = ViewModel.SourceSelectedIndex.Value;
+        var flatIndex = 0;
 
         var registryRows = new List<ILayoutNode>();
         if (sources.Registries.Count == 0)
@@ -376,15 +404,18 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHi
         {
             foreach (var url in sources.Registries)
             {
+                var isSelected = flatIndex == selectedIndex;
+                var marker = isSelected ? "▸" : " ";
                 registryRows.Add(Layouts.Horizontal(
-                    new TextNode("● ").WithForeground(theme.Success).WidthAuto(),
-                    new TextNode(url).WithForeground(theme.Foreground).Bold().WidthFill()
+                    new TextNode($"{marker} ● ").WithForeground(isSelected ? theme.Foreground : theme.Success).WidthAuto(),
+                    new TextNode(url).WithForeground(isSelected ? theme.Foreground : theme.TextDim).Bold().WidthFill()
                 ).Height(1));
                 registryRows.Add(Layouts.Horizontal(
-                    new TextNode("  ").WidthAuto(),
+                    new TextNode("    ").WidthAuto(),
                     new BadgeNode("CONNECTED", theme.SelectionText, theme.Success).Height(1)
                 ).Height(1));
                 registryRows.Add(Layouts.Empty().Height(1));
+                flatIndex++;
             }
         }
 
@@ -405,15 +436,18 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHi
         {
             foreach (var path in sources.Repositories)
             {
+                var isSelected = flatIndex == selectedIndex;
+                var marker = isSelected ? "▸" : " ";
                 repoRows.Add(Layouts.Horizontal(
-                    new TextNode("○ ").WithForeground(theme.TextDim).WidthAuto(),
-                    new TextNode(path).WithForeground(theme.Foreground).WidthFill()
+                    new TextNode($"{marker} ○ ").WithForeground(isSelected ? theme.Foreground : theme.TextDim).WidthAuto(),
+                    new TextNode(path).WithForeground(isSelected ? theme.Foreground : theme.TextDim).WidthFill()
                 ).Height(1));
                 repoRows.Add(Layouts.Horizontal(
-                    new TextNode("  ").WidthAuto(),
+                    new TextNode("    ").WidthAuto(),
                     new BadgeNode("LOCAL", theme.Foreground, theme.TextDim).Height(1)
                 ).Height(1));
                 repoRows.Add(Layouts.Empty().Height(1));
+                flatIndex++;
             }
         }
 
@@ -428,7 +462,9 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHi
         var actionsContent = Layouts.Horizontal(
             new TextNode("Press ").WithForeground(theme.TextDim).WidthAuto(),
             new TextNode("a").WithForeground(theme.Foreground).Bold().WidthAuto(),
-            new TextNode(" to add registry  │  Press ").WithForeground(theme.TextDim).WidthAuto(),
+            new TextNode(" to add source  │  Press ").WithForeground(theme.TextDim).WidthAuto(),
+            new TextNode("x").WithForeground(theme.Foreground).Bold().WidthAuto(),
+            new TextNode(" to remove selected  │  Press ").WithForeground(theme.TextDim).WidthAuto(),
             new TextNode("r").WithForeground(theme.Foreground).Bold().WidthAuto(),
             new TextNode(" to refresh all").WithForeground(theme.TextDim).WidthFill()
         );
@@ -442,5 +478,166 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHi
             .WithContent(actionsContent);
 
         return Layouts.Vertical(registriesPanel, reposPanel, actionsPanel);
+    }
+
+    // --- Add Source Modal ---
+
+    private void ShowAddSourceModal()
+    {
+        var theme = _themeService.Current;
+        var typeList = new SelectionListNode<string>(
+            ["Registry (URL)", "Repository (Folder)"], item => item)
+            .WithHighlightColors(theme.SelectionText, theme.Selection);
+
+        _activeModal = new ModalNode()
+            .WithTitle("Add Source")
+            .WithBorder(BorderStyle.Rounded)
+            .WithBorderColor(theme.Accent)
+            .WithBackdrop(BackdropStyle.Dim)
+            .WithPadding(1)
+            .WithDismissOnEscape(true)
+            .WithContent(typeList);
+
+        typeList.SelectionConfirmed.Subscribe(selected =>
+        {
+            var choice = selected[0];
+            if (choice.StartsWith("Registry"))
+                ShowUrlInputModal();
+            else
+                ShowFolderPickerModal();
+        }).DisposeWith(Subscriptions);
+
+        typeList.Cancelled.Subscribe(_ => DismissModal()).DisposeWith(Subscriptions);
+        _activeModal.Dismissed.Subscribe(_ => DismissModal()).DisposeWith(Subscriptions);
+
+        _showModal = true;
+        InvalidateLayout();
+        Focus.PushFocus(_activeModal);
+        Focus.PushFocus(typeList);
+    }
+
+    private void ShowUrlInputModal()
+    {
+        // Pop the type-selection list and modal
+        Focus.PopFocus();
+        Focus.PopFocus();
+
+        var theme = _themeService.Current;
+        var input = new TextInputNode()
+            .WithPlaceholder("https://registry.example.com")
+            .WithForeground(theme.Foreground);
+
+        _activeModal = new ModalNode()
+            .WithTitle("Add Registry URL")
+            .WithBorder(BorderStyle.Rounded)
+            .WithBorderColor(theme.Accent)
+            .WithBackdrop(BackdropStyle.Dim)
+            .WithPadding(1)
+            .WithDismissOnEscape(true)
+            .WithContent(input);
+
+        input.Submitted.Subscribe(url =>
+        {
+            if (!string.IsNullOrWhiteSpace(url))
+                ViewModel.AddSource(url.Trim(), SourceType.Registry);
+            DismissModal();
+        }).DisposeWith(Subscriptions);
+
+        _activeModal.Dismissed.Subscribe(_ => DismissModal()).DisposeWith(Subscriptions);
+
+        InvalidateLayout();
+        Focus.PushFocus(_activeModal);
+        Focus.PushFocus(input);
+    }
+
+    private void ShowFolderPickerModal()
+    {
+        // Pop the type-selection list and modal
+        Focus.PopFocus();
+        Focus.PopFocus();
+
+        var theme = _themeService.Current;
+        var picker = new FilePickerNode()
+            .WithMode(FilePickerMode.Directories)
+            .WithHighlightColors(theme.SelectionText, theme.Selection)
+            .WithDirectoryColor(theme.Accent)
+            .WithFillHeight(true);
+
+        _activeModal = new ModalNode()
+            .WithTitle("Select Repository Folder")
+            .WithBorder(BorderStyle.Rounded)
+            .WithBorderColor(theme.Accent)
+            .WithBackdrop(BackdropStyle.Dim)
+            .WithPadding(1)
+            .WithDismissOnEscape(true)
+            .WithContent(picker);
+
+        picker.SelectionConfirmed.Subscribe(selected =>
+        {
+            if (selected.Count > 0)
+                ViewModel.AddSource(selected[0], SourceType.Repository);
+            DismissModal();
+        }).DisposeWith(Subscriptions);
+
+        picker.Cancelled.Subscribe(_ => DismissModal()).DisposeWith(Subscriptions);
+        _activeModal.Dismissed.Subscribe(_ => DismissModal()).DisposeWith(Subscriptions);
+
+        InvalidateLayout();
+        Focus.PushFocus(_activeModal);
+        Focus.PushFocus(picker);
+    }
+
+    // --- Remove Source Modal ---
+
+    private void ShowRemoveSourceModal()
+    {
+        var url = ViewModel.SelectedSourceUrl;
+        if (url is null) return;
+
+        var theme = _themeService.Current;
+        var confirmList = new SelectionListNode<string>(
+            ["Confirm", "Cancel"], item => item)
+            .WithHighlightColors(theme.SelectionText, theme.Selection);
+
+        var content = Layouts.Vertical(
+            new TextNode($"Remove source?").WithForeground(theme.Foreground).Height(1),
+            new TextNode(url).WithForeground(theme.TextDim).Height(1),
+            Layouts.Empty().Height(1),
+            confirmList
+        );
+
+        _activeModal = new ModalNode()
+            .WithTitle("Remove Source")
+            .WithBorder(BorderStyle.Rounded)
+            .WithBorderColor(theme.Error)
+            .WithBackdrop(BackdropStyle.Dim)
+            .WithPadding(1)
+            .WithDismissOnEscape(true)
+            .WithContent(content);
+
+        confirmList.SelectionConfirmed.Subscribe(selected =>
+        {
+            if (selected[0] == "Confirm")
+                ViewModel.RemoveSelectedSource();
+            DismissModal();
+        }).DisposeWith(Subscriptions);
+
+        confirmList.Cancelled.Subscribe(_ => DismissModal()).DisposeWith(Subscriptions);
+        _activeModal.Dismissed.Subscribe(_ => DismissModal()).DisposeWith(Subscriptions);
+
+        _showModal = true;
+        InvalidateLayout();
+        Focus.PushFocus(_activeModal);
+        Focus.PushFocus(confirmList);
+    }
+
+    private void DismissModal()
+    {
+        if (!_showModal) return;
+        Focus.PopFocus();
+        Focus.PopFocus();
+        _activeModal = null;
+        _showModal = false;
+        InvalidateLayout();
     }
 }

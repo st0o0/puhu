@@ -26,6 +26,7 @@ public sealed class MarketplaceViewModel : ReactiveViewModel
         new(new Dictionary<string, string>());
     public ReactiveProperty<int> SelectedIndex { get; } = new(0);
     public ReactiveProperty<PluginInfo?> SelectedPlugin { get; } = new(null);
+    public ReactiveProperty<int> SourceSelectedIndex { get; } = new(0);
     public ReactiveProperty<bool> IsSyncing { get; } = new(false);
     public ReactiveProperty<string?> StatusMessage { get; } = new(null);
 
@@ -58,6 +59,7 @@ public sealed class MarketplaceViewModel : ReactiveViewModel
         ActiveView.Subscribe(_ =>
         {
             SelectedIndex.Value = 0;
+            SourceSelectedIndex.Value = 0;
             UpdateSelectedPlugin();
         });
     }
@@ -102,6 +104,37 @@ public sealed class MarketplaceViewModel : ReactiveViewModel
 
     public void AddSource(string url, SourceType type) => _actor.Tell(new AddSource(url, type));
 
+    public string? SelectedSourceUrl
+    {
+        get
+        {
+            var sources = Sources.Value;
+            var index = SourceSelectedIndex.Value;
+            if (index < sources.Registries.Count)
+                return sources.Registries[index];
+            var repoIndex = index - sources.Registries.Count;
+            return repoIndex < sources.Repositories.Count ? sources.Repositories[repoIndex] : null;
+        }
+    }
+
+    public bool IsSelectedSourceRegistry => SourceSelectedIndex.Value < Sources.Value.Registries.Count;
+
+    public int TotalSourceCount => Sources.Value.Registries.Count + Sources.Value.Repositories.Count;
+
+    public void MoveSourceSelection(int delta)
+    {
+        var total = TotalSourceCount;
+        if (total == 0) return;
+        SourceSelectedIndex.Value = Math.Clamp(SourceSelectedIndex.Value + delta, 0, total - 1);
+    }
+
+    public void RemoveSelectedSource()
+    {
+        var url = SelectedSourceUrl;
+        if (url is not null)
+            _actor.Tell(new RemoveSource(url));
+    }
+
     public void RemoveSource(string url) => _actor.Tell(new RemoveSource(url));
 
     public void CyclePolicy(string pluginId) => _actor.Tell(new CycleUpdatePolicy(pluginId));
@@ -131,6 +164,7 @@ public sealed class MarketplaceViewModel : ReactiveViewModel
         ActiveOperations.Dispose();
         SelectedIndex.Dispose();
         SelectedPlugin.Dispose();
+        SourceSelectedIndex.Dispose();
         IsSyncing.Dispose();
         StatusMessage.Dispose();
         base.Dispose();
