@@ -605,22 +605,15 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHi
             .WithForeground(theme.Foreground)
             .WithVisibleRows(2);
 
-        var content = Layouts.Vertical(
-            new TextNode("Remove source?").WithForeground(theme.Foreground).Height(1),
-            new TextNode(url).WithForeground(theme.TextDim).Height(1),
-            Layouts.Empty().Height(1),
-            confirmList
-        );
-
         _activeModal = new ModalNode()
             .WithBackdrop(BackdropStyle.Transparent)
-            .WithTitle("Remove Source")
+            .WithTitle($"Remove: {url}")
+            .WithTitleColor(theme.Error)
             .WithBorder(BorderStyle.Rounded)
             .WithBorderColor(theme.Error)
-
             .WithPadding(1)
             .WithDismissOnEscape(false)
-            .WithContent(content);
+            .WithContent(confirmList);
 
         confirmList.SelectionConfirmed.Subscribe(selected =>
         {
