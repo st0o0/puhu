@@ -40,7 +40,7 @@ public sealed class MarketplaceActor : ReceiveActor
             SetActiveOp(store, msg.PluginId, "Installing...");
             pluginManager.InstallAsync(msg.PluginId)
                 .PipeTo(Self,
-                    success: () => new OperationCompleted(msg.PluginId, $"{msg.PluginId} installed"),
+                    success: () => new OperationCompleted(msg.PluginId, $"{msg.PluginId} installed — restart to activate"),
                     failure: ex => new OperationFailed(msg.PluginId, ex.Message));
         });
 
@@ -49,7 +49,7 @@ public sealed class MarketplaceActor : ReceiveActor
             SetActiveOp(store, msg.PluginId, "Updating...");
             pluginManager.UpdateAsync(msg.PluginId)
                 .PipeTo(Self,
-                    success: () => new OperationCompleted(msg.PluginId, $"{msg.PluginId} updated"),
+                    success: () => new OperationCompleted(msg.PluginId, $"{msg.PluginId} updated — restart to activate"),
                     failure: ex => new OperationFailed(msg.PluginId, ex.Message));
         });
 
