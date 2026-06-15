@@ -506,6 +506,7 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHi
             .WithVisibleRows(2);
 
         _activeModal = new ModalNode()
+            .WithBackdrop(BackdropStyle.Transparent)
             .WithTitle("Add Source")
             .WithBorder(BorderStyle.Rounded)
             .WithBorderColor(theme.Accent)
@@ -538,6 +539,7 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHi
             .WithForeground(theme.Foreground);
 
         _activeModal = new ModalNode()
+            .WithBackdrop(BackdropStyle.Transparent)
             .WithTitle("Add Registry URL")
             .WithBorder(BorderStyle.Rounded)
             .WithBorderColor(theme.Accent)
@@ -569,6 +571,7 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHi
             .WithFillHeight(true);
 
         _activeModal = new ModalNode()
+            .WithBackdrop(BackdropStyle.Transparent)
             .WithTitle("Select Repository Folder")
             .WithBorder(BorderStyle.Rounded)
             .WithBorderColor(theme.Accent)
@@ -610,6 +613,7 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHi
         );
 
         _activeModal = new ModalNode()
+            .WithBackdrop(BackdropStyle.Transparent)
             .WithTitle("Remove Source")
             .WithBorder(BorderStyle.Rounded)
             .WithBorderColor(theme.Error)
