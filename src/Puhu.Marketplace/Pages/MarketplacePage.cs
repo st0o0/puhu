@@ -54,9 +54,6 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHi
     {
         var theme = _themeService.Current;
 
-        // Views are rebuilt fresh on every layout pass: they are static snapshots
-        // of ViewModel state, so caching them (e.g. via KeyedDynamic) would freeze
-        // selection markers and expansion state after the first paint.
         LayoutNode activeView = ViewModel.ActiveView.Value switch
         {
             MarketplaceView.Browse => BuildBrowseView(),
@@ -79,127 +76,7 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHi
     public override void OnNavigatedTo()
     {
         base.OnNavigatedTo();
-
-        KeyBindings.Register(ConsoleKey.Escape, () =>
-        {
-            if (_showModal)
-                DismissModal();
-            else
-                ViewModel.RequestShutdown();
-        });
-
-        if (_tabNavigator.HasTabs)
-        {
-            KeyBindings.Register(ConsoleKey.Tab, () =>
-            {
-                if (_showModal) return;
-                _tabNavigator.CycleTab(path => Navigate(path), 1);
-            });
-            KeyBindings.Register(ConsoleKey.Tab, ConsoleModifiers.Shift, () =>
-            {
-                if (_showModal) return;
-                _tabNavigator.CycleTab(path => Navigate(path), -1);
-            });
-        }
-
-        KeyBindings.Register(ConsoleKey.F, ConsoleModifiers.Control, () =>
-        {
-            if (_showModal) return;
-            _refreshController.SpeedUp();
-        });
-        KeyBindings.Register(ConsoleKey.S, ConsoleModifiers.Control, () =>
-        {
-            if (_showModal) return;
-            _refreshController.SlowDown();
-        });
-        KeyBindings.Register(ConsoleKey.P, () =>
-        {
-            if (_showModal) return;
-            _refreshController.TogglePause();
-        });
-
-        // Navigation — skip when modal is active (modal handles its own input via Focus)
-        KeyBindings.Register(ConsoleKey.UpArrow, () =>
-        {
-            if (_showModal) return;
-            if (ViewModel.ActiveView.Value == MarketplaceView.Sources)
-                ViewModel.MoveSourceSelection(-1);
-            else
-                ViewModel.MoveSelection(-1);
-            InvalidateLayout();
-        });
-        KeyBindings.Register(ConsoleKey.DownArrow, () =>
-        {
-            if (_showModal) return;
-            if (ViewModel.ActiveView.Value == MarketplaceView.Sources)
-                ViewModel.MoveSourceSelection(1);
-            else
-                ViewModel.MoveSelection(1);
-            InvalidateLayout();
-        });
-
-        // Expand/collapse (Browse view)
-        KeyBindings.Register(ConsoleKey.Enter, () =>
-        {
-            if (_showModal) return;
-            if (ViewModel.ActiveView.Value == MarketplaceView.Browse)
-            {
-                _expandedIndex = _expandedIndex == ViewModel.SelectedIndex.Value
-                    ? -1
-                    : ViewModel.SelectedIndex.Value;
-                InvalidateLayout();
-            }
-        });
-
-        // Install action (Browse view)
-        KeyBindings.Register(ConsoleKey.I, () =>
-        {
-            if (_showModal) return;
-            if (ViewModel.ActiveView.Value == MarketplaceView.Browse)
-                ViewModel.HandleAction();
-        });
-
-        // Refresh
-        KeyBindings.Register(ConsoleKey.R, () =>
-        {
-            if (_showModal) return;
-            ViewModel.Refresh();
-        });
-
-        // Update (Installed view)
-        KeyBindings.Register(ConsoleKey.U, () =>
-        {
-            if (_showModal) return;
-            if (ViewModel.ActiveView.Value == MarketplaceView.Installed)
-                ViewModel.UpdateSelected();
-        });
-
-        // Uninstall (Installed view) / Remove source (Sources view)
-        KeyBindings.Register(ConsoleKey.X, () =>
-        {
-            if (_showModal) return;
-            if (ViewModel.ActiveView.Value == MarketplaceView.Installed)
-                ViewModel.UninstallSelected();
-            else if (ViewModel.ActiveView.Value == MarketplaceView.Sources)
-                ShowRemoveSourceModal();
-        });
-
-        // Cycle policy (Installed view)
-        KeyBindings.Register(ConsoleKey.C, () =>
-        {
-            if (_showModal) return;
-            if (ViewModel.ActiveView.Value == MarketplaceView.Installed &&
-                ViewModel.SelectedPlugin.Value is { } plugin)
-                ViewModel.CyclePolicy(plugin.Id);
-        });
-
-        // Add source (Sources view)
-        KeyBindings.Register(ConsoleKey.A, () =>
-        {
-            if (_showModal) return;
-            if (ViewModel.ActiveView.Value == MarketplaceView.Sources)
-                ShowAddSourceModal();
-        });
+        RegisterPageKeys();
 
         // Subscriptions
         ViewModel.ActiveView
@@ -237,6 +114,95 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHi
                     Icon: isError ? "✗" : "✓"));
             })
             .DisposeWith(Subscriptions);
+    }
+
+    private void RegisterPageKeys()
+    {
+        KeyBindings.Clear();
+
+        // SubNav keys need to be re-registered after Clear since OnBound registered them
+        _subNav = new SubNavNode<MarketplaceView>(
+            ViewModel.ActiveView,
+            KeyBindings,
+            _themeService,
+            (ConsoleKey.D1, "Browse", MarketplaceView.Browse),
+            (ConsoleKey.D2, "Installed", MarketplaceView.Installed),
+            (ConsoleKey.D3, "Sources", MarketplaceView.Sources));
+
+        KeyBindings.RegisterGlobalKeys(
+            () => ViewModel.RequestShutdown(),
+            path => Navigate(path),
+            _tabNavigator,
+            _refreshController);
+
+        KeyBindings.Register(ConsoleKey.UpArrow, () =>
+        {
+            if (ViewModel.ActiveView.Value == MarketplaceView.Sources)
+                ViewModel.MoveSourceSelection(-1);
+            else
+                ViewModel.MoveSelection(-1);
+            InvalidateLayout();
+        });
+        KeyBindings.Register(ConsoleKey.DownArrow, () =>
+        {
+            if (ViewModel.ActiveView.Value == MarketplaceView.Sources)
+                ViewModel.MoveSourceSelection(1);
+            else
+                ViewModel.MoveSelection(1);
+            InvalidateLayout();
+        });
+
+        KeyBindings.Register(ConsoleKey.Enter, () =>
+        {
+            if (ViewModel.ActiveView.Value == MarketplaceView.Browse)
+            {
+                _expandedIndex = _expandedIndex == ViewModel.SelectedIndex.Value
+                    ? -1
+                    : ViewModel.SelectedIndex.Value;
+                InvalidateLayout();
+            }
+        });
+
+        KeyBindings.Register(ConsoleKey.I, () =>
+        {
+            if (ViewModel.ActiveView.Value == MarketplaceView.Browse)
+                ViewModel.HandleAction();
+        });
+
+        KeyBindings.Register(ConsoleKey.R, () => ViewModel.Refresh());
+
+        KeyBindings.Register(ConsoleKey.U, () =>
+        {
+            if (ViewModel.ActiveView.Value == MarketplaceView.Installed)
+                ViewModel.UpdateSelected();
+        });
+
+        KeyBindings.Register(ConsoleKey.X, () =>
+        {
+            if (ViewModel.ActiveView.Value == MarketplaceView.Installed)
+                ViewModel.UninstallSelected();
+            else if (ViewModel.ActiveView.Value == MarketplaceView.Sources)
+                ShowRemoveSourceModal();
+        });
+
+        KeyBindings.Register(ConsoleKey.C, () =>
+        {
+            if (ViewModel.ActiveView.Value == MarketplaceView.Installed &&
+                ViewModel.SelectedPlugin.Value is { } plugin)
+                ViewModel.CyclePolicy(plugin.Id);
+        });
+
+        KeyBindings.Register(ConsoleKey.A, () =>
+        {
+            if (ViewModel.ActiveView.Value == MarketplaceView.Sources)
+                ShowAddSourceModal();
+        });
+    }
+
+    private void RegisterModalKeys()
+    {
+        KeyBindings.Clear();
+        KeyBindings.Register(ConsoleKey.Escape, DismissModal);
     }
 
     // --- Browse View ---
@@ -524,7 +490,7 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHi
         return Layouts.Vertical(registriesPanel, reposPanel, actionsPanel);
     }
 
-    // --- Add Source Modal ---
+    // --- Modals ---
 
     private void ShowAddSourceModal()
     {
@@ -541,7 +507,7 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHi
             .WithBorderColor(theme.Accent)
             .WithBackdrop(BackdropStyle.Dim)
             .WithPadding(1)
-            .WithDismissOnEscape(true)
+            .WithDismissOnEscape(false)
             .WithContent(typeList);
 
         typeList.SelectionConfirmed.Subscribe(selected =>
@@ -554,11 +520,8 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHi
         }).DisposeWith(Subscriptions);
 
         typeList.Cancelled.Subscribe(_ => DismissModal()).DisposeWith(Subscriptions);
-        _activeModal.Dismissed.Subscribe(_ => DismissModal()).DisposeWith(Subscriptions);
 
-        _showModal = true;
-        InvalidateLayout();
-        Focus.PushFocus(_activeModal);
+        OpenModal();
     }
 
     private void ShowUrlInputModal()
@@ -576,7 +539,7 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHi
             .WithBorderColor(theme.Accent)
             .WithBackdrop(BackdropStyle.Dim)
             .WithPadding(1)
-            .WithDismissOnEscape(true)
+            .WithDismissOnEscape(false)
             .WithContent(input);
 
         input.Submitted.Subscribe(url =>
@@ -585,8 +548,6 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHi
                 ViewModel.AddSource(url.Trim(), SourceType.Registry);
             DismissModal();
         }).DisposeWith(Subscriptions);
-
-        _activeModal.Dismissed.Subscribe(_ => DismissModal()).DisposeWith(Subscriptions);
 
         InvalidateLayout();
         Focus.PushFocus(_activeModal);
@@ -609,7 +570,7 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHi
             .WithBorderColor(theme.Accent)
             .WithBackdrop(BackdropStyle.Dim)
             .WithPadding(1)
-            .WithDismissOnEscape(true)
+            .WithDismissOnEscape(false)
             .WithContent(picker);
 
         picker.SelectionConfirmed.Subscribe(selected =>
@@ -620,13 +581,10 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHi
         }).DisposeWith(Subscriptions);
 
         picker.Cancelled.Subscribe(_ => DismissModal()).DisposeWith(Subscriptions);
-        _activeModal.Dismissed.Subscribe(_ => DismissModal()).DisposeWith(Subscriptions);
 
         InvalidateLayout();
         Focus.PushFocus(_activeModal);
     }
-
-    // --- Remove Source Modal ---
 
     private void ShowRemoveSourceModal()
     {
@@ -653,7 +611,7 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHi
             .WithBorderColor(theme.Error)
             .WithBackdrop(BackdropStyle.Dim)
             .WithPadding(1)
-            .WithDismissOnEscape(true)
+            .WithDismissOnEscape(false)
             .WithContent(content);
 
         confirmList.SelectionConfirmed.Subscribe(selected =>
@@ -664,11 +622,16 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHi
         }).DisposeWith(Subscriptions);
 
         confirmList.Cancelled.Subscribe(_ => DismissModal()).DisposeWith(Subscriptions);
-        _activeModal.Dismissed.Subscribe(_ => DismissModal()).DisposeWith(Subscriptions);
 
+        OpenModal();
+    }
+
+    private void OpenModal()
+    {
         _showModal = true;
+        RegisterModalKeys();
         InvalidateLayout();
-        Focus.PushFocus(_activeModal);
+        Focus.PushFocus(_activeModal!);
     }
 
     private void DismissModal()
@@ -677,6 +640,7 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHi
         Focus.PopFocus();
         _activeModal = null;
         _showModal = false;
+        RegisterPageKeys();
         InvalidateLayout();
     }
 }
