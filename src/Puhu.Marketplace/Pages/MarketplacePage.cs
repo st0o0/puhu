@@ -42,13 +42,19 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHi
             (ConsoleKey.D3, "Sources", MarketplaceView.Sources));
     }
 
-    public string[] GetKeyHints() => ViewModel.ActiveView.Value switch
+    public string[] GetKeyHints()
     {
-        MarketplaceView.Browse => ["↑↓:Navigate", "Enter:Expand", "i:Install", "r:Refresh"],
-        MarketplaceView.Installed => ["↑↓:Navigate", "u:Update", "x:Uninstall", "c:Policy"],
-        MarketplaceView.Sources => ["↑↓:Navigate", "a:Add", "x:Remove"],
-        _ => []
-    };
+        if (_showModal)
+            return ["↑↓:Select", "Enter:Confirm", "Esc:Close"];
+
+        return ViewModel.ActiveView.Value switch
+        {
+            MarketplaceView.Browse => ["↑↓:Navigate", "Enter:Expand", "i:Install", "r:Refresh"],
+            MarketplaceView.Installed => ["↑↓:Navigate", "u:Update", "x:Uninstall", "c:Policy"],
+            MarketplaceView.Sources => ["↑↓:Navigate", "a:Add", "x:Remove"],
+            _ => []
+        };
+    }
 
     public override ILayoutNode BuildLayout()
     {
@@ -505,7 +511,7 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHi
             .WithTitle("Add Source")
             .WithBorder(BorderStyle.Rounded)
             .WithBorderColor(theme.Accent)
-            .WithBackdrop(BackdropStyle.Dim)
+            .WithBackdrop(BackdropStyle.Solid)
             .WithPadding(1)
             .WithDismissOnEscape(false)
             .WithContent(typeList);
@@ -537,7 +543,7 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHi
             .WithTitle("Add Registry URL")
             .WithBorder(BorderStyle.Rounded)
             .WithBorderColor(theme.Accent)
-            .WithBackdrop(BackdropStyle.Dim)
+            .WithBackdrop(BackdropStyle.Solid)
             .WithPadding(1)
             .WithDismissOnEscape(false)
             .WithContent(input);
@@ -568,7 +574,7 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHi
             .WithTitle("Select Repository Folder")
             .WithBorder(BorderStyle.Rounded)
             .WithBorderColor(theme.Accent)
-            .WithBackdrop(BackdropStyle.Dim)
+            .WithBackdrop(BackdropStyle.Solid)
             .WithPadding(1)
             .WithDismissOnEscape(false)
             .WithContent(picker);
@@ -609,7 +615,7 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHi
             .WithTitle("Remove Source")
             .WithBorder(BorderStyle.Rounded)
             .WithBorderColor(theme.Error)
-            .WithBackdrop(BackdropStyle.Dim)
+            .WithBackdrop(BackdropStyle.Solid)
             .WithPadding(1)
             .WithDismissOnEscape(false)
             .WithContent(content);
