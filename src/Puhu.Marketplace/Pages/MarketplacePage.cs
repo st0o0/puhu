@@ -80,15 +80,48 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHi
     {
         base.OnNavigatedTo();
 
-        KeyBindings.RegisterGlobalKeys(
-            () => ViewModel.RequestShutdown(),
-            path => Navigate(path),
-            _tabNavigator,
-            _refreshController);
+        KeyBindings.Register(ConsoleKey.Escape, () =>
+        {
+            if (_showModal)
+                DismissModal();
+            else
+                ViewModel.RequestShutdown();
+        });
 
-        // Navigation
+        if (_tabNavigator.HasTabs)
+        {
+            KeyBindings.Register(ConsoleKey.Tab, () =>
+            {
+                if (_showModal) return;
+                _tabNavigator.CycleTab(path => Navigate(path), 1);
+            });
+            KeyBindings.Register(ConsoleKey.Tab, ConsoleModifiers.Shift, () =>
+            {
+                if (_showModal) return;
+                _tabNavigator.CycleTab(path => Navigate(path), -1);
+            });
+        }
+
+        KeyBindings.Register(ConsoleKey.F, ConsoleModifiers.Control, () =>
+        {
+            if (_showModal) return;
+            _refreshController.SpeedUp();
+        });
+        KeyBindings.Register(ConsoleKey.S, ConsoleModifiers.Control, () =>
+        {
+            if (_showModal) return;
+            _refreshController.SlowDown();
+        });
+        KeyBindings.Register(ConsoleKey.P, () =>
+        {
+            if (_showModal) return;
+            _refreshController.TogglePause();
+        });
+
+        // Navigation — skip when modal is active (modal handles its own input via Focus)
         KeyBindings.Register(ConsoleKey.UpArrow, () =>
         {
+            if (_showModal) return;
             if (ViewModel.ActiveView.Value == MarketplaceView.Sources)
                 ViewModel.MoveSourceSelection(-1);
             else
@@ -97,6 +130,7 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHi
         });
         KeyBindings.Register(ConsoleKey.DownArrow, () =>
         {
+            if (_showModal) return;
             if (ViewModel.ActiveView.Value == MarketplaceView.Sources)
                 ViewModel.MoveSourceSelection(1);
             else
@@ -107,6 +141,7 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHi
         // Expand/collapse (Browse view)
         KeyBindings.Register(ConsoleKey.Enter, () =>
         {
+            if (_showModal) return;
             if (ViewModel.ActiveView.Value == MarketplaceView.Browse)
             {
                 _expandedIndex = _expandedIndex == ViewModel.SelectedIndex.Value
@@ -119,16 +154,22 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHi
         // Install action (Browse view)
         KeyBindings.Register(ConsoleKey.I, () =>
         {
+            if (_showModal) return;
             if (ViewModel.ActiveView.Value == MarketplaceView.Browse)
                 ViewModel.HandleAction();
         });
 
         // Refresh
-        KeyBindings.Register(ConsoleKey.R, () => ViewModel.Refresh());
+        KeyBindings.Register(ConsoleKey.R, () =>
+        {
+            if (_showModal) return;
+            ViewModel.Refresh();
+        });
 
         // Update (Installed view)
         KeyBindings.Register(ConsoleKey.U, () =>
         {
+            if (_showModal) return;
             if (ViewModel.ActiveView.Value == MarketplaceView.Installed)
                 ViewModel.UpdateSelected();
         });
@@ -136,6 +177,7 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHi
         // Uninstall (Installed view) / Remove source (Sources view)
         KeyBindings.Register(ConsoleKey.X, () =>
         {
+            if (_showModal) return;
             if (ViewModel.ActiveView.Value == MarketplaceView.Installed)
                 ViewModel.UninstallSelected();
             else if (ViewModel.ActiveView.Value == MarketplaceView.Sources)
@@ -145,6 +187,7 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHi
         // Cycle policy (Installed view)
         KeyBindings.Register(ConsoleKey.C, () =>
         {
+            if (_showModal) return;
             if (ViewModel.ActiveView.Value == MarketplaceView.Installed &&
                 ViewModel.SelectedPlugin.Value is { } plugin)
                 ViewModel.CyclePolicy(plugin.Id);
@@ -153,6 +196,7 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHi
         // Add source (Sources view)
         KeyBindings.Register(ConsoleKey.A, () =>
         {
+            if (_showModal) return;
             if (ViewModel.ActiveView.Value == MarketplaceView.Sources)
                 ShowAddSourceModal();
         });
