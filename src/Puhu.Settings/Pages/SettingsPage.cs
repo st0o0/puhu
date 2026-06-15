@@ -214,9 +214,12 @@ public sealed class SettingsPage : ReactivePage<SettingsViewModel>, IKeyHintProv
             .WithPadding(1)
             .WithContent(wizardContent);
 
+        var puhuVersion = typeof(SettingsPage).Assembly.GetName().Version;
+        var terminaVersion = typeof(Layouts).Assembly.GetName().Version;
+
         var aboutContent = Layouts.Vertical(
-            new KeyValueRowNode("puhu", "v0.1.0", labelWidth: 12, labelColor: theme.TextDim, valueColor: theme.Foreground),
-            new KeyValueRowNode("termina", "v0.3.0", labelWidth: 12, labelColor: theme.TextDim, valueColor: theme.Foreground),
+            new KeyValueRowNode("puhu", $"v{puhuVersion?.ToString(3) ?? "?"}", labelWidth: 12, labelColor: theme.TextDim, valueColor: theme.Foreground),
+            new KeyValueRowNode("termina", $"v{terminaVersion?.ToString(3) ?? "?"}", labelWidth: 12, labelColor: theme.TextDim, valueColor: theme.Foreground),
             new KeyValueRowNode("plugins", $"{ViewModel.Tabs.Count} loaded", labelWidth: 12, labelColor: theme.TextDim, valueColor: theme.Foreground)
         );
 
