@@ -7,36 +7,21 @@ namespace Puhu.Plugin.Tests;
 public sealed class GlobalKeyExtensionsTests
 {
     [Fact]
-    public void RegisterGlobalKeys_WithController_BindsSpeedKeys()
+    public void RegisterGlobalKeys_WithController_BindsSpeedAndPauseKeys()
     {
         var keys = new PageKeyBindings();
         var controller = new FakeRefreshController();
 
         keys.RegisterGlobalKeys(() => { }, _ => { }, new FakeTabNavigator(), controller);
 
-        keys.TryHandle(new ConsoleKeyInfo('+', ConsoleKey.OemPlus, true, false, false));
+        keys.TryHandle(new ConsoleKeyInfo('\x06', ConsoleKey.F, false, false, true));
         Assert.Equal(1, controller.SpeedUps);
 
-        keys.TryHandle(new ConsoleKeyInfo('-', ConsoleKey.OemMinus, false, false, false));
+        keys.TryHandle(new ConsoleKeyInfo('\x13', ConsoleKey.S, false, false, true));
         Assert.Equal(1, controller.SlowDowns);
 
         keys.TryHandle(new ConsoleKeyInfo('p', ConsoleKey.P, false, false, false));
         Assert.Equal(1, controller.PauseToggles);
-    }
-
-    [Fact]
-    public void RegisterGlobalKeys_WithController_BindsNumpadKeys()
-    {
-        var keys = new PageKeyBindings();
-        var controller = new FakeRefreshController();
-
-        keys.RegisterGlobalKeys(() => { }, _ => { }, new FakeTabNavigator(), controller);
-
-        keys.TryHandle(new ConsoleKeyInfo('+', ConsoleKey.Add, false, false, false));
-        keys.TryHandle(new ConsoleKeyInfo('-', ConsoleKey.Subtract, false, false, false));
-
-        Assert.Equal(1, controller.SpeedUps);
-        Assert.Equal(1, controller.SlowDowns);
     }
 
     private sealed class FakeTabNavigator : ITabNavigator

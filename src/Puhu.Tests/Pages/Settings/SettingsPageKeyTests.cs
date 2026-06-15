@@ -102,27 +102,27 @@ public sealed class SettingsPageKeyTests
     }
 
     [Fact]
-    public async Task Plus_SpeedsUpRefreshInterval()
+    public async Task CtrlF_SpeedsUpRefreshInterval()
     {
         await using var app = await StartAsync();
 
-        app.SendKey(ConsoleKey.Add);
+        app.SendKey(ConsoleKey.F, control: true);
 
         await ScreenAssert.WaitUntilAsync(
             () => app.Refresh.CurrentInterval == TimeSpan.FromMilliseconds(500),
-            "'+' should speed the refresh interval up to 500ms");
+            "Ctrl+F should speed the refresh interval up to 500ms");
     }
 
     [Fact]
-    public async Task Minus_SlowsDownRefreshInterval()
+    public async Task CtrlS_SlowsDownRefreshInterval()
     {
         await using var app = await StartAsync();
 
-        app.SendKey(ConsoleKey.Subtract);
+        app.SendKey(ConsoleKey.S, control: true);
 
         await ScreenAssert.WaitUntilAsync(
             () => app.Refresh.CurrentInterval == TimeSpan.FromMilliseconds(2000),
-            "'-' should slow the refresh interval down to 2s");
+            "Ctrl+S should slow the refresh interval down to 2s");
     }
 
     [Fact]
