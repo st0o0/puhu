@@ -68,7 +68,7 @@ internal static class WizardSteps
         IReadOnlyList<string> themes, int selectedIndex, string? savedTheme, ThemeDefinition theme)
     {
         return Centered(Layouts.Horizontal(
-            Layouts.Vertical(SettingsRows.ThemeRows(themes, selectedIndex, savedTheme, theme).ToArray()).Width(24),
+            Layouts.Vertical(SettingsRows.ThemeRows(themes, selectedIndex, savedTheme, theme, compact: true).ToArray()).Width(24),
             new ThemePaletteNode(theme)));
     }
 }

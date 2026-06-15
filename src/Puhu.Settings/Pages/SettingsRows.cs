@@ -14,7 +14,8 @@ internal static class SettingsRows
         IReadOnlyList<string> themes,
         int selectedIndex,
         string? savedTheme,
-        ThemeDefinition theme)
+        ThemeDefinition theme,
+        bool compact = false)
     {
         var rows = new List<ILayoutNode>();
 
@@ -25,20 +26,30 @@ internal static class SettingsRows
             var isSaved = string.Equals(name, savedTheme, StringComparison.OrdinalIgnoreCase);
             var marker = isSelected ? "▸" : " ";
 
-            var nameRow = new List<ILayoutNode>
+            if (compact)
             {
-                new TextNode($"{marker} {name}")
+                var suffix = isSaved ? "  ●" : "";
+                rows.Add(new TextNode($"{marker} {name}{suffix}")
                     .WithForeground(isSelected ? theme.Foreground : theme.TextDim)
-                    .WidthFill()
-            };
-
-            if (isSaved)
-            {
-                nameRow.Add(new BadgeNode("ACTIVE", theme.SelectionText, theme.Success, icon: "●").Height(1));
+                    .Height(1));
             }
+            else
+            {
+                var nameRow = new List<ILayoutNode>
+                {
+                    new TextNode($"{marker} {name}")
+                        .WithForeground(isSelected ? theme.Foreground : theme.TextDim)
+                        .WidthFill()
+                };
 
-            rows.Add(Layouts.Horizontal(nameRow.ToArray()).Height(1));
-            rows.Add(Layouts.Empty().Height(1));
+                if (isSaved)
+                {
+                    nameRow.Add(new BadgeNode("ACTIVE", theme.SelectionText, theme.Success, icon: "●").Height(1));
+                }
+
+                rows.Add(Layouts.Horizontal(nameRow.ToArray()).Height(1));
+                rows.Add(Layouts.Empty().Height(1));
+            }
         }
 
         if (themes.Count == 0)

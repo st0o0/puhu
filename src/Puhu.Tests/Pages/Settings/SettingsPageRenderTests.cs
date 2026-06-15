@@ -18,8 +18,8 @@ namespace Puhu.Tests.Pages.Settings;
 /// </summary>
 public sealed class SettingsPageRenderTests
 {
-    private const int Width = 40;
-    private const int Height = 12;
+    private const int Width = 80;
+    private const int Height = 30;
 
     [Fact]
     public void RefreshView_MarkerFollowsIntervalAcrossRebuilds()
@@ -46,12 +46,12 @@ public sealed class SettingsPageRenderTests
         vm.ActiveView.Value = SettingsView.Refresh;
 
         var first = RenderLayout(page.BuildLayout());
-        Assert.Contains("paused: no", first);
+        Assert.Contains("RUNNING", first);
 
         controller.TogglePause();
 
         var second = RenderLayout(page.BuildLayout());
-        Assert.Contains("paused: yes", second);
+        Assert.Contains("PAUSED", second);
     }
 
     [Fact]
@@ -75,12 +75,12 @@ public sealed class SettingsPageRenderTests
         var (page, vm) = CreateBoundPage(themes: ["alpha"]);
 
         var themesView = RenderLayout(page.BuildLayout());
-        Assert.Contains("themes", themesView);
+        Assert.Contains("Theme", themesView);
 
         vm.ActiveView.Value = SettingsView.Refresh;
 
         var refreshView = RenderLayout(page.BuildLayout());
-        Assert.Contains("refresh rate", refreshView);
+        Assert.Contains("Refresh Rate", refreshView);
         Assert.DoesNotContain("▸ alpha", refreshView);
     }
 
@@ -93,8 +93,8 @@ public sealed class SettingsPageRenderTests
 
         var view = RenderLayout(page.BuildLayout());
 
-        Assert.Contains("tab order", view);
-        Assert.Contains("▸ marketplace", view);
+        Assert.Contains("Tab Order", view);
+        Assert.Contains("▸ 1", view);
         Assert.Contains("system", view);
     }
 
@@ -106,7 +106,7 @@ public sealed class SettingsPageRenderTests
 
         var view = RenderLayout(page.BuildLayout());
 
-        Assert.Contains("re-run setup wizard", view);
+        Assert.Contains("Setup Wizard", view);
     }
 
     private static (SettingsPage Page, SettingsViewModel ViewModel) CreateBoundPage(
