@@ -14,7 +14,14 @@ public sealed class AppShellNodeTests
     private static VirtualTerminal Render(int w, int h, ILayoutNode content, params string[] hints)
     {
         TabRegistry.RegisterTabs([new PluginTabInfo("Alpha", "/alpha")]);
-        var node = new AppShellNode(new FakeThemeService(), new FakeRefreshController(), content, hints);
+        var node = new AppShellNode(new FakeThemeService(), new FakeRefreshController(), content, hints, []);
+        return Tui.Render(node, w, h);
+    }
+
+    private static VirtualTerminal RenderSplit(int w, int h, ILayoutNode content, string[] pluginHints, string[] globalHints)
+    {
+        TabRegistry.RegisterTabs([new PluginTabInfo("Alpha", "/alpha")]);
+        var node = new AppShellNode(new FakeThemeService(), new FakeRefreshController(), content, pluginHints, globalHints);
         return Tui.Render(node, w, h);
     }
 
@@ -82,6 +89,47 @@ public sealed class AppShellNodeTests
         var ctx = Render(24, 5, new EmptyNode(), "Esc:Quit", "Tab:Switch", "Enter:Confirm");
         var bottom = ctx.Row(4);
 
+        Assert.Equal('╰', bottom[0]);
+        Assert.Equal('╯', bottom[^1]);
+    }
+
+    [Fact]
+    public void Render_PluginHintsLeft_GlobalHintsRight()
+    {
+        var ctx = RenderSplit(60, 10, new EmptyNode(),
+            ["Enter:Details"],
+            ["Esc:Quit"]);
+        var bottom = ctx.Row(9);
+
+        var enterPos = bottom.IndexOf("┤ Enter");
+        var escPos = bottom.IndexOf("┤ Esc");
+
+        Assert.True(enterPos >= 0, "Plugin hint 'Enter' not found");
+        Assert.True(escPos >= 0, "Global hint 'Esc' not found");
+        Assert.True(enterPos < escPos, "Plugin hints should be left of global hints");
+    }
+
+    [Fact]
+    public void Render_ShowGlobalHintsDisabled_OnlyPluginHints()
+    {
+        var ctx = RenderSplit(60, 10, new EmptyNode(),
+            ["Enter:Details"],
+            []);
+        var bottom = ctx.Row(9);
+
+        Assert.Contains("┤ Enter details ├", bottom);
+        Assert.DoesNotContain("Esc", bottom);
+    }
+
+    [Fact]
+    public void Render_GlobalHintsTruncatePlugin_WhenNarrow()
+    {
+        var ctx = RenderSplit(30, 10, new EmptyNode(),
+            ["Enter:Details", "R:Refresh", "X:Extra"],
+            ["Esc:Quit"]);
+        var bottom = ctx.Row(9);
+
+        Assert.Contains("┤ Esc quit ├", bottom);
         Assert.Equal('╰', bottom[0]);
         Assert.Equal('╯', bottom[^1]);
     }

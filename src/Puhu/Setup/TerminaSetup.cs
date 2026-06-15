@@ -47,12 +47,20 @@ public sealed class TerminaSetup : IServiceSetupContainer
 
             termina.UseLayoutDecorator((page, layout) =>
             {
-                if (page is IKeyHintProvider hintProvider)
+                if (page is not IKeyHintProvider hintProvider)
+                    return layout;
+
+                var globalHints = Array.Empty<string>();
+                if (hintProvider.ShowGlobalHints)
                 {
-                    return new AppShellNode(themeService, refreshController, layout, hintProvider.GetKeyHints());
+                    globalHints = refreshController is not null
+                        ? ["Esc:Quit", "Tab:Switch", "+/-:Speed", "P:Pause"]
+                        : ["Esc:Quit", "Tab:Switch"];
                 }
 
-                return layout;
+                return new AppShellNode(
+                    themeService, refreshController, layout,
+                    hintProvider.GetKeyHints(), globalHints);
             });
         });
 

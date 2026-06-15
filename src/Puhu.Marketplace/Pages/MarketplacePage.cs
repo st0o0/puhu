@@ -42,9 +42,9 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHi
 
     public string[] GetKeyHints() => ViewModel.ActiveView.Value switch
     {
-        MarketplaceView.Browse => ["↑↓:Navigate", "Enter:Expand", "i:Install", "r:Refresh", "Esc:Quit", "Tab:Switch"],
-        MarketplaceView.Installed => ["↑↓:Navigate", "u:Update", "x:Uninstall", "c:Policy", "Esc:Quit", "Tab:Switch"],
-        MarketplaceView.Sources => ["↑↓:Navigate", "a:Add", "x:Remove", "Esc:Quit", "Tab:Switch"],
+        MarketplaceView.Browse => ["↑↓:Navigate", "Enter:Expand", "i:Install", "r:Refresh"],
+        MarketplaceView.Installed => ["↑↓:Navigate", "u:Update", "x:Uninstall", "c:Policy"],
+        MarketplaceView.Sources => ["↑↓:Navigate", "a:Add", "x:Remove"],
         _ => []
     };
 

@@ -34,10 +34,10 @@ public sealed class SettingsPage : ReactivePage<SettingsViewModel>, IKeyHintProv
 
     public string[] GetKeyHints() => ViewModel.ActiveView.Value switch
     {
-        SettingsView.Themes => ["↑↓:Theme", "Enter:Save", "Esc:Quit", "Tab:Switch"],
-        SettingsView.Tabs => ["↑↓:Select", "⇧↑↓:Move", "Esc:Quit", "Tab:Switch"],
-        SettingsView.Setup => ["Enter:Run", "Esc:Quit", "Tab:Switch"],
-        _ => ["↑↓:Rate", "p:Pause", "Esc:Quit", "Tab:Switch"],
+        SettingsView.Themes => ["↑↓:Theme", "Enter:Save"],
+        SettingsView.Tabs => ["↑↓:Select", "⇧↑↓:Move"],
+        SettingsView.Setup => ["Enter:Run"],
+        _ => ["↑↓:Rate"],
     };
 
     public override ILayoutNode BuildLayout()

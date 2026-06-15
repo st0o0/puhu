@@ -4,23 +4,21 @@ using Termina.Rendering;
 
 namespace Puhu.Nodes;
 
-/// <summary>
-/// Full-screen btop-style shell panel: TopBarNode as top border,
-/// key hints embedded in the bottom border, content in between.
-/// </summary>
 internal sealed class AppShellNode : LayoutNode
 {
     private readonly IThemeService _themeService;
     private readonly TopBarNode _topBar;
     private readonly ILayoutNode _content;
-    private readonly string[] _keyHints;
+    private readonly string[] _pluginHints;
+    private readonly string[] _globalHints;
 
-    public AppShellNode(IThemeService themeService, IRefreshController refreshController, ILayoutNode content, params string[] keyHints)
+    public AppShellNode(IThemeService themeService, IRefreshController refreshController, ILayoutNode content, string[] pluginHints, string[] globalHints)
     {
         _themeService = themeService;
         _topBar = new TopBarNode(themeService, refreshController);
         _content = content;
-        _keyHints = keyHints;
+        _pluginHints = pluginHints;
+        _globalHints = globalHints;
         HeightConstraint = new SizeConstraint.Fill();
         WidthConstraint = new SizeConstraint.Fill();
     }
@@ -65,40 +63,82 @@ internal sealed class AppShellNode : LayoutNode
 
         ctx.WriteAt(w - 1, y, '╯');
 
-        var cx = 1;
-        foreach (var hint in _keyHints)
+        var globalWidth = MeasureHints(_globalHints);
+        var availableForPlugin = w - 2 - globalWidth;
+
+        RenderHintsLeftToRight(ctx, theme, _pluginHints, y, 1, availableForPlugin);
+        RenderHintsRightToLeft(ctx, theme, _globalHints, y, w - 2);
+    }
+
+    private static void RenderHintsLeftToRight(IRenderContext ctx, ThemeDefinition theme, string[] hints, int y, int startX, int maxWidth)
+    {
+        var cx = startX;
+        foreach (var hint in hints)
         {
-            var parts = hint.Split(':', 2);
-            var key = parts[0];
-            var label = parts.Length == 2 ? parts[1].ToLowerInvariant() : null;
-            var innerLength = label is null ? key.Length + 2 : key.Length + label.Length + 3;
-            var total = innerLength + 2;
-
-            if (cx + total >= w - 1)
-            {
+            var (key, label, total) = ParseHint(hint);
+            if (cx + total >= startX + maxWidth)
                 break;
-            }
 
-            ctx.SetForeground(theme.Border);
-            ctx.WriteAt(cx, y, '┤');
-            ctx.SetForeground(theme.Accent);
-            ctx.WriteAt(cx + 1, y, $" {key}");
-
-            if (label is not null)
-            {
-                ctx.SetForeground(theme.TextDim);
-                ctx.WriteAt(cx + 2 + key.Length, y, $" {label} ");
-            }
-            else
-            {
-                ctx.SetForeground(theme.TextDim);
-                ctx.WriteAt(cx + 2 + key.Length, y, ' ');
-            }
-
-            ctx.SetForeground(theme.Border);
-            ctx.WriteAt(cx + total - 1, y, '├');
+            WriteHint(ctx, theme, y, cx, key, label, total);
             cx += total + 1;
         }
+    }
+
+    private static void RenderHintsRightToLeft(IRenderContext ctx, ThemeDefinition theme, string[] hints, int y, int rightEdge)
+    {
+        var cx = rightEdge;
+        for (var i = hints.Length - 1; i >= 0; i--)
+        {
+            var (key, label, total) = ParseHint(hints[i]);
+            if (cx - total < 1)
+                break;
+
+            WriteHint(ctx, theme, y, cx - total, key, label, total);
+            cx -= total + 1;
+        }
+    }
+
+    private static void WriteHint(IRenderContext ctx, ThemeDefinition theme, int y, int cx, string key, string? label, int total)
+    {
+        ctx.SetForeground(theme.Border);
+        ctx.WriteAt(cx, y, '┤');
+        ctx.SetForeground(theme.Accent);
+        ctx.WriteAt(cx + 1, y, $" {key}");
+
+        if (label is not null)
+        {
+            ctx.SetForeground(theme.TextDim);
+            ctx.WriteAt(cx + 2 + key.Length, y, $" {label} ");
+        }
+        else
+        {
+            ctx.SetForeground(theme.TextDim);
+            ctx.WriteAt(cx + 2 + key.Length, y, ' ');
+        }
+
+        ctx.SetForeground(theme.Border);
+        ctx.WriteAt(cx + total - 1, y, '├');
+    }
+
+    private static int MeasureHints(string[] hints)
+    {
+        var total = 0;
+        foreach (var hint in hints)
+        {
+            var (_, _, size) = ParseHint(hint);
+            total += size + 1;
+        }
+
+        return total;
+    }
+
+    private static (string key, string? label, int total) ParseHint(string hint)
+    {
+        var parts = hint.Split(':', 2);
+        var key = parts[0];
+        var label = parts.Length == 2 ? parts[1].ToLowerInvariant() : null;
+        var innerLength = label is null ? key.Length + 2 : key.Length + label.Length + 3;
+        return (key, label, innerLength + 2);
     }
 
     public override void OnActivate()
