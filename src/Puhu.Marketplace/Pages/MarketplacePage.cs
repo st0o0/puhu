@@ -487,7 +487,9 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHi
         var theme = _themeService.Current;
         var typeList = new SelectionListNode<string>(
             ["Registry (URL)", "Repository (Folder)"], item => item)
-            .WithHighlightColors(theme.SelectionText, theme.Selection);
+            .WithHighlightColors(theme.SelectionText, theme.Selection)
+            .WithForeground(theme.Foreground)
+            .WithVisibleRows(2);
 
         _activeModal = new ModalNode()
             .WithTitle("Add Source")
@@ -513,13 +515,10 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHi
         _showModal = true;
         InvalidateLayout();
         Focus.PushFocus(_activeModal);
-        Focus.PushFocus(typeList);
     }
 
     private void ShowUrlInputModal()
     {
-        // Pop the type-selection list and modal
-        Focus.PopFocus();
         Focus.PopFocus();
 
         var theme = _themeService.Current;
@@ -547,13 +546,10 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHi
 
         InvalidateLayout();
         Focus.PushFocus(_activeModal);
-        Focus.PushFocus(input);
     }
 
     private void ShowFolderPickerModal()
     {
-        // Pop the type-selection list and modal
-        Focus.PopFocus();
         Focus.PopFocus();
 
         var theme = _themeService.Current;
@@ -584,7 +580,6 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHi
 
         InvalidateLayout();
         Focus.PushFocus(_activeModal);
-        Focus.PushFocus(picker);
     }
 
     // --- Remove Source Modal ---
@@ -597,10 +592,12 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHi
         var theme = _themeService.Current;
         var confirmList = new SelectionListNode<string>(
             ["Confirm", "Cancel"], item => item)
-            .WithHighlightColors(theme.SelectionText, theme.Selection);
+            .WithHighlightColors(theme.SelectionText, theme.Selection)
+            .WithForeground(theme.Foreground)
+            .WithVisibleRows(2);
 
         var content = Layouts.Vertical(
-            new TextNode($"Remove source?").WithForeground(theme.Foreground).Height(1),
+            new TextNode("Remove source?").WithForeground(theme.Foreground).Height(1),
             new TextNode(url).WithForeground(theme.TextDim).Height(1),
             Layouts.Empty().Height(1),
             confirmList
@@ -628,13 +625,11 @@ public sealed class MarketplacePage : ReactivePage<MarketplaceViewModel>, IKeyHi
         _showModal = true;
         InvalidateLayout();
         Focus.PushFocus(_activeModal);
-        Focus.PushFocus(confirmList);
     }
 
     private void DismissModal()
     {
         if (!_showModal) return;
-        Focus.PopFocus();
         Focus.PopFocus();
         _activeModal = null;
         _showModal = false;
